@@ -36,6 +36,11 @@ final case class B2[C[_, _], A, B0](v: P[C, A, B0]) extends B[C, A, B0]
 sealed trait Queue[C[_, _], A, B] {
   def |>[Z](e: C[B, Z]): Queue[C, A, Z]
   def tviewl: TAViewL[Queue, C, A, B]
+  def <|:[X](l: C[X, A]): Queue[C, X, B] = Q1(l) >< this
+  def ><[X](r: Queue[C, B, X]): Queue[C, A, X] = tviewl match {
+    case tael: TAEmptyL[Queue, C, A, B] => tael.witness.subst[({ type L[V] = Queue[C, V, X] })#L](r)
+    case cl: :<[Queue, C, A, _, B] => cl.e <|: (cl.s >< r)
+  }
 }
 final case class Q0[C[_, _], A]() extends Queue[C, A, A] {
   override def |>[Z](e: C[A, Z]) = Q1(e)
