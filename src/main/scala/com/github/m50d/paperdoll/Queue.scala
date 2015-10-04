@@ -22,7 +22,7 @@ sealed trait P[C[_, _], A, B]
  * Partially applied P to make it easier to write types
  */
 sealed trait P_[C[_, _]] {
- final type O[X, Y] = P[C, X, Y] 
+  final type O[X, Y] = P[C, X, Y]
 }
 
 final case class CS[C[_, _], A, B, W0](a: C[A, W0], b: C[W0, B]) extends P[C, A, B] {
@@ -38,34 +38,34 @@ sealed trait Queue[C[_, _], A, B] {
   def tviewl: TAViewL[Queue, C, A, B]
 }
 final case class Q0[C[_, _], A]() extends Queue[C, A, A] {
-  override def |>[Z](e: C[A, Z]) = Q1(e) 
+  override def |>[Z](e: C[A, Z]) = Q1(e)
   override def tviewl = TAEmptyL()
 }
 final case class Q1[C[_, _], A, B](a: C[A, B]) extends Queue[C, A, B] {
-  override def  |>[Z](e: C[B, Z]) =
+  override def |>[Z](e: C[B, Z]) =
     QN[C, A, Z, B, B](B1(a), Q0[P_[C]#O, B](), B1(e))
   override def tviewl = :<(a, Q0())
 }
 final case class QN[C[_, _], A, B0, X, Y](
-  l: B[C, A, X], m: Queue[P_[C]#O, X, Y], r:  B[C, Y, B0]) extends Queue[C, A, B0] {
+  l: B[C, A, X], m: Queue[P_[C]#O, X, Y], r: B[C, Y, B0]) extends Queue[C, A, B0] {
   override def |>[Z](e: C[B0, Z]) =
     r match {
-    case B1(a) => QN(l, m, B2(CS(a, e)))
-    case B2(r) => QN(l, m |> r, B1(e))
-  }
+      case B1(a) ⇒ QN(l, m, B2(CS(a, e)))
+      case B2(r) ⇒ QN(l, m |> r, B1(e))
+    }
   override def tviewl = l match {
-    case B2(CS(a, b)) => :<(a, QN(B1(b), m, r))
-    case B1(a) => {
+    case B2(CS(a, b)) ⇒ :<(a, QN(B1(b), m, r))
+    case B1(a) ⇒ {
       def buf2queue[Z, W](b: B[C, Z, W]): Queue[C, Z, W] = b match {
-        case B1(a) => Q1(a)
-        case B2(cs @ CS(a, b)) => QN(B1(a), Q0[P_[C]#O, cs.W](), B1(b))
-      } 
-//      def shiftLeft[A, B3, W](q: Queue[({ type L[A, B] = P[C, A, B] })#L, A, W], r: B[C, W, B3]): Queue[C, A, B3] =
-//        q.tviewl match {
-//        case tael @ TAEmptyL() => buf2queue(tael.witness.subst[({type L[V] = B[C, V, B3]})#L](r))
-//        case cl @ :<(l, m) => QN(B2(l), m, r)
-//      }
-      ???
+        case B1(a) ⇒ Q1(a)
+        case B2(cs @ CS(a, b)) ⇒ QN(B1(a), Q0[P_[C]#O, cs.W](), B1(b))
+      }
+      def shiftLeft[A, B3, W](q: Queue[P_[C]#O, A, W], r: B[C, W, B3]): Queue[C, A, B3] =
+        q.tviewl match {
+          case tael: TAEmptyL[Queue, P_[C]#O, A, W] ⇒ buf2queue(tael.witness.subst[({ type L[V] = B[C, V, B3] })#L](r))
+          case cl: :<[Queue, P_[C]#O, A, _, W] ⇒ QN(B2(cl.e), cl.s, r)
+        }
+      :<(a, shiftLeft(m, r))
     }
   }
 }
