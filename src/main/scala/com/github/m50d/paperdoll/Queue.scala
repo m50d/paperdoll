@@ -71,8 +71,8 @@ final case class QN[C[_, _], A, B0, X, Y](
 }
 
 object Queue {
-  def tmapp[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[({ type L[X, Y] = (P[C, X, Y]) })#L, ({ type L[X, Y] = (P[D, X, Y]) })#L] =
-    new FunctionKK[({ type L[X, Y] = (P[C, X, Y]) })#L, ({ type L[X, Y] = (P[D, X, Y]) })#L] {
+  def tmapp[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[P_[C]#O, P_[D]#O] =
+    new FunctionKK[P_[C]#O, P_[D]#O] {
       def apply[X, Y](phi: P[C, X, Y]): P[D, X, Y] =
         phi match {
           case CS(v1, v2) ⇒ CS(f.apply(v1), f.apply(v2))
