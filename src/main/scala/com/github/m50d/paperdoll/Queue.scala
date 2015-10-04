@@ -41,6 +41,7 @@ sealed trait Queue[C[_, _], A, B] {
     case tael: TAEmptyL[Queue, C, A, B] => tael.witness.subst[({ type L[V] = Queue[C, V, X] })#L](r)
     case cl: :<[Queue, C, A, _, B] => cl.e <|: (cl.s >< r)
   }
+//  def tviewr
 }
 final case class Q0[C[_, _], A]() extends Queue[C, A, A] {
   override def |>[Z](e: C[A, Z]) = Q1(e)
