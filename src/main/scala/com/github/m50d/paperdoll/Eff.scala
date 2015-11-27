@@ -16,7 +16,7 @@ import aliases._
 
 sealed trait Eff[R <: Coproduct, A]
 final case class Pure[R <: Coproduct, A](a: A) extends Eff[R, A]
-sealed trait Impure[R <: Coproduct, A] extends Eff[R, A]{
+trait Impure[R <: Coproduct, A] extends Eff[R, A]{
   type L <: Layers[R]
   type X
     val eff: L#O[X]
