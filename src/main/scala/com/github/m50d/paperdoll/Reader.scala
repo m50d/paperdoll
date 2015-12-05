@@ -5,6 +5,7 @@ import shapeless.CNil
 import shapeless.:+:
 import shapeless.ops.coproduct.Inject
 import aliases._
+import scalaz.syntax.monad._
 
 trait Reader[I, X]
 
@@ -20,5 +21,9 @@ object example {
     
   def askReaderOnly[I]: Eff[Reader_[I] :+: CNil, I] =
     ask[I, Reader_[I] :+: CNil, ({type L[X] = Reader[I, X] :+: X :+: CNil})#L]
+  
+  def addGet[R <: Coproduct, F[_] <: Coproduct](x: Int)(
+      implicit l: Layers[R]{type O[X] = F[X]}, inj: Inject[F[Int], Reader_[Int]#F[Int]]): Eff[R, Int] =
+    Eff.monadEff.bind(ask[Int, R, F](l, inj)){i => (i+x).point[Eff_[R]#O]}
     
 }
