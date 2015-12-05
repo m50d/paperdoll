@@ -4,6 +4,9 @@ import shapeless.Coproduct
 import scalaz.Monad
 import shapeless.CNil
 import shapeless.:+:
+import aliases._
+import shapeless.Coproduct
+import shapeless.ops.coproduct.Inject
 
 object aliases {
   type Arr[R <: Coproduct, A, B] = A => Eff[R, B]
@@ -12,11 +15,10 @@ object aliases {
   }
   type Arrs[R <: Coproduct, A, B] = Queue[Arr_[R]#O, A, B]
 }
-import aliases._
 
 sealed trait Eff[R <: Coproduct, A]
 final case class Pure[R <: Coproduct, A](a: A) extends Eff[R, A]
-trait Impure[R <: Coproduct, A] extends Eff[R, A]{
+sealed trait Impure[R <: Coproduct, A] extends Eff[R, A]{
   type L <: Layers[R]
   type X
     val eff: L#O[X]
@@ -58,4 +60,13 @@ object Eff {
       }
     }
   }
+  
+  def send[F[_], R <: Coproduct, N[_] <: Coproduct, V](value: F[V])(implicit l: Layers[R]{type O[X] = N[X]}, inj: Inject[N[V], F[V]]): Eff[R, V] =
+    new Impure[R, V] {
+    type L = Layers[R] {type O[Y] = N[Y]}
+    type X = V
+    val eff = Coproduct[N[V]](value)
+    val step = Q0[Arr_[R]#O, V]()
+  }
+ 
 }
