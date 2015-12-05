@@ -38,11 +38,14 @@ sealed trait Layers[R <: Coproduct] {
 }
 object Layers {
   implicit object cnil extends Layers[CNil] {
-    type O[X] = X :+: CNil
+    type O[X] = CNil
   }
   implicit def ccons[H <: Layer, T <: Coproduct](implicit t: Layers[T]) =
     new Layers[H :+: T] {
     type O[X] = H#F[X] :+: t.O[X]
+  }
+  type Aux[R <: Coproduct, F[_] <: Coproduct] = Layers[R] {
+    type O[X] = F[X]
   }
 }
 
