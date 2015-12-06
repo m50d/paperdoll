@@ -94,5 +94,6 @@ object Eff {
       {x => bind(kt.e(x), kt.s)}
   }
  
-  def qcomp[R1 <: Coproduct, R2 <: Coproduct, A, B, C](arrs: Arrs[R1, A, B], func: Eff[R1, B] => Eff[R2, C]): Arr[R2, A, C] = ???
+  def qcomp[R1 <: Coproduct, R2 <: Coproduct, A, B, C](arrs: Arrs[R1, A, B], func: Eff[R1, B] => Eff[R2, C]): Arr[R2, A, C] = 
+    qApp(arrs) andThen func
 }
