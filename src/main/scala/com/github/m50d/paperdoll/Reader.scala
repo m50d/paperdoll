@@ -9,8 +9,7 @@ import scalaz.syntax.monad._
 import scala.annotation.tailrec
 import shapeless.ops.coproduct.Remove
 
-trait Reader[I, X]
-
+sealed trait Reader[I, X]
 case class Get[I]() extends Reader[I, I]
 
 object example {
