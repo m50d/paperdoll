@@ -79,6 +79,14 @@ object Eff {
     case e: TAEmptyL[Queue, Arr_[R]#O, B, W] => {
       b => Leibniz.symm[Nothing, Any, W, B](e.witness).apply(b).point[Eff_[R]#O]
     }
+    case kt: :<[Queue, Arr_[R]#O, B, _, W] =>
+      def bind[A, B](eff: Eff[R, A], k: Arrs[R, A, B]): Eff[R, B] =
+        eff match {
+        case Pure(y) => qApp(k)(y)
+        case imp: Impure[R, A] =>
+          ???
+      }
+      {x => bind(kt.e(x), kt.s)}
   }
  
 }
