@@ -7,6 +7,7 @@ import shapeless.ops.coproduct.Inject
 import aliases._
 import scalaz.syntax.monad._
 import scala.annotation.tailrec
+import shapeless.ops.coproduct.Remove
 
 trait Reader[I, X]
 
@@ -27,15 +28,19 @@ object example {
       implicit l: Layers.Aux[R, F], inj: Inject[F[Int], Reader_[Int]#F[Int]]): Eff[R, Int] =
     Eff.monadEff.bind(ask[Int, R, F](l, inj)){i => (i+x).point[Eff_[R]#O]}
   
-  def runReader[I, R <: Coproduct, A](i: I, e: Eff[Reader_[I] :+: R, A]): Eff[R, A] = {
-//   def loop(m: Eff[Reader_[I] :+: R, A]): Eff[R, A] = m match {
-//      case Pure(x) => x.point[Eff_[R]#O]
-//      case i: Impure[R, A] =>
-//        i.eff.removeElemC[Reader_[I]#F[i.X]] match {
-//          case _ => ???
-//        }
-//        ???
-//    }
+  def runReader[I, R <: Coproduct, A, M[_] <: Coproduct](i: I, e: Eff[Reader_[I] :+: R, A])(implicit l: Layers.Aux[R, M]): Eff[R, A] = {
+   def loop(m: Eff[Reader_[I] :+: R, A]): Eff[R, A] = m match {
+      case Pure(x) => x.point[Eff_[R]#O]
+      case i: Impure[Reader_[I] :+: R, A] {
+        type L = Layers[Reader_[I] :+: R] {
+          type O[X] = Reader[I, X] :+: M[X]
+        }
+      } =>
+        i.eff.removeElemC[Reader_[I]#F[i.X]] match {
+          case _ => ???
+        }
+        ???
+    }
     ???
   }
     
