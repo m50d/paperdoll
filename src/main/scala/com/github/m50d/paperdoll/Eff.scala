@@ -84,7 +84,12 @@ object Eff {
         eff match {
         case Pure(y) => qApp(k)(y)
         case imp: Impure[R, A] =>
-          ???
+          new Impure[R, B] {
+            type L = imp.L
+            type X = imp.X
+            val eff = imp.eff
+            val step = imp.step >< k
+          }
       }
       {x => bind(kt.e(x), kt.s)}
   }
