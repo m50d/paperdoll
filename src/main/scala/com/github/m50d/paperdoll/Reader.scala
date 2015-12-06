@@ -31,18 +31,23 @@ object example {
   def runReader[I, R <: Coproduct, A, M[_] <: Coproduct](i: I, e: Eff[Reader_[I] :+: R, A])(implicit l: Layers.Aux[R, M]): Eff[R, A] = {
    def loop(m: Eff[Reader_[I] :+: R, A]): Eff[R, A] = m match {
       case Pure(x) => x.point[Eff_[R]#O]
-      case i: Impure[Reader_[I] :+: R, A] {
+      case imp: Impure[Reader_[I] :+: R, A] {
         type L = Layers[Reader_[I] :+: R] {
           type O[X] = Reader[I, X] :+: M[X]
         }
+        type X = I
       } =>
-        i.eff.removeElem[Reader_[I]#F[i.X]] match {
-          case Left(Get()) => ???
-          case _ => ???
+        imp.eff.removeElem[Reader_[I]#F[imp.X]] match {
+          case Left(Get()) => loop(Eff.qApp(imp.step).apply(i))
+          case Right(u) => new Impure[R, A] {
+            type L = Layers.Aux[R, M]
+            type X = I
+            val eff = u
+            val step = Q1[Arr_[R]#O, I, A](Eff.qcomp(imp.step, loop))
+          }
         }
-        ???
     }
-    ???
+    loop(e)
   }
     
 }

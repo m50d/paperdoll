@@ -20,7 +20,7 @@ object aliases {
 
 sealed trait Eff[R <: Coproduct, A]
 final case class Pure[R <: Coproduct, A](a: A) extends Eff[R, A]
-sealed trait Impure[R <: Coproduct, A] extends Eff[R, A]{
+/*sealed*/ trait Impure[R <: Coproduct, A] extends Eff[R, A]{
   type L <: Layers[R]
   type X
     val eff: L#O[X]
@@ -94,4 +94,5 @@ object Eff {
       {x => bind(kt.e(x), kt.s)}
   }
  
+  def qcomp[R1 <: Coproduct, R2 <: Coproduct, A, B, C](arrs: Arrs[R1, A, B], func: Eff[R1, B] => Eff[R2, C]): Arr[R2, A, C] = ???
 }
