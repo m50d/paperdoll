@@ -36,7 +36,8 @@ object example {
           type O[X] = Reader[I, X] :+: M[X]
         }
       } =>
-        i.eff.removeElemC[Reader_[I]#F[i.X]] match {
+        i.eff.removeElem[Reader_[I]#F[i.X]] match {
+          case Left(Get()) => ???
           case _ => ???
         }
         ???

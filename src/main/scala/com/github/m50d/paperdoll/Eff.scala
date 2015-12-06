@@ -7,6 +7,8 @@ import shapeless.:+:
 import aliases._
 import shapeless.Coproduct
 import shapeless.ops.coproduct.Inject
+import scalaz.Leibniz
+import scalaz.syntax.monad._
 
 object aliases {
   type Arr[R <: Coproduct, A, B] = A => Eff[R, B]
@@ -70,6 +72,13 @@ object Eff {
     type X = V
     val eff = Coproduct[N[V]](value)
     val step = Q0[Arr_[R]#O, V]()
+  }
+  
+  def qApp[R <: Coproduct, B, W](arrs: Arrs[R, B, W]): Arr[R, B, W] =
+    arrs.tviewl match {
+    case e: TAEmptyL[Queue, Arr_[R]#O, B, W] => {
+      b => Leibniz.symm[Nothing, Any, W, B](e.witness).apply(b).point[Eff_[R]#O]
+    }
   }
  
 }
