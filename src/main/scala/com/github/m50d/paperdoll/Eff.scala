@@ -9,6 +9,7 @@ import shapeless.Coproduct
 import shapeless.ops.coproduct.Inject
 import scalaz.Leibniz
 import scalaz.syntax.monad._
+import scalaz.Forall
 
 object aliases {
   type Arr[R <: Coproduct, A, B] = A => Eff[R, B]
@@ -96,4 +97,13 @@ object Eff {
  
   def qcomp[R1 <: Coproduct, R2 <: Coproduct, A, B, C](arrs: Arrs[R1, A, B], func: Eff[R1, B] => Eff[R2, C]): Arr[R2, A, C] = 
     qApp(arrs) andThen func
+    
+  def handleRelay[R1, R <: Coproduct, A, W, M[_] <: Coproduct, T[_]](
+      ret: Arr[R, A, W],
+      bind: Forall[({type L[V] =
+        (T[V], Arr[R, V, W]) => Eff[R, W]
+        })#L],
+      x: Eff[R1 :+: R, A]
+  ): Eff[R, W]
+  = ???
 }
