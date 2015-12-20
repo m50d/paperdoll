@@ -22,9 +22,13 @@ object aliases {
 sealed trait Eff[R <: Coproduct, A]
 final case class Pure[R <: Coproduct, A](a: A) extends Eff[R, A]
 /*sealed*/ trait Impure[R <: Coproduct, A] extends Eff[R, A]{
+  //The composed layer type
   type L <: Layers[R]
+  //The type of the value of the lazy intermediate step
   type X
+  //The immediate value, an X inside an effect
     val eff: L#O[X]
+  //The continuation from X to the next step
     val step: Arrs[R, X, A]
 }
 
@@ -105,5 +109,15 @@ object Eff {
         })#L],
       x: Eff[R1 :+: R, A]
   ): Eff[R, W]
-  = ???
+  = x match {
+    case Pure(x) => ret(x)
+    case imp: Impure[R1 :+: R, A] {
+        type L = Layers[R1 :+: R] {
+          type O[X] = T[X] :+: M[X]
+        }
+//        type X = I
+      } =>
+        ???
+//        imp.eff
+  }
 }
