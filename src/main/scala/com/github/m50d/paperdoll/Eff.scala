@@ -44,10 +44,12 @@ sealed trait Layer {
 sealed trait Layers[R <: Coproduct] {
   type O[X] <: Coproduct
 }
-object Layers {
+trait Layers1 {
   implicit object cnil extends Layers[CNil] {
     type O[X] = CNil
   }
+}
+object Layers extends Layers1 {
   implicit def ccons[H <: Layer, T <: Coproduct](implicit t: Layers[T]) =
     new Layers[H :+: T] {
       type O[X] = H#F[X] :+: t.O[X]
@@ -115,7 +117,7 @@ object Eff {
     ret: Arr[R, A, A],
     bind: Forall[({
       type L[V] = (T[V], Arr[R, V, A]) => Eff[R, A]
-    })#L]): Eff[R1 :+: R, A] => Eff[R, A] = {
+    })#L])(implicit l: Layers.Aux[R, M]): Eff[R1 :+: R, A] => Eff[R, A] = {
     case Pure(x) => ret(x)
     case imp: Impure[R1 :+: R, A] {
       type L = Layers[R1 :+: R] {
@@ -133,5 +135,8 @@ object Eff {
             override val step = Q1[Arr_[R]#O, X, A](k)
           }
       }
+  }
+  def run[A](eff: Eff[CNil, A]): A = eff match {
+    case Pure(a) => a
   }
 }
