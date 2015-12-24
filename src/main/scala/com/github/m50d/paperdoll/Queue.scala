@@ -45,6 +45,8 @@ sealed trait Queue[C[_, _], A, B] {
 final case class Q0[C[_, _], A]() extends Queue[C, A, A] {
   override def |>[Z](e: C[A, Z]) = Q1(e)
   override def tviewl = TAEmptyL()
+  override def <|:[X](l: C[X, A]): Queue[C, X, A] =
+    Q1(l)
 }
 final case class Q1[C[_, _], A, B](a: C[A, B]) extends Queue[C, A, B] {
   override def |>[Z](e: C[B, Z]) =
