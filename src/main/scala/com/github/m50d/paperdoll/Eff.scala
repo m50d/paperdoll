@@ -111,26 +111,26 @@ object Eff {
   def qcomp[R1 <: Coproduct, R2 <: Coproduct, A, B, C](arrs: Arrs[R1, A, B], func: Eff[R1, B] => Eff[R2, C]): Arr[R2, A, C] =
     qApp(arrs) andThen func
 
-  def handleRelay[R1, R <: Coproduct, A, W, M[_] <: Coproduct, T[_]](
-    ret: Arr[R, A, W],
+  def handleRelay[R1, R <: Coproduct, A, M[_] <: Coproduct, T[_]](
+    ret: Arr[R, A, A],
     bind: Forall[({
-      type L[V] = (T[V], Arr[R, V, W]) => Eff[R, W]
-    })#L]): Eff[R1 :+: R, A] => Eff[R, W] = {
+      type L[V] = (T[V], Arr[R, V, A]) => Eff[R, A]
+    })#L]): Eff[R1 :+: R, A] => Eff[R, A] = {
     case Pure(x) => ret(x)
     case imp: Impure[R1 :+: R, A] {
       type L = Layers[R1 :+: R] {
         type O[X] = T[X] :+: M[X]
       }
     } =>
-      val k = qcomp(imp.step, handleRelay[R1, R, A, W, M, T](ret, bind))
+      val k = qcomp(imp.step, handleRelay[R1, R, A, M, T](ret, bind))
       imp.eff.removeElem[T[imp.X]] match {
         case Left(x) => bind.apply(x, k)
         case Right(u) =>
-          new Impure[R, W] {
+          new Impure[R, A] {
             override type L = Layers.Aux[R, M]
             override type X = imp.X
             override val eff = u
-            override val step = Q1[Arr_[R]#O, X, W](k)
+            override val step = Q1[Arr_[R]#O, X, A](k)
           }
       }
   }
