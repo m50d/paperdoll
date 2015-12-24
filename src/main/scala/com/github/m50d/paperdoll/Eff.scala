@@ -22,7 +22,7 @@ object aliases {
 
 sealed trait Eff[R <: Coproduct, A]
 final case class Pure[R <: Coproduct, A](a: A) extends Eff[R, A]
-/*sealed*/ trait Impure[R <: Coproduct, A] extends Eff[R, A] {
+sealed trait Impure[R <: Coproduct, A] extends Eff[R, A] {
   //The composed layer type
   type L <: Layers[R]
   //The type of the value of the lazy intermediate step
