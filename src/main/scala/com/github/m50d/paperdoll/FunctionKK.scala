@@ -1,4 +1,4 @@
-package com.github.m50d.paperdoll.queue
+package com.github.m50d.paperdoll
 
 /**
  * Function1 for types of kind [_, _]

@@ -1,4 +1,4 @@
-package com.github.m50d.paperdoll.queue
+package com.github.m50d.paperdoll
 
 import scalaz.{Forall, Leibniz}
 import scalaz.Leibniz.===

@@ -1,6 +1,7 @@
 package com.github.m50d.paperdoll.queue
 
 import scalaz.Forall
+import com.github.m50d.paperdoll.{Pair, Pair_, FunctionKK}
 
 /**
  * Type aligned queue of exactly one or two elements

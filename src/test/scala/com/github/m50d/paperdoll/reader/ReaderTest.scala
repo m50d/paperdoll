@@ -3,7 +3,7 @@ package com.github.m50d.paperdoll.reader
 import org.junit.Test
 import scalaz.syntax.monad._
 import Reader._
-import com.github.m50d.paperdoll.Eff
+import com.github.m50d.paperdoll.effect.Eff
 import shapeless.CNil
 import org.fest.assertions.Assertions.assertThat
 

@@ -1,10 +1,10 @@
-package com.github.m50d
+package com.github.m50d.paperdoll
 
 import shapeless.Coproduct
 import com.github.m50d.paperdoll.reader.Reader
 import com.github.m50d.paperdoll.queue.Queue
 
-package object paperdoll {
+package object effect {
   /**
    * An effectful function A => B, with effects from the stack represented
    * by R and L.
