@@ -7,18 +7,19 @@ trait FunctionKK[C[_, _], D[_, _]] {
   def apply[X, Y](c: C[X, Y]): D[X, Y]
 }
 /**
- * TODO: this type was given in the paper but I think it's only necessary there
- * because of Haskell GADTs. See if it can be merged down into CS,
- * or ideally all the way into B2
+ * A pair of C[A, W] and C[W, B]
+ * for some unknown type W.
+ * Interface and impl deliberately separated
+ * so that the type W is not observable
  */
-sealed trait P[C[_, _], A, B]
-sealed trait P_[C[_, _]] {
-  final type O[X, Y] = P[C, X, Y]
+sealed trait Pair[C[_, _], A, B]
+sealed trait Pair_[C[_, _]] {
+  final type O[X, Y] = Pair[C, X, Y]
 }
 /**
  * Two-element mini-queue
  */
-final case class CS[C[_, _], A, B, W0](a: C[A, W0], b: C[W0, B]) extends P[C, A, B] {
+final case class CS[C[_, _], A, B, W0](a: C[A, W0], b: C[W0, B]) extends Pair[C, A, B] {
   type W = W0
 }
 /**
@@ -32,7 +33,9 @@ final case class B1[C[_, _], A, B0](a: C[A, B0]) extends B[C, A, B0]
 /**
  * Two elements
  */
-final case class B2[C[_, _], A, B0](v: P[C, A, B0]) extends B[C, A, B0]
+final case class B2[C[_, _], A, B0, W0](v: Pair[C, A, B0]) extends B[C, A, B0] {
+  type W = W0
+}
 
 /**
  * A type-aligned queue C[A, X] :: C[X, Y] :: ... :: C[Z, B]
@@ -83,11 +86,11 @@ final case class Q0[C[_, _], A]() extends Queue[C, A, A] {
  */
 final case class Q1[C[_, _], A, B](a: C[A, B]) extends Queue[C, A, B] {
   override def |>[Z](e: C[B, Z]) =
-    QN[C, A, Z, B, B](B1(a), Q0[P_[C]#O, B](), B1(e))
+    QN[C, A, Z, B, B](B1(a), Q0[Pair_[C]#O, B](), B1(e))
   override def tviewl = :<(a, Q0())
 }
 final case class QN[C[_, _], A, B0, X, Y](
-  l: B[C, A, X], m: Queue[P_[C]#O, X, Y], r: B[C, Y, B0]) extends Queue[C, A, B0] {
+  l: B[C, A, X], m: Queue[Pair_[C]#O, X, Y], r: B[C, Y, B0]) extends Queue[C, A, B0] {
   override def |>[Z](e: C[B0, Z]) =
     r match {
       case B1(a) ⇒ QN(l, m, B2(CS(a, e)))
@@ -98,21 +101,21 @@ final case class QN[C[_, _], A, B0, X, Y](
     case B1(a) ⇒ {
       def buf2queue[Z, W](b: B[C, Z, W]): Queue[C, Z, W] = b match {
         case B1(a) ⇒ Q1(a)
-        case B2(cs @ CS(a, b)) ⇒ QN(B1(a), Q0[P_[C]#O, cs.W](), B1(b))
+        case B2(cs @ CS(a, b)) ⇒ QN(B1(a), Q0[Pair_[C]#O, cs.W](), B1(b))
       }
-      def shiftLeft[A, B3, W](q: Queue[P_[C]#O, A, W], r: B[C, W, B3]): Queue[C, A, B3] =
+      def shiftLeft[A, B3, W](q: Queue[Pair_[C]#O, A, W], r: B[C, W, B3]): Queue[C, A, B3] =
         q.tviewl match {
-          case tael: TAEmptyL[Queue, P_[C]#O, A, W] ⇒ buf2queue(tael.witness.subst[({ type L[V] = B[C, V, B3] })#L](r))
-          case cl: :<[Queue, P_[C]#O, A, _, W] ⇒ QN(B2(cl.e), cl.s, r)
+          case tael: TAEmptyL[Queue, Pair_[C]#O, A, W] ⇒ buf2queue(tael.witness.subst[({ type L[V] = B[C, V, B3] })#L](r))
+          case cl: :<[Queue, Pair_[C]#O, A, _, W] ⇒ QN(B2(cl.e), cl.s, r)
         }
       :<(a, shiftLeft(m, r))
     }
   }
 }
 object Queue {
-  def tmapp[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[P_[C]#O, P_[D]#O] =
-    new FunctionKK[P_[C]#O, P_[D]#O] {
-      def apply[X, Y](phi: P[C, X, Y]): P[D, X, Y] =
+  def tmapp[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[Pair_[C]#O, Pair_[D]#O] =
+    new FunctionKK[Pair_[C]#O, Pair_[D]#O] {
+      def apply[X, Y](phi: Pair[C, X, Y]): Pair[D, X, Y] =
         phi match {
           case CS(v1, v2) ⇒ CS(f.apply(v1), f.apply(v2))
         }

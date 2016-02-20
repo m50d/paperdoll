@@ -77,7 +77,7 @@ object Eff {
     }
 
   /**
-   * Collapse an Arrs (a queue of Arr) to a single Arr
+   * Collapse an Arrs (a queue of Arr) to a single Arr. Arguably belongs with Queue rather than here
    */
   def qApp[R <: Coproduct, L <: Layers[R], B, W](arrs: Arrs[R, L, B, W]): Arr[R, L, B, W] =
     arrs.tviewl match {
@@ -107,14 +107,21 @@ object Eff {
   private[this] def qcomp[R1 <: Coproduct, L1 <: Layers[R1], R2 <: Coproduct, L2 <: Layers[R2], A, B, C](arrs: Arrs[R1, L1, A, B],
     func: Eff[R1, L1, B] => Eff[R2, L2, C]): Arr[R2, L2, A, C] =
     qApp(arrs) andThen func
-  def handleRelay[R1, R <: Coproduct, A, M[_] <: Coproduct, T[_]](
-    ret: (A => Eff[R, Layers.Aux[R, M], A]),
+  /**
+   * Lightly curried - TODO look at whether this could be expressed more clearly.
+   * Handle the effect R1/T, using the supplied handler bind
+   * that knows how to translate a T[V] (the concrete effect) and an
+   * effectful continuation from V to A with effects R/M
+   * into a single effectful lazy value of type A
+   * (usually by somehow "running" the T[V] to obtain a V and then passing it to the continuation)
+   */
+  def handleRelay[R1, R <: Coproduct, T[_], M[_] <: Coproduct, A](
     bind: Forall[({
       type L[V] = (T[V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A]
     })#L])(implicit l: Layers.Aux[R, M]): Eff[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, A] => Eff[R, Layers.Aux[R, M], A] =
-    _.fold(ret, new Forall[({ type K[X] = (T[X] :+: M[X], Arrs[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, X, A]) => Eff[R, Layers.Aux[R, M], A] })#K] {
+    _.fold({a0 => new Pure[R, Layers.Aux[R, M], A] { val a = a0 }}, new Forall[({ type K[X] = (T[X] :+: M[X], Arrs[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, X, A]) => Eff[R, Layers.Aux[R, M], A] })#K] {
       override def apply[X0] = { (eff, step) =>
-        val k = qcomp(step, handleRelay[R1, R, A, M, T](ret, bind))
+        val k = qcomp(step, handleRelay[R1, R, T, M, A](bind))
         eff.removeElem[T[X0]] match {
           case Left(x) => bind.apply(x, k)
           case Right(u) =>
@@ -126,6 +133,10 @@ object Eff {
         }
       }
     })
+  /**
+   * Run a lazy effectful value after all the effects have already been handled -
+   * it necessarily no longer contains any actual effects, just the value of type A
+   */
   def run[A](eff: Eff[CNil, Layers[CNil] { type O[X] = CNil }, A]): A = eff.fold(identity, new Forall[({ type K[X] = (CNil, Arrs[CNil, Layers[CNil] { type O[X] = CNil }, X, A]) => A })#K] {
     override def apply[X] = {
       (eff, step) =>
