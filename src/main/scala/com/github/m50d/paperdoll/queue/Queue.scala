@@ -1,6 +1,8 @@
 package com.github.m50d.paperdoll.queue
 
+import com.github.m50d.paperdoll.queue.pair.{Pair, Pair_}
 import scalaz.Forall
+
 
 /**
  * Function1 for types of kind [_, _]
@@ -8,23 +10,7 @@ import scalaz.Forall
 trait FunctionKK[C[_, _], D[_, _]] {
   def apply[X, Y](c: C[X, Y]): D[X, Y]
 }
-/**
- * A pair of C[A, W] and C[W, B]
- * for some unknown type W.
- * Interface and impl deliberately separated
- * so that the type W is not observable
- */
-sealed trait Pair[C[_, _], A, B] {
-  def fold[Z](f: Forall[({type L[W] = (C[A, W], C[W, B]) => Z})#L]): Z
-}
-sealed trait Pair_[C[_, _]] {
-  final type O[X, Y] = Pair[C, X, Y]
-}
 
-private[queue] final case class PairImpl[C[_, _], A, B, W](a: C[A, W], b: C[W, B]) extends Pair[C, A, B] {
-  override def fold[Z](f: Forall[({type L[W] = (C[A, W], C[W, B]) => Z})#L]) =
-    f.apply[W].apply(a, b)
-}
 /**
  * One or two element mini-queue
  */
@@ -96,11 +82,18 @@ final case class QN[C[_, _], A, B0, X, Y](
   l: B[C, A, X], m: Queue[Pair_[C]#O, X, Y], r: B[C, Y, B0]) extends Queue[C, A, B0] {
   override def |>[Z](e: C[B0, Z]) =
     r match {
-      case B1(a) ⇒ QN(l, m, B2(PairImpl(a, e)))
+      case B1(a) ⇒ QN(l, m, B2(Pair(a, e)))
       case B2(r) ⇒ QN(l, m |> r, B1(e))
     }
   override def tviewl = l match {
-    case B2(PairImpl(a, b)) ⇒ :<(a, QN(B1(b), m, r))
+    case B2(p) ⇒
+      p.fold(new Forall[({type L[W] = (C[A, W], C[W, X]) => TAViewL[Queue, C, A, B0]})#L] {
+        override def apply[W] = {
+          (a, b) =>
+            :<(a, QN(B1[C, W, X](b), m, r))
+        }
+      })
+    
     case B1(a) ⇒ {
       def buf2queue[Z, W](b: B[C, Z, W]): Queue[C, Z, W] = b match {
         case B1(a) ⇒ Q1(a)
@@ -125,9 +118,11 @@ object Queue {
   def tmapp[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[Pair_[C]#O, Pair_[D]#O] =
     new FunctionKK[Pair_[C]#O, Pair_[D]#O] {
       def apply[X, Y](phi: Pair[C, X, Y]): Pair[D, X, Y] =
-        phi match {
-          case PairImpl(v1, v2) ⇒ PairImpl(f.apply(v1), f.apply(v2))
-        }
+        phi.fold(new Forall[({type L[W] = (C[X, W], C[W, Y]) => Pair[D, X, Y]})#L]{
+          override def apply[W] = {
+            (a, b) => Pair(f(a), f(b))
+          }
+        })
     }
   def tmapb[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[({ type L[X, Y] = (B[C, X, Y]) })#L, ({ type L[X, Y] = (B[D, X, Y]) })#L] =
     new FunctionKK[({ type L[X, Y] = (B[C, X, Y]) })#L, ({ type L[X, Y] = (B[D, X, Y]) })#L] {
