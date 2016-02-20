@@ -142,8 +142,8 @@ object Eff {
         }
       }
     })
-  def run[A](eff: Eff[CNil, CNil, A]): A = eff.fold(identity, new Forall[({type K[X] = (CNil, Arrs[CNil, CNil, X, A]) => A})#K]{
-    override def apply[X]() = {
+  def run[A](eff: Eff[CNil, Layers[CNil] {type O[X] = CNil}, A]): A = eff.fold(identity, new Forall[({type K[X] = (CNil, Arrs[CNil, Layers[CNil] {type O[X] = CNil}, X, A]) => A})#K]{
+    override def apply[X] = {
       (eff, step) =>
       sys.error("This case is only called for CNil, which is supposed to be impossible")
     }
