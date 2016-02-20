@@ -15,7 +15,7 @@ class ReaderTest {
         snd <- askReaderOnly[Int]
       } yield fst + snd
       
-    val pure = runReader[Int, CNil, Int, ({type L[X] = CNil})#L](4, reader)
+    val pure = runReader[Int, CNil, ({type L[X] = CNil})#L, Int](4, reader)
     val result = Eff.run(pure)
     assertThat(result).isEqualTo(8)
   }

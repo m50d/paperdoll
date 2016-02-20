@@ -37,7 +37,7 @@ object Reader {
    * (i.e. giving the value i to any reads in the "lazy effectful value" e),
    * removing Reader_[I] from the stack of effects in the result.
    */
-  def runReader[I, R <: Coproduct, A, M[_] <: Coproduct](i: I, e: Eff[Reader_[I] :+: R, Layers[Reader_[I] :+: R] {
+  def runReader[I, R <: Coproduct, M[_] <: Coproduct, A](i: I, e: Eff[Reader_[I] :+: R, Layers[Reader_[I] :+: R] {
     type O[X] = Reader[I, X] :+: M[X]
   }, A])(implicit l: Layers.Aux[R, M]): Eff[R, Layers.Aux[R, M], A] =
     Eff.handleRelay[Reader_[I], R, Reader_[I]#F, M, A](
