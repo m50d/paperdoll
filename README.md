@@ -24,7 +24,7 @@ an instance of this pattern.
 
 Algebraic data types generally offer a fold method which is designed
 to be the safe equivalent of a pattern match. When reviewing Scala
-[it is difficult to distinguish between safe and unsafe pattern matches]((http://typelevel.org/blog/2014/11/10/why_is_adt_pattern_matching_allowed.html),
+[it is difficult to distinguish between safe and unsafe pattern matches](http://typelevel.org/blog/2014/11/10/why_is_adt_pattern_matching_allowed.html),
 so my preferred style is to avoid pattern matches entirely.
 This also makes it possible to hide trait implementation subtypes.
 
@@ -35,6 +35,10 @@ This also makes it possible to hide trait implementation subtypes.
  * Rename the eff methods (e.g. send and handleRelay) to something easier to understand
   * The original idea (and reason for the project name) was for an extended metaphor
   of adding and removing layers of clothing on a FrenchKISS-style paper doll
+   * Rename pure/impure to naked/wrapped or some such?
+   * send -> wrap?
+   * handleRelay -> takeOffOneLayer?
+   * run -> something you can only do when the doll is naked? 
  * Get into Maven Central
   * GPG signing in build (I know how to do this, it's just a matter of doing it)
  * Release 1.0
