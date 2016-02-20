@@ -1,42 +1,52 @@
 package com.github.m50d.paperdoll
 
-import scalaz.Leibniz.===
-
 /**
  * Function1 for types of kind [_, _]
  */
 trait FunctionKK[C[_, _], D[_, _]] {
   def apply[X, Y](c: C[X, Y]): D[X, Y]
 }
-
-sealed trait TAViewL[S[_[_, _], _, _], C[_, _], X, Y]
-
-final case class TAEmptyL[S[_[_, _], _, _], C[_, _], X, Y]()(implicit val witness: Y === X) extends TAViewL[S, C, X, Y]
-final case class :<[S[_[_, _], _, _], C[_, _], X, Y0, Z](e: C[X, Y0], s: S[C, Y0, Z]) extends TAViewL[S, C, X, Z] {
-  type Y = Y0
-}
-
 sealed trait P[C[_, _], A, B]
-
-/**
- * Partially applied P to make it easier to write types
- */
 sealed trait P_[C[_, _]] {
   final type O[X, Y] = P[C, X, Y]
 }
-
 final case class CS[C[_, _], A, B, W0](a: C[A, W0], b: C[W0, B]) extends P[C, A, B] {
   type W = W0
 }
-
 sealed trait B[C[_, _], A, B]
 final case class B1[C[_, _], A, B0](a: C[A, B0]) extends B[C, A, B0]
 final case class B2[C[_, _], A, B0](v: P[C, A, B0]) extends B[C, A, B0]
 
+/**
+ * A type-aligned queue C[A, X] :: C[X, Y] :: ... :: C[Z, B]
+ * Implemented as a kind of lazy binary tree: a Queue is either empty,
+ * one element, or two ends and a queue of queues in the middle.
+ * Theoretically this provides amortised O(1) append and take operations:
+ * we only have to increase/decrease the depth to N once every 2^N
+ * operations.
+ * TODO: Benchmark and/or automated test to confirm this implementation is actually O(1)
+ * and not accidentally much slower due to implementation errors.
+ * The code was ported from Haskell (a lazy language) at a time when I didn't
+ * really understand it, and so may have issues with eager evaluation in Scala
+ * Also untested usage patterns might result in stack overflows for the same reason.
+ */
 sealed trait Queue[C[_, _], A, B] {
+  /**
+   * Append a single element e onto the end of this queue
+   */
   def |>[Z](e: C[B, Z]): Queue[C, A, Z]
+  /**
+   * Either empty, or head and tail. This is a basic operation that would be really useful
+   * to have on ordinary List, but I don't know the name for it
+   */
   def tviewl: TAViewL[Queue, C, A, B]
+  /**
+   * Prepend a single element l onto the beginning of this queue
+   */
   def <|:[X](l: C[X, A]): Queue[C, X, B] = Q1(l) >< this
+  /**
+   * Append a queue R onto the end of this queue
+   */
   def ><[X](r: Queue[C, B, X]): Queue[C, A, X] = tviewl match {
     case tael: TAEmptyL[Queue, C, A, B] => tael.witness.subst[({ type L[V] = Queue[C, V, X] })#L](r)
     case cl: :<[Queue, C, A, _, B] => cl.e <|: (cl.s >< r)
@@ -76,7 +86,6 @@ final case class QN[C[_, _], A, B0, X, Y](
     }
   }
 }
-
 object Queue {
   def tmapp[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[P_[C]#O, P_[D]#O] =
     new FunctionKK[P_[C]#O, P_[D]#O] {
