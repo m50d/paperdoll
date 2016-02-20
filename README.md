@@ -30,16 +30,14 @@ This also makes it possible to hide trait implementation subtypes.
 
 ## Future tasks
 
- * Rename the queue operations to something sensible now that I understand them,
- rather than the symbol bingo they currently are
- * Rename the queue types to something easier to understand
- * Rename the layer types to something easier to understand
-  * The original idea (and reason for the project name) was that 
  * Implement more effect types
- * Binary compatibility checking in the build (using MiMA or similar)
+ * Rename the layer types to something easier to understand
+  * The original idea (and reason for the project name) was for an extended metaphor
+  of adding and removing layers of clothing on a FrenchKISS-style paper doll
  * Get into Maven Central
-  * GPG signing in build (I know how to do this)
+  * GPG signing in build (I know how to do this, it's just a matter of doing it)
  * Release 1.0
+ * Binary compatibility checking in the build (using MiMA or similar)
  * Port to Cats if it:
   * Adds Leibniz or equivalent
   * Becomes 1.0

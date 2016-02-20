@@ -22,7 +22,7 @@ object MiniQueue {
     override def asQueue = a.fold(new Forall[({ type L[Z] = (C[A, Z], C[Z, B]) => Queue[C, A, B] })#L] {
       override def apply[Z] = {
         (a, b) =>
-          QN(one(a), Empty[Pair_[C]#O, Z](), one(b))
+          Node(one(a), Empty[Pair_[C]#O, Z](), one(b))
       }
     })
   }
