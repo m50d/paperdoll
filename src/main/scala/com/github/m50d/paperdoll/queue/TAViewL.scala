@@ -7,7 +7,9 @@ import scalaz.Leibniz.===
  * S[C, X, Y]
  * Either empty (in which case X === Y)
  * or a head element C[X, A] and a tail S[C, A, Y]
- * for some unknown type A
+ * for some unknown type A.
+ * TODO: follow the same pattern as other code
+ * and only expose the fold method, not the two case classes
  */
 sealed trait TAViewL[S[_[_, _], _, _], C[_, _], X, Y]
 
