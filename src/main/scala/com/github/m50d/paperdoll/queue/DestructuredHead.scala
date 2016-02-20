@@ -4,22 +4,21 @@ import scalaz.{Forall, Leibniz}
 import scalaz.Leibniz.===
 
 /**
- * A view of the head of a type-aligned datastructure
- * S[C, X, Y]
+ * Destructure of a type-aligned datastructure S[C, X, Y] from the left
  * Either nil (in which case X === Y)
  * or a head element C[X, A] and a tail S[C, A, Y]
- * for some unknown type A
+ * for some unknown type A (which is deliberately not exposed outside)
  */
-sealed trait TAViewL[S[_[_, _], _, _], C[_, _], X, Y] {
+sealed trait DestructuredHead[S[_[_, _], _, _], C[_, _], X, Y] {
   def fold[A](nil: (Y === X) => A, cons: Forall[({type L[W] = (C[X, W], S[C, W, Y]) => A})#L]): A
 }
 
-object TAViewL {
-  def nil[S[_[_, _], _, _], C[_, _], X]: TAViewL[S, C, X, X] = new TAViewL[S, C, X, X] {
+object DestructuredHead {
+  def nil[S[_[_, _], _, _], C[_, _], X]: DestructuredHead[S, C, X, X] = new DestructuredHead[S, C, X, X] {
     override def fold[A](nil: (X === X) => A, cons: Forall[({type L[W] = (C[X, W], S[C, W, X]) => A})#L]) =
       nil(Leibniz.refl[X])
   }
-  def cons[S[_[_, _], _, _], C[_, _], X, W, Y](head: C[X, W], tail: S[C, W, Y]) = new TAViewL[S, C, X, Y] {
+  def cons[S[_[_, _], _, _], C[_, _], X, W, Y](head: C[X, W], tail: S[C, W, Y]) = new DestructuredHead[S, C, X, Y] {
     override def fold[A](nil: (Y === X) => A, cons: Forall[({type L[W] = (C[X, W], S[C, W, Y]) => A})#L]) =
       cons.apply[W](head, tail)
   }

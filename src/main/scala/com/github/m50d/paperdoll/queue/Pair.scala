@@ -5,7 +5,7 @@ import scalaz.Forall
 /**
  * A type-aligned pair of C[A, W] and C[W, B]
  * for some unknown type W.
- * Type W is deliberately hiden in implementation
+ * Type W is deliberately inaccessible from outside
  */
 sealed trait Pair[C[_, _], A, B] {
   def fold[Z](f: Forall[({ type L[W] = (C[A, W], C[W, B]) => Z })#L]): Z

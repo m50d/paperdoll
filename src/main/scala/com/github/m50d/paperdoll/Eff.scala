@@ -4,7 +4,7 @@ import shapeless.{ Coproduct, CNil, :+: }
 import shapeless.ops.coproduct.Inject
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
-import com.github.m50d.paperdoll.queue.{ Queue, Q1, Q0 }
+import com.github.m50d.paperdoll.queue.Queue
 
 /**
  * A lazy value of type A with a (possibly empty) stack of effects from the list given by R/L
@@ -54,7 +54,7 @@ object Eff {
             new Impure[R, L, B] {
               type X = X0
               val eff = eff0
-              val step = step0 |> f
+              val step = step0 :+ f
             }
         }
       })
@@ -74,14 +74,14 @@ object Eff {
     new Impure[R, Layers[R] { type O[X] = N[X] }, V] {
       type X = V
       val eff = Coproduct[N[V]](value)
-      val step = Q0[Arr_[R, Layers[R] { type O[X] = N[X] }]#O, V]()
+      val step = Queue.empty[Arr_[R, Layers[R] { type O[X] = N[X] }]#O, V]
     }
 
   /**
    * Collapse an Arrs (a queue of Arr) to a single Arr. Arguably belongs with Queue rather than here
    */
   def qApp[R <: Coproduct, L <: Layers[R], B, W](arrs: Arrs[R, L, B, W]): Arr[R, L, B, W] =
-    arrs.tviewl.fold({ witness => { b: B => Leibniz.symm[Nothing, Any, W, B](witness).apply(b).point[Eff_[R, L]#O] } },
+    arrs.destructureHead.fold({ witness => { b: B => Leibniz.symm[Nothing, Any, W, B](witness).apply(b).point[Eff_[R, L]#O] } },
       new Forall[({ type K[V] = (Arr[R, L, B, V], Arrs[R, L, V, W]) => Arr[R, L, B, W] })#K] {
         override def apply[V] = {
           (head, tail) =>
@@ -94,7 +94,7 @@ object Eff {
                       new Impure[R, L, B] {
                         type X = X0
                         val eff = eff0
-                        val step = step0 >< k
+                        val step = step0 ++ k
                       }
                   }
                 });
@@ -130,7 +130,7 @@ object Eff {
             new Impure[R, Layers.Aux[R, M], A] {
               override type X = X0
               override val eff = u
-              override val step = Q1[Arr_[R, Layers.Aux[R, M]]#O, X0, A](k)
+              override val step = Queue.one[Arr_[R, Layers.Aux[R, M]]#O, X0, A](k)
             }
         }
       }
