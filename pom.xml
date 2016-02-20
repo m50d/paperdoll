@@ -18,6 +18,11 @@
                         </goals>
                     </execution>
                 </executions>
+                <configuration>
+                	<args>
+                		<arg>-language:higherKinds</arg>
+                	</args>
+                </configuration>
             </plugin>
         </plugins>
     </build>

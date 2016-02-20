@@ -13,28 +13,35 @@ import scalaz.Forall
 import scalaz.Unapply
 
 object aliases {
-  type Arr[R <: Coproduct, A, B] = A => Eff[R, B]
-  sealed trait Arr_[R <: Coproduct] {
-    final type O[A, B] = Arr[R, A, B]
-  }
-  type Arrs[R <: Coproduct, A, B] = Queue[Arr_[R]#O, A, B]
+  type Arr[R <: Coproduct, L <: Layers[R], A, B] = A => Eff[R, L, B]
+  type Arrs[R <: Coproduct, L <: Layers[R], A, B] = Queue[(Arr_[R, L])#O, A, B]
 }
 
-sealed trait Eff[R <: Coproduct, A]
-final case class Pure[R <: Coproduct, A](a: A) extends Eff[R, A]
-sealed trait Impure[R <: Coproduct, A] extends Eff[R, A] {
-  //The composed layer type
-  type L <: Layers[R]
+sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
+  final type O[A, B] = A => Eff[R, L, B]
+}
+
+sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
+  def fold[B](p: A => B, i: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]): B
+}
+sealed trait Pure[R <: Coproduct, L <: Layers[R], A] extends Eff[R, L, A] {
+  val a: A
+  override def fold[B](p: A => B, i: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]) = p(a)
+}
+sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends Eff[R, L, A] {
   //The type of the value of the lazy intermediate step
   type X
   //The immediate value, an X inside an effect
   val eff: L#O[X]
   //The continuation from X to the next step
-  val step: Arrs[R, X, A]
+  val step: Arrs[R, L, X, A]
+
+  override def fold[B](p: A => B, i: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]) =
+    i.apply[X](eff, step)
 }
 
-sealed trait Eff_[R <: Coproduct] {
-  final type O[A] = Eff[R, A]
+sealed trait Eff_[R <: Coproduct, L <: Layers[R]] {
+  final type O[A] = Eff[R, L, A]
 }
 
 sealed trait Layer {
@@ -60,83 +67,85 @@ object Layers extends Layers1 {
 }
 
 object Eff {
-  implicit def monadEff[R <: Coproduct] = new Monad[Eff_[R]#O] {
-    override def point[A](a: => A) = Pure(a)
-    override def bind[A, B](fa: Eff[R, A])(f: A => Eff[R, B]) =
-      fa match {
-        case Pure(x) => f(x)
-        case i: Impure[R, A] => new Impure[R, B] {
-          type L = i.L
-          type X = i.X
-          val eff = i.eff
-          val step = i.step |> f
+  implicit def monadEff[R <: Coproduct, L <: Layers[R]] = new Monad[(Eff_[R, L])#O] {
+    override def point[A](a0: => A) = new Pure[R, L, A] { val a = a0 }
+    override def bind[A, B](fa: Eff[R, L, A])(f: A => Eff[R, L, B]) =
+      fa.fold[Eff[R, L, B]](f, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => Eff[R, L, B] })#K] {
+        override def apply[X0] = {
+          (eff0, step0) =>
+            new Impure[R, L, B] {
+              type X = X0
+              val eff = eff0
+              val step = step0 |> f
+            }
         }
-      }
+      })
   }
 
-  implicit def unapplyEff[TC[_[_]], R <: Coproduct, A0](
-    implicit instance: TC[Eff_[R]#O]) = new Unapply[TC, Eff[R, A0]] {
+  implicit def unapplyEff[TC[_[_]], R <: Coproduct, L <: Layers[R], A0](
+    implicit instance: TC[Eff_[R, L]#O]) = new Unapply[TC, Eff[R, L, A0]] {
     override type A = A0
-    override type M[X] = Eff[R, X]
+    override type M[X] = Eff[R, L, X]
     override val TC = instance
-    override val leibniz = Leibniz.refl[Eff[R, A0]]
+    override val leibniz = Leibniz.refl[Eff[R, L, A0]]
   }
 
-  def send[F[_], R <: Coproduct, N[_] <: Coproduct, V](value: F[V])(implicit l: Layers[R] { type O[X] = N[X] }, inj: Inject[N[V], F[V]]): Eff[R, V] =
-    new Impure[R, V] {
-      type L = Layers[R] { type O[Y] = N[Y] }
+  def send[F[_], R <: Coproduct, N[_] <: Coproduct, V](value: F[V])(implicit l: Layers[R] { type O[X] = N[X] }, inj: Inject[N[V], F[V]]): Eff[R, Layers[R] { type O[X] = N[X] }, V] =
+    new Impure[R, Layers[R] { type O[X] = N[X] }, V] {
       type X = V
       val eff = Coproduct[N[V]](value)
-      val step = Q0[Arr_[R]#O, V]()
+      val step = Q0[Arr_[R, Layers[R] { type O[X] = N[X] }]#O, V]()
     }
 
-  def qApp[R <: Coproduct, B, W](arrs: Arrs[R, B, W]): Arr[R, B, W] =
+  def qApp[R <: Coproduct, L <: Layers[R], B, W](arrs: Arrs[R, L, B, W]): Arr[R, L, B, W] =
     arrs.tviewl match {
-      case e: TAEmptyL[Queue, Arr_[R]#O, B, W] => {
-        b => Leibniz.symm[Nothing, Any, W, B](e.witness).apply(b).point[Eff_[R]#O]
+      case e: TAEmptyL[Queue, Arr_[R, L]#O, B, W] => {
+        b => Leibniz.symm[Nothing, Any, W, B](e.witness).apply(b).point[Eff_[R, L]#O]
       }
-      case kt: :<[Queue, Arr_[R]#O, B, _, W] =>
-        def bind[A, B](eff: Eff[R, A], k: Arrs[R, A, B]): Eff[R, B] =
-          eff match {
-            case Pure(y) => qApp(k)(y)
-            case imp: Impure[R, A] =>
-              new Impure[R, B] {
-                type L = imp.L
-                type X = imp.X
-                val eff = imp.eff
-                val step = imp.step >< k
+      case kt: :<[Queue, Arr_[R, L]#O, B, _, W] =>
+        def bind[A, B](eff: Eff[R, L, A], k: Arrs[R, L, A, B]): Eff[R, L, B] =
+          eff.fold(
+            qApp(k),
+            new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => Eff[R, L, B] })#K] {
+              override def apply[X0] = {
+                (eff0, step0) =>
+                  new Impure[R, L, B] {
+                    type X = X0
+                    val eff = eff0
+                    val step = step0 >< k
+                  }
               }
-          }
+            });
         { x => bind(kt.e(x), kt.s) }
     }
 
-  def qcomp[R1 <: Coproduct, R2 <: Coproduct, A, B, C](arrs: Arrs[R1, A, B], func: Eff[R1, B] => Eff[R2, C]): Arr[R2, A, C] =
+  def qcomp[R1 <: Coproduct, L1 <: Layers[R1], R2 <: Coproduct, L2 <: Layers[R2], A, B, C](arrs: Arrs[R1, L1, A, B],
+    func: Eff[R1, L1, B] => Eff[R2, L2, C]): Arr[R2, L2, A, C] =
     qApp(arrs) andThen func
 
   def handleRelay[R1, R <: Coproduct, A, M[_] <: Coproduct, T[_]](
-    ret: Arr[R, A, A],
+    ret: (A => Eff[R, Layers[R] { type O[X] = M[X] }, A]),
     bind: Forall[({
-      type L[V] = (T[V], Arr[R, V, A]) => Eff[R, A]
-    })#L])(implicit l: Layers.Aux[R, M]): Eff[R1 :+: R, A] => Eff[R, A] = {
-    case Pure(x) => ret(x)
-    case imp: Impure[R1 :+: R, A] {
-      type L = Layers[R1 :+: R] {
-        type O[X] = T[X] :+: M[X]
+      type L[V] = (T[V], Arr[R, Layers[R] { type O[X] = M[X] }, V, A]) => Eff[R, Layers[R] { type O[X] = M[X] }, A]
+    })#L])(implicit l: Layers.Aux[R, M]): Eff[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, A] => Eff[R, Layers[R] { type O[X] = M[X] }, A] =
+    _.fold(ret, new Forall[({ type K[X] = (T[X] :+: M[X], Arrs[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, X, A]) => Eff[R, Layers[R] { type O[X] = M[X] }, A] })#K] {
+      override def apply[X0] = { (eff, step) =>
+        val k = qcomp(step, handleRelay[R1, R, A, M, T](ret, bind))
+        eff.removeElem[T[X0]] match {
+          case Left(x) => bind.apply(x, k)
+          case Right(u) =>
+            new Impure[R, Layers.Aux[R, M], A] {
+              override type X = X0
+              override val eff = u
+              override val step = Q1[Arr_[R, Layers.Aux[R, M]]#O, X0, A](k)
+            }
+        }
       }
-    } =>
-      val k = qcomp(imp.step, handleRelay[R1, R, A, M, T](ret, bind))
-      imp.eff.removeElem[T[imp.X]] match {
-        case Left(x) => bind.apply(x, k)
-        case Right(u) =>
-          new Impure[R, A] {
-            override type L = Layers.Aux[R, M]
-            override type X = imp.X
-            override val eff = u
-            override val step = Q1[Arr_[R]#O, X, A](k)
-          }
-      }
-  }
-  def run[A](eff: Eff[CNil, A]): A = eff match {
-    case Pure(a) => a
-  }
+    })
+  def run[A](eff: Eff[CNil, CNil, A]): A = eff.fold(identity, new Forall[({type K[X] = (CNil, Arrs[CNil, CNil, X, A]) => A})#K]{
+    override def apply[X]() = {
+      (eff, step) =>
+      sys.error("This case is only called for CNil, which is supposed to be impossible")
+    }
+  })
 }
