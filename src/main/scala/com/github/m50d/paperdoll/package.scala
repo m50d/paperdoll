@@ -1,6 +1,7 @@
 package com.github.m50d
 
 import shapeless.Coproduct
+import com.github.m50d.paperdoll.reader.Reader
 
 package object paperdoll {
   /**
@@ -16,7 +17,4 @@ package object paperdoll {
    * The overall queue runs A => B, but there may be other intermediate types in the queue
    */
   type Arrs[R <: Coproduct, L <: Layers[R], A, B] = Queue[(Arr_[R, L])#O, A, B]
-  type Reader_[I] = Layer {
-    type F[X] = Reader[I, X]
-  }
 }

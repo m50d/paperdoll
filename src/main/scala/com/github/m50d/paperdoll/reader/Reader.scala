@@ -1,17 +1,17 @@
-package com.github.m50d.paperdoll
+package com.github.m50d.paperdoll.reader
 
-import shapeless.Coproduct
-import shapeless.CNil
-import shapeless.:+:
+import shapeless.{Coproduct, CNil, :+:}
 import shapeless.ops.coproduct.Inject
 import scalaz.syntax.monad._
-import scala.annotation.tailrec
-import shapeless.ops.coproduct.Remove
-import scalaz.Forall
-import scalaz.Leibniz
+import scalaz.{Forall,Leibniz}
+import com.github.m50d.paperdoll.{Eff, Eff_, Layers, Arr}
 
+/**
+ * The type representing an effectful value of type X
+ * that reads from input of type I
+ */
 sealed trait Reader[I, X]
-case class Get[I, X](val ev: Leibniz.===[I, X]) extends Reader[I, X]
+private[paperdoll] case class Get[I, X](val ev: Leibniz.===[I, X]) extends Reader[I, X]
 
 object Reader {
   def ask[I, R <: Coproduct, F[_] <: Coproduct](implicit l: Layers.Aux[R, F], inj: Inject[F[I], Reader_[I]#F[I]]): Eff[R, Layers.Aux[R, F], I] =

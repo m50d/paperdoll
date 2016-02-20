@@ -6,15 +6,32 @@ package com.github.m50d.paperdoll
 trait FunctionKK[C[_, _], D[_, _]] {
   def apply[X, Y](c: C[X, Y]): D[X, Y]
 }
+/**
+ * TODO: this type was given in the paper but I think it's only necessary there
+ * because of Haskell GADTs. See if it can be merged down into CS,
+ * or ideally all the way into B2
+ */
 sealed trait P[C[_, _], A, B]
 sealed trait P_[C[_, _]] {
   final type O[X, Y] = P[C, X, Y]
 }
+/**
+ * Two-element mini-queue
+ */
 final case class CS[C[_, _], A, B, W0](a: C[A, W0], b: C[W0, B]) extends P[C, A, B] {
   type W = W0
 }
+/**
+ * One or two element mini-queue
+ */
 sealed trait B[C[_, _], A, B]
+/**
+ * One element
+ */
 final case class B1[C[_, _], A, B0](a: C[A, B0]) extends B[C, A, B0]
+/**
+ * Two elements
+ */
 final case class B2[C[_, _], A, B0](v: P[C, A, B0]) extends B[C, A, B0]
 
 /**
@@ -52,12 +69,18 @@ sealed trait Queue[C[_, _], A, B] {
     case cl: :<[Queue, C, A, _, B] => cl.e <|: (cl.s >< r)
   }
 }
+/**
+ * An empty queue - note that this implies A === B at the type level
+ */
 final case class Q0[C[_, _], A]() extends Queue[C, A, A] {
   override def |>[Z](e: C[A, Z]) = Q1(e)
   override def tviewl = TAEmptyL()
   override def <|:[X](l: C[X, A]): Queue[C, X, A] =
     Q1(l)
 }
+/**
+ * A 1-element queue
+ */
 final case class Q1[C[_, _], A, B](a: C[A, B]) extends Queue[C, A, B] {
   override def |>[Z](e: C[B, Z]) =
     QN[C, A, Z, B, B](B1(a), Q0[P_[C]#O, B](), B1(e))

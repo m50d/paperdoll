@@ -24,6 +24,7 @@
 				<configuration>
 					<args>
 						<arg>-language:higherKinds</arg>
+						<arg>-Xfatal-warnings</arg>
 					</args>
 					<scalaCompatVersion>2.11.-1</scalaCompatVersion>
 					<failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
