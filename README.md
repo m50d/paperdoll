@@ -32,7 +32,7 @@ This also makes it possible to hide trait implementation subtypes.
 
  * Implement more effect types
  * Make sure it's possible to realign an effect stack (use shapeless.Align)
- * Rename the layer types to something easier to understand
+ * Rename the eff methods (e.g. send and handleRelay) to something easier to understand
   * The original idea (and reason for the project name) was for an extended metaphor
   of adding and removing layers of clothing on a FrenchKISS-style paper doll
  * Get into Maven Central
