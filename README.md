@@ -22,6 +22,12 @@ so that `F_[X]#O` can be used to express the partially applied type
 instead of a type lambda. Any type ending in `_` is likely to be
 an instance of this pattern.
 
+Algebraic data types generally offer a fold method which is designed
+to be the safe equivalent of a pattern match. When reviewing Scala
+[it is difficult to distinguish between safe and unsafe pattern matches]((http://typelevel.org/blog/2014/11/10/why_is_adt_pattern_matching_allowed.html),
+so my preferred style is to avoid pattern matches entirely.
+This also makes it possible to hide trait implementation subtypes.
+
 ## Future tasks
 
  * Rename the queue operations to something sensible now that I understand them,

@@ -4,26 +4,21 @@ import com.github.m50d.paperdoll.queue.pair.{ Pair, Pair_ }
 import scalaz.Forall
 
 /**
- * Function1 for types of kind [_, _]
+ * Type aligned queue of exactly one or two elements
  */
-trait FunctionKK[C[_, _], D[_, _]] {
-  def apply[X, Y](c: C[X, Y]): D[X, Y]
+sealed trait MiniQueue[C[_, _], A, B] {
+  def fold[Z](one: C[A, B] => Z, pair: Pair[C, A, B] => Z): Z
 }
 
-/**
- * One or two element mini-queue
- * TODO: better documentation, separation, fold instead of pattern match
- */
-sealed trait B[C[_, _], A, B]
-/**
- * One element
- */
-final case class B1[C[_, _], A, B0](a: C[A, B0]) extends B[C, A, B0]
-/**
- * Two elements
- */
-final case class B2[C[_, _], A, B0, W0](v: Pair[C, A, B0]) extends B[C, A, B0] {
-  type W = W0
+object MiniQueue {
+  def one[C[_, _], A, B](a: C[A, B]): MiniQueue[C, A, B] = new MiniQueue[C, A, B] {
+    override def fold[Z](one: C[A, B] => Z, pair: Pair[C, A, B] => Z) =
+      one(a)
+  }
+  def pair[C[_, _], A, B](a: Pair[C, A, B]): MiniQueue[C, A, B] = new MiniQueue[C, A, B] {
+    override def fold[Z](one: C[A, B] => Z, pair: Pair[C, A, B] => Z) =
+      pair(a)
+  }
 }
 
 /**
@@ -79,65 +74,47 @@ final case class Q0[C[_, _], A]() extends Queue[C, A, A] {
  */
 final case class Q1[C[_, _], A, B](a: C[A, B]) extends Queue[C, A, B] {
   override def |>[Z](e: C[B, Z]) =
-    QN[C, A, Z, B, B](B1(a), Q0[Pair_[C]#O, B](), B1(e))
+    QN[C, A, Z, B, B](MiniQueue.one(a), Q0[Pair_[C]#O, B](), MiniQueue.one(e))
   override def tviewl = TAViewL.cons(a, Q0())
 }
 final case class QN[C[_, _], A, B0, X, Y](
-  l: B[C, A, X], m: Queue[Pair_[C]#O, X, Y], r: B[C, Y, B0]) extends Queue[C, A, B0] {
+  l: MiniQueue[C, A, X], m: Queue[Pair_[C]#O, X, Y], r: MiniQueue[C, Y, B0]) extends Queue[C, A, B0] {
   override def |>[Z](e: C[B0, Z]) =
-    r match {
-      case B1(a) ⇒ QN(l, m, B2(Pair(a, e)))
-      case B2(r) ⇒ QN(l, m |> r, B1(e))
-    }
-  override def tviewl = l match {
-    case B2(p) ⇒
-      p.fold(new Forall[({ type L[W] = (C[A, W], C[W, X]) => TAViewL[Queue, C, A, B0] })#L] {
-        override def apply[W] = {
-          (a, b) =>
-            TAViewL.cons(a, QN(B1[C, W, X](b), m, r))
-        }
+    r.fold({
+      a => QN(l, m, MiniQueue.pair(Pair(a, e)))
+    },
+      {
+        a => QN(l, m |> a, MiniQueue.one(e))
       })
 
-    case B1(a) ⇒ {
-      def buf2queue[Z, W](b: B[C, Z, W]): Queue[C, Z, W] = b match {
-        case B1(a) ⇒ Q1(a)
-        case B2(cs) ⇒
-          cs.fold(new Forall[({ type L[V] = (C[Z, V], C[V, W]) => Queue[C, Z, W] })#L] {
+  override def tviewl = l.fold({
+    a =>
+      def buf2queue[Z, W](b: MiniQueue[C, Z, W]): Queue[C, Z, W] =
+        b.fold(
+          Q1.apply,
+          _.fold(new Forall[({ type L[V] = (C[Z, V], C[V, W]) => Queue[C, Z, W] })#L] {
             override def apply[W] = {
               (a, b) =>
-                QN(B1(a), Q0[Pair_[C]#O, W](), B1(b))
+                QN(MiniQueue.one(a), Q0[Pair_[C]#O, W](), MiniQueue.one(b))
             }
-          })
-      }
-      def shiftLeft[A, B3, W](q: Queue[Pair_[C]#O, A, W], r: B[C, W, B3]): Queue[C, A, B3] =
+          }))
+      def shiftLeft[A, B3, W](q: Queue[Pair_[C]#O, A, W], r: MiniQueue[C, W, B3]): Queue[C, A, B3] =
         q.tviewl.fold({
-          witness => buf2queue(witness.subst[({ type L[V] = B[C, V, B3] })#L](r))
+          witness => buf2queue(witness.subst[({ type L[V] = MiniQueue[C, V, B3] })#L](r))
         }, new Forall[({ type L[V] = (Pair[C, A, V], Queue[Pair_[C]#O, V, W]) => Queue[C, A, B3] })#L] {
           override def apply[V] = {
             (head, tail) =>
-              QN(B2(head), tail, r)
+              QN(MiniQueue.pair(head), tail, r)
           }
         })
       TAViewL.cons(a, shiftLeft(m, r))
-    }
-  }
-}
-object Queue {
-  def tmapp[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[Pair_[C]#O, Pair_[D]#O] =
-    new FunctionKK[Pair_[C]#O, Pair_[D]#O] {
-      def apply[X, Y](phi: Pair[C, X, Y]): Pair[D, X, Y] =
-        phi.fold(new Forall[({ type L[W] = (C[X, W], C[W, Y]) => Pair[D, X, Y] })#L] {
-          override def apply[W] = {
-            (a, b) => Pair(f(a), f(b))
-          }
-        })
-    }
-  def tmapb[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[({ type L[X, Y] = (B[C, X, Y]) })#L, ({ type L[X, Y] = (B[D, X, Y]) })#L] =
-    new FunctionKK[({ type L[X, Y] = (B[C, X, Y]) })#L, ({ type L[X, Y] = (B[D, X, Y]) })#L] {
-      def apply[X, Y](phi: B[C, X, Y]) =
-        phi match {
-          case B1(v) ⇒ B1(f.apply(v))
-          case B2(v) ⇒ B2(tmapp(f)(v))
+  },
+    {
+      _.fold(new Forall[({ type L[W] = (C[A, W], C[W, X]) => TAViewL[Queue, C, A, B0] })#L] {
+        override def apply[W] = {
+          (a, b) =>
+            TAViewL.cons(a, QN(MiniQueue.one[C, W, X](b), m, r))
         }
-    }
+      })
+    })
 }

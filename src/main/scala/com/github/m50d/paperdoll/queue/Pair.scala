@@ -5,10 +5,7 @@ import scalaz.Forall
 /**
  * A type-aligned pair of C[A, W] and C[W, B]
  * for some unknown type W.
- * Interface and impl deliberately separated
- * so that the type W is not observable
- * TODO: impl was not actually necessary, should be able to move this
- * out of the .pair package
+ * Type W is deliberately hiden in implementation
  */
 sealed trait Pair[C[_, _], A, B] {
   def fold[Z](f: Forall[({ type L[W] = (C[A, W], C[W, B]) => Z })#L]): Z
@@ -19,6 +16,6 @@ sealed trait Pair_[C[_, _]] {
 object Pair {
   def apply[C[_, _], A, B, W](a: C[A, W], b: C[W, B]): Pair[C, A, B] = new Pair[C, A, B] {
     override def fold[Z](f: Forall[({ type L[W] = (C[A, W], C[W, B]) => Z })#L]) =
-      f.apply[W].apply(a, b)
+      f[W](a, b)
   }
 }
