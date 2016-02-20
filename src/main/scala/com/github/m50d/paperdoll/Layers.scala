@@ -4,6 +4,8 @@ import shapeless.{ CNil, Coproduct, :+: }
 
 /**
  * An effect, represented as a functor-like type F[X]
+ * (Note that F does not necessarily need to be a Functor - the machinery
+ * will provide suitable map and flatMap operations)
  */
 sealed trait Layer {
   type F[X]

@@ -4,6 +4,7 @@ import shapeless.{ Coproduct, CNil, :+: }
 import shapeless.ops.coproduct.Inject
 import scalaz.syntax.monad._
 import scalaz.{ Forall, Leibniz }
+import scalaz.Leibniz.===
 import com.github.m50d.paperdoll.Layers
 import com.github.m50d.paperdoll.effect.{ Eff, Eff_, Arr }
 
@@ -12,8 +13,12 @@ import com.github.m50d.paperdoll.effect.{ Eff, Eff_, Arr }
  * that reads from input of type I
  * Implementation is encapsulated (hopefully).
  */
-sealed trait Reader[I, X]
-private[reader] case class Get[I, X](val ev: Leibniz.===[I, X]) extends Reader[I, X]
+sealed trait Reader[I, X] {
+  def fold[A](get: (I === X) => A): A
+}
+private[reader] final case class Get[I, X](val witness: Leibniz.===[I, X]) extends Reader[I, X] {
+  override def fold[A](get: (I === X) => A) = get(witness)
+}
 
 object Reader {
   /**
@@ -45,10 +50,7 @@ object Reader {
       new Forall[({ type L[V] = (Reader[I, V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A] })#L] {
         override def apply[V] = {
           (reader: Reader[I, V], arr: Arr[R, Layers.Aux[R, M], V, A]) =>
-            reader match {
-              case Get(ev) =>
-                arr(ev(i))
-            }
+            reader.fold(witness => arr(witness(i)))
         }
       }).apply(e)
 }

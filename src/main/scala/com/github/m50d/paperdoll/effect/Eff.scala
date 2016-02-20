@@ -13,34 +13,34 @@ import com.github.m50d.paperdoll.Layers
  * Evaluating this by providing implementations of each effect will eventually yield a value of type A
  */
 sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
-  def fold[B](p: A => B, i: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]): B
+  def fold[B](pure: A => B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]): B
 }
 /**
  * An actual A - this is the "nil" case of Eff
  */
 private[effect] sealed trait Pure[R <: Coproduct, L <: Layers[R], A] extends Eff[R, L, A] {
   val a: A
-  override def fold[B](p: A => B, i: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]) = p(a)
+  override def fold[B](pure: A => B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]) = pure(a)
 }
 /**
  * The "cons" case: an effectful value and a continuation that will eventually lead to an A
  */
 private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends Eff[R, L, A] {
   /**
-   * Type of the present, intermediate value
+   * Type of the current value
    */
   type X
   /**
-   * The actual value: an X inside an effect
+   * The current value: an X inside an effect
    */
   val eff: L#O[X]
   /**
    * The continuation from X to what will ultimately be an A
    */
-  val step: Arrs[R, L, X, A]
+  val cont: Arrs[R, L, X, A]
 
-  override def fold[B](p: A => B, i: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]) =
-    i.apply[X](eff, step)
+  override def fold[B](pure: A => B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]) =
+    impure.apply[X](eff, cont)
 }
 sealed trait Eff_[R <: Coproduct, L <: Layers[R]] {
   final type O[A] = Eff[R, L, A]
@@ -51,11 +51,11 @@ object Eff {
     override def bind[A, B](fa: Eff[R, L, A])(f: A => Eff[R, L, B]) =
       fa.fold[Eff[R, L, B]](f, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => Eff[R, L, B] })#K] {
         override def apply[X0] = {
-          (eff0, step0) =>
+          (eff0, cont0) =>
             new Impure[R, L, B] {
-              type X = X0
-              val eff = eff0
-              val step = step0 :+ f
+              override type X = X0
+              override val eff = eff0
+              override val cont = cont0 :+ f
             }
         }
       })
@@ -73,67 +73,62 @@ object Eff {
   def send[F[_], R <: Coproduct, N[_] <: Coproduct, V](value: F[V])(
     implicit l: Layers.Aux[R, N], inj: Inject[N[V], F[V]]): Eff[R, Layers.Aux[R, N], V] =
     new Impure[R, Layers[R] { type O[X] = N[X] }, V] {
-      type X = V
-      val eff = Coproduct[N[V]](value)
-      val step = Queue.empty[Arr_[R, Layers[R] { type O[X] = N[X] }]#O, V]
+      override type X = V
+      override val eff = Coproduct[N[V]](value)
+      override val cont = Queue.empty[Arr_[R, Layers[R] { type O[X] = N[X] }]#O, V]
     }
 
   /**
-   * Collapse an Arrs (a queue of Arr) to a single Arr. Arguably belongs with Queue rather than here
+   * Collapse an Arrs (a queue of Arr) to a single Arr.
    */
-  def qApp[R <: Coproduct, L <: Layers[R], B, W](arrs: Arrs[R, L, B, W]): Arr[R, L, B, W] =
-    arrs.destructureHead.fold({ witness => { b: B => Leibniz.symm[Nothing, Any, W, B](witness).apply(b).point[Eff_[R, L]#O] } },
-      new Forall[({ type K[V] = (Arr[R, L, B, V], Arrs[R, L, V, W]) => Arr[R, L, B, W] })#K] {
-        override def apply[V] = {
-          (head, tail) =>
-            def bind[A, B](eff: Eff[R, L, A], k: Arrs[R, L, A, B]): Eff[R, L, B] =
-              eff.fold(
-                qApp(k),
-                new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => Eff[R, L, B] })#K] {
+  private[this] def compose[R <: Coproduct, L <: Layers[R], A, B](arrs: Arrs[R, L, A, B]): Arr[R, L, A, B] = {
+    value: A =>
+      arrs.destructureHead.fold({ witness => Leibniz.symm[Nothing, Any, B, A](witness)(value).point[Eff_[R, L]#O] },
+        new Forall[({ type K[W] = (Arr[R, L, A, W], Arrs[R, L, W, B]) => Eff[R, L, B] })#K] {
+          override def apply[W] = {
+            (head, tail) =>
+              head(value).fold(
+                compose(tail),
+                new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, W]) => Eff[R, L, B] })#K] {
                   override def apply[X0] = {
-                    (eff0, step0) =>
+                    (eff0, cont0) =>
                       new Impure[R, L, B] {
-                        type X = X0
-                        val eff = eff0
-                        val step = step0 ++ k
+                        override type X = X0
+                        override val eff = eff0
+                        override val cont = cont0 ++ tail
                       }
                   }
-                });
-            { x => bind(head(x), tail) }
-        }
-      })
+                })
+          }
+        })
+  }
 
   /**
-   * Compose the function func onto the end of the queue of arrows arrs, resulting in a single Arr
-   * with a potentially different effect stack and/or ultimate value.
-   */
-  private[this] def qcomp[R1 <: Coproduct, L1 <: Layers[R1], R2 <: Coproduct, L2 <: Layers[R2], A, B, C](arrs: Arrs[R1, L1, A, B],
-    func: Eff[R1, L1, B] => Eff[R2, L2, C]): Arr[R2, L2, A, C] =
-    qApp(arrs) andThen func
-  /**
-   * Lightly curried - TODO look at whether this could be expressed more clearly.
    * Handle the effect R1/T, using the supplied handler bind
    * that knows how to translate a T[V] (the concrete effect) and an
    * effectful continuation from V to A with effects R/M
    * into a single effectful lazy value of type A
    * (usually by somehow "running" the T[V] to obtain a V and then passing it to the continuation)
+   * Curried for ease of implementation and to match the Haskell
    */
   def handleRelay[R1, R <: Coproduct, T[_], M[_] <: Coproduct, A](
     bind: Forall[({
       type L[V] = (T[V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A]
     })#L])(implicit l: Layers.Aux[R, M]): Eff[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, A] => Eff[R, Layers.Aux[R, M], A] =
     _.fold({ a0 => new Pure[R, Layers.Aux[R, M], A] { val a = a0 } }, new Forall[({ type K[X] = (T[X] :+: M[X], Arrs[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, X, A]) => Eff[R, Layers.Aux[R, M], A] })#K] {
-      override def apply[X0] = { (eff, step) =>
-        val k = qcomp(step, handleRelay[R1, R, T, M, A](bind))
-        eff.removeElem[T[X0]] match {
-          case Left(x) => bind.apply(x, k)
-          case Right(u) =>
+      override def apply[X0] = { (eff, cont0) =>
+        //New continuation is: recursively call handleRelay(bind) on the result of the old continuation 
+        val cont1 = compose(cont0) andThen handleRelay[R1, R, T, M, A](bind)
+        eff.removeElem[T[X0]].fold({
+          tEffect => bind[X0](tEffect, cont1)
+        }, {
+          otherEffect =>
             new Impure[R, Layers.Aux[R, M], A] {
               override type X = X0
-              override val eff = u
-              override val step = Queue.one[Arr_[R, Layers.Aux[R, M]]#O, X0, A](k)
+              override val eff = otherEffect
+              override val cont = Queue.one[Arr_[R, Layers.Aux[R, M]]#O, X0, A](cont1)
             }
-        }
+        })
       }
     })
   /**
@@ -142,7 +137,7 @@ object Eff {
    */
   def run[A](eff: Eff[CNil, Layers[CNil] { type O[X] = CNil }, A]): A = eff.fold(identity, new Forall[({ type K[X] = (CNil, Arrs[CNil, Layers[CNil] { type O[X] = CNil }, X, A]) => A })#K] {
     override def apply[X] = {
-      (eff, step) =>
+      (eff, cont) =>
         sys.error("This case is only called for CNil, which is supposed to be impossible")
     }
   })

@@ -1,9 +1,8 @@
 package com.github.m50d.paperdoll.queue
 
 import scalaz.Forall
-import com.github.m50d.paperdoll.DestructuredHead
-import com.github.m50d.paperdoll.Pair_
-import com.github.m50d.paperdoll.Pair
+import scalaz.Leibniz.===
+import com.github.m50d.paperdoll.{ DestructuredHead, Pair, Pair_ }
 
 /**
  * A type-aligned queue C[A, X] :: C[X, Y] :: ... :: C[Z, B]
@@ -23,8 +22,9 @@ sealed trait Queue[C[_, _], A, B] {
   /**
    * Examine the front of the queue, destructuring it as either the queue being empty,
    * or a head and tail. Usually followed by a .fold which acts as a shallow fold
-   * (i.e. no recursion)
-   * TODO: look at whether conventional fold would be more useful
+   * (i.e. no recursion). Most callers end up recursing in one way or another,
+   * but I've found it too difficult to abstract over the type differences enough to factor
+   * out this common recursion.
    * This is a basic operation that would be really useful
    * to have on ordinary List, but I'm not aware of it having a standard name
    */
