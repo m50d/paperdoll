@@ -4,12 +4,7 @@ import shapeless.{ Coproduct, CNil, :+: }
 import shapeless.ops.coproduct.Inject
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
-import com.github.m50d.paperdoll.queue.Queue
-import com.github.m50d.paperdoll.queue.Q1
-import com.github.m50d.paperdoll.queue.Q0
-import com.github.m50d.paperdoll.queue._
-import com.github.m50d.paperdoll.queue.TAEmptyL
-import com.github.m50d.paperdoll.queue.:<
+import com.github.m50d.paperdoll.queue.{ Queue, Q1, Q0 }
 
 /**
  * A lazy value of type A with a (possibly empty) stack of effects from the list given by R/L
@@ -86,26 +81,27 @@ object Eff {
    * Collapse an Arrs (a queue of Arr) to a single Arr. Arguably belongs with Queue rather than here
    */
   def qApp[R <: Coproduct, L <: Layers[R], B, W](arrs: Arrs[R, L, B, W]): Arr[R, L, B, W] =
-    arrs.tviewl match {
-      case e: TAEmptyL[Queue, Arr_[R, L]#O, B, W] => {
-        b => Leibniz.symm[Nothing, Any, W, B](e.witness).apply(b).point[Eff_[R, L]#O]
-      }
-      case kt: :<[Queue, Arr_[R, L]#O, B, _, W] =>
-        def bind[A, B](eff: Eff[R, L, A], k: Arrs[R, L, A, B]): Eff[R, L, B] =
-          eff.fold(
-            qApp(k),
-            new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => Eff[R, L, B] })#K] {
-              override def apply[X0] = {
-                (eff0, step0) =>
-                  new Impure[R, L, B] {
-                    type X = X0
-                    val eff = eff0
-                    val step = step0 >< k
+    arrs.tviewl.fold({ witness => { b: B => Leibniz.symm[Nothing, Any, W, B](witness).apply(b).point[Eff_[R, L]#O] } },
+      new Forall[({ type K[V] = (Arr[R, L, B, V], Arrs[R, L, V, W]) => Arr[R, L, B, W] })#K] {
+        override def apply[V] = {
+          (head, tail) =>
+            def bind[A, B](eff: Eff[R, L, A], k: Arrs[R, L, A, B]): Eff[R, L, B] =
+              eff.fold(
+                qApp(k),
+                new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => Eff[R, L, B] })#K] {
+                  override def apply[X0] = {
+                    (eff0, step0) =>
+                      new Impure[R, L, B] {
+                        type X = X0
+                        val eff = eff0
+                        val step = step0 >< k
+                      }
                   }
-              }
-            });
-        { x => bind(kt.e(x), kt.s) }
-    }
+                });
+            { x => bind(head(x), tail) }
+        }
+      })
+
   /**
    * Compose the function func onto the end of the queue of arrows arrs, resulting in a single Arr
    * with a potentially different effect stack and/or ultimate value.
@@ -125,7 +121,7 @@ object Eff {
     bind: Forall[({
       type L[V] = (T[V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A]
     })#L])(implicit l: Layers.Aux[R, M]): Eff[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, A] => Eff[R, Layers.Aux[R, M], A] =
-    _.fold({a0 => new Pure[R, Layers.Aux[R, M], A] { val a = a0 }}, new Forall[({ type K[X] = (T[X] :+: M[X], Arrs[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, X, A]) => Eff[R, Layers.Aux[R, M], A] })#K] {
+    _.fold({ a0 => new Pure[R, Layers.Aux[R, M], A] { val a = a0 } }, new Forall[({ type K[X] = (T[X] :+: M[X], Arrs[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, X, A]) => Eff[R, Layers.Aux[R, M], A] })#K] {
       override def apply[X0] = { (eff, step) =>
         val k = qcomp(step, handleRelay[R1, R, T, M, A](bind))
         eff.removeElem[T[X0]] match {

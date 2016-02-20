@@ -7,6 +7,8 @@ import scalaz.Forall
  * for some unknown type W.
  * Interface and impl deliberately separated
  * so that the type W is not observable
+ * TODO: impl was not actually necessary, should be able to move this
+ * out of the .pair package
  */
 sealed trait Pair[C[_, _], A, B] {
   def fold[Z](f: Forall[({ type L[W] = (C[A, W], C[W, B]) => Z })#L]): Z

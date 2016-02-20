@@ -1,8 +1,7 @@
 package com.github.m50d.paperdoll.queue
 
-import com.github.m50d.paperdoll.queue.pair.{Pair, Pair_}
+import com.github.m50d.paperdoll.queue.pair.{ Pair, Pair_ }
 import scalaz.Forall
-
 
 /**
  * Function1 for types of kind [_, _]
@@ -13,6 +12,7 @@ trait FunctionKK[C[_, _], D[_, _]] {
 
 /**
  * One or two element mini-queue
+ * TODO: better documentation, separation, fold instead of pattern match
  */
 sealed trait B[C[_, _], A, B]
 /**
@@ -56,17 +56,21 @@ sealed trait Queue[C[_, _], A, B] {
   /**
    * Append a queue R onto the end of this queue
    */
-  def ><[X](r: Queue[C, B, X]): Queue[C, A, X] = tviewl match {
-    case tael: TAEmptyL[Queue, C, A, B] => tael.witness.subst[({ type L[V] = Queue[C, V, X] })#L](r)
-    case cl: :<[Queue, C, A, _, B] => cl.e <|: (cl.s >< r)
-  }
+  def ><[X](r: Queue[C, B, X]): Queue[C, A, X] = tviewl.fold(
+    { witness => witness.subst[({ type L[V] = Queue[C, V, X] })#L](r) },
+    new Forall[({ type L[W] = (C[A, W], Queue[C, W, B]) => Queue[C, A, X] })#L] {
+      override def apply[W] = {
+        (head, tail) =>
+          head <|: (tail >< r)
+      }
+    })
 }
 /**
  * An empty queue - note that this implies A === B at the type level
  */
 final case class Q0[C[_, _], A]() extends Queue[C, A, A] {
   override def |>[Z](e: C[A, Z]) = Q1(e)
-  override def tviewl = TAEmptyL()
+  override def tviewl = TAViewL.nil
   override def <|:[X](l: C[X, A]): Queue[C, X, A] =
     Q1(l)
 }
@@ -76,7 +80,7 @@ final case class Q0[C[_, _], A]() extends Queue[C, A, A] {
 final case class Q1[C[_, _], A, B](a: C[A, B]) extends Queue[C, A, B] {
   override def |>[Z](e: C[B, Z]) =
     QN[C, A, Z, B, B](B1(a), Q0[Pair_[C]#O, B](), B1(e))
-  override def tviewl = :<(a, Q0())
+  override def tviewl = TAViewL.cons(a, Q0())
 }
 final case class QN[C[_, _], A, B0, X, Y](
   l: B[C, A, X], m: Queue[Pair_[C]#O, X, Y], r: B[C, Y, B0]) extends Queue[C, A, B0] {
@@ -87,30 +91,34 @@ final case class QN[C[_, _], A, B0, X, Y](
     }
   override def tviewl = l match {
     case B2(p) ⇒
-      p.fold(new Forall[({type L[W] = (C[A, W], C[W, X]) => TAViewL[Queue, C, A, B0]})#L] {
+      p.fold(new Forall[({ type L[W] = (C[A, W], C[W, X]) => TAViewL[Queue, C, A, B0] })#L] {
         override def apply[W] = {
           (a, b) =>
-            :<(a, QN(B1[C, W, X](b), m, r))
+            TAViewL.cons(a, QN(B1[C, W, X](b), m, r))
         }
       })
-    
+
     case B1(a) ⇒ {
       def buf2queue[Z, W](b: B[C, Z, W]): Queue[C, Z, W] = b match {
         case B1(a) ⇒ Q1(a)
         case B2(cs) ⇒
-          cs.fold(new Forall[({type L[V] = (C[Z, V], C[V, W]) => Queue[C, Z, W]})#L]{
+          cs.fold(new Forall[({ type L[V] = (C[Z, V], C[V, W]) => Queue[C, Z, W] })#L] {
             override def apply[W] = {
               (a, b) =>
                 QN(B1(a), Q0[Pair_[C]#O, W](), B1(b))
-            }  
+            }
           })
       }
       def shiftLeft[A, B3, W](q: Queue[Pair_[C]#O, A, W], r: B[C, W, B3]): Queue[C, A, B3] =
-        q.tviewl match {
-          case tael: TAEmptyL[Queue, Pair_[C]#O, A, W] ⇒ buf2queue(tael.witness.subst[({ type L[V] = B[C, V, B3] })#L](r))
-          case cl: :<[Queue, Pair_[C]#O, A, _, W] ⇒ QN(B2(cl.e), cl.s, r)
-        }
-      :<(a, shiftLeft(m, r))
+        q.tviewl.fold({
+          witness => buf2queue(witness.subst[({ type L[V] = B[C, V, B3] })#L](r))
+        }, new Forall[({ type L[V] = (Pair[C, A, V], Queue[Pair_[C]#O, V, W]) => Queue[C, A, B3] })#L] {
+          override def apply[V] = {
+            (head, tail) =>
+              QN(B2(head), tail, r)
+          }
+        })
+      TAViewL.cons(a, shiftLeft(m, r))
     }
   }
 }
@@ -118,7 +126,7 @@ object Queue {
   def tmapp[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[Pair_[C]#O, Pair_[D]#O] =
     new FunctionKK[Pair_[C]#O, Pair_[D]#O] {
       def apply[X, Y](phi: Pair[C, X, Y]): Pair[D, X, Y] =
-        phi.fold(new Forall[({type L[W] = (C[X, W], C[W, Y]) => Pair[D, X, Y]})#L]{
+        phi.fold(new Forall[({ type L[W] = (C[X, W], C[W, Y]) => Pair[D, X, Y] })#L] {
           override def apply[W] = {
             (a, b) => Pair(f(a), f(b))
           }
