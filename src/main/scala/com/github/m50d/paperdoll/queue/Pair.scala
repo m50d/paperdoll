@@ -1,4 +1,4 @@
-package com.github.m50d.paperdoll.queue.pair
+package com.github.m50d.paperdoll.queue
 
 import scalaz.Forall
 
