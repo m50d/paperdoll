@@ -9,6 +9,7 @@ import scalaz.Forall
  */
 sealed trait Pair[C[_, _], A, B] {
   def fold[Z](f: Forall[({ type L[W] = (C[A, W], C[W, B]) => Z })#L]): Z
+  def map[D[_, _]](f: FunctionKK[C, D]): Pair[D, A, B] 
 }
 sealed trait Pair_[C[_, _]] {
   final type O[X, Y] = Pair[C, X, Y]
@@ -17,5 +18,7 @@ object Pair {
   def apply[C[_, _], A, B, W](a: C[A, W], b: C[W, B]): Pair[C, A, B] = new Pair[C, A, B] {
     override def fold[Z](f: Forall[({ type L[W] = (C[A, W], C[W, B]) => Z })#L]) =
       f[W](a, b)
+    override def map[D[_, _]](f: FunctionKK[C, D]) =
+      apply(f(a), f(b))
   }
 }

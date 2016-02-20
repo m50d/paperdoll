@@ -8,6 +8,7 @@ import scalaz.Forall
 sealed trait MiniQueue[C[_, _], A, B] {
   def fold[Z](one: C[A, B] => Z, pair: Pair[C, A, B] => Z): Z
   def asQueue: Queue[C, A, B]
+  def map[D[_, _]](f: FunctionKK[C, D]): MiniQueue[D, A, B]
 }
 
 object MiniQueue {
@@ -15,6 +16,7 @@ object MiniQueue {
     override def fold[Z](one: C[A, B] => Z, pair: Pair[C, A, B] => Z) =
       one(a)
     override def asQueue = One(a)
+    override def map[D[_, _]](f: FunctionKK[C, D]) = one(f(a))
   }
   def pair[C[_, _], A, B](a: Pair[C, A, B]): MiniQueue[C, A, B] = new MiniQueue[C, A, B] {
     override def fold[Z](one: C[A, B] => Z, pair: Pair[C, A, B] => Z) =
@@ -25,5 +27,6 @@ object MiniQueue {
           Node(one(a), Empty[Pair_[C]#O, Z](), one(b))
       }
     })
+    override def map[D[_, _]](f: FunctionKK[C, D]) = pair(a map f)
   }
 }
