@@ -4,6 +4,12 @@ import shapeless.{ Coproduct, CNil, :+: }
 import shapeless.ops.coproduct.Inject
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
+import com.github.m50d.paperdoll.queue.Queue
+import com.github.m50d.paperdoll.queue.Q1
+import com.github.m50d.paperdoll.queue.Q0
+import com.github.m50d.paperdoll.queue._
+import com.github.m50d.paperdoll.queue.TAEmptyL
+import com.github.m50d.paperdoll.queue.:<
 
 /**
  * A lazy value of type A with a (possibly empty) stack of effects from the list given by R/L

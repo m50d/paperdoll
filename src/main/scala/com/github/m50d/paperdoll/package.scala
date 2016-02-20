@@ -2,6 +2,7 @@ package com.github.m50d
 
 import shapeless.Coproduct
 import com.github.m50d.paperdoll.reader.Reader
+import com.github.m50d.paperdoll.queue.Queue
 
 package object paperdoll {
   /**

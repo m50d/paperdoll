@@ -1,4 +1,6 @@
-package com.github.m50d.paperdoll
+package com.github.m50d.paperdoll.queue
+
+import scalaz.Forall
 
 /**
  * Function1 for types of kind [_, _]
@@ -12,15 +14,16 @@ trait FunctionKK[C[_, _], D[_, _]] {
  * Interface and impl deliberately separated
  * so that the type W is not observable
  */
-sealed trait Pair[C[_, _], A, B]
+sealed trait Pair[C[_, _], A, B] {
+  def fold[Z](f: Forall[({type L[W] = (C[A, W], C[W, B]) => Z})#L]): Z
+}
 sealed trait Pair_[C[_, _]] {
   final type O[X, Y] = Pair[C, X, Y]
 }
-/**
- * Two-element mini-queue
- */
-final case class CS[C[_, _], A, B, W0](a: C[A, W0], b: C[W0, B]) extends Pair[C, A, B] {
-  type W = W0
+
+private[queue] final case class PairImpl[C[_, _], A, B, W](a: C[A, W], b: C[W, B]) extends Pair[C, A, B] {
+  override def fold[Z](f: Forall[({type L[W] = (C[A, W], C[W, B]) => Z})#L]) =
+    f.apply[W].apply(a, b)
 }
 /**
  * One or two element mini-queue
@@ -93,15 +96,21 @@ final case class QN[C[_, _], A, B0, X, Y](
   l: B[C, A, X], m: Queue[Pair_[C]#O, X, Y], r: B[C, Y, B0]) extends Queue[C, A, B0] {
   override def |>[Z](e: C[B0, Z]) =
     r match {
-      case B1(a) ⇒ QN(l, m, B2(CS(a, e)))
+      case B1(a) ⇒ QN(l, m, B2(PairImpl(a, e)))
       case B2(r) ⇒ QN(l, m |> r, B1(e))
     }
   override def tviewl = l match {
-    case B2(CS(a, b)) ⇒ :<(a, QN(B1(b), m, r))
+    case B2(PairImpl(a, b)) ⇒ :<(a, QN(B1(b), m, r))
     case B1(a) ⇒ {
       def buf2queue[Z, W](b: B[C, Z, W]): Queue[C, Z, W] = b match {
         case B1(a) ⇒ Q1(a)
-        case B2(cs @ CS(a, b)) ⇒ QN(B1(a), Q0[Pair_[C]#O, cs.W](), B1(b))
+        case B2(cs) ⇒
+          cs.fold(new Forall[({type L[V] = (C[Z, V], C[V, W]) => Queue[C, Z, W]})#L]{
+            override def apply[W] = {
+              (a, b) =>
+                QN(B1(a), Q0[Pair_[C]#O, W](), B1(b))
+            }  
+          })
       }
       def shiftLeft[A, B3, W](q: Queue[Pair_[C]#O, A, W], r: B[C, W, B3]): Queue[C, A, B3] =
         q.tviewl match {
@@ -117,7 +126,7 @@ object Queue {
     new FunctionKK[Pair_[C]#O, Pair_[D]#O] {
       def apply[X, Y](phi: Pair[C, X, Y]): Pair[D, X, Y] =
         phi match {
-          case CS(v1, v2) ⇒ CS(f.apply(v1), f.apply(v2))
+          case PairImpl(v1, v2) ⇒ PairImpl(f.apply(v1), f.apply(v2))
         }
     }
   def tmapb[C[_, _], D[_, _]](f: FunctionKK[C, D]): FunctionKK[({ type L[X, Y] = (B[C, X, Y]) })#L, ({ type L[X, Y] = (B[D, X, Y]) })#L] =

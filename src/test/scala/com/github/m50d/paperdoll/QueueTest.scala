@@ -3,6 +3,11 @@ package com.github.m50d.paperdoll
 import org.junit.Test
 import org.fest.assertions.Assertions.assertThat
 import org.junit.Assert.fail
+import com.github.m50d.paperdoll.queue.Queue
+import com.github.m50d.paperdoll.queue.Q0
+import com.github.m50d.paperdoll.queue._
+import com.github.m50d.paperdoll.queue.TAEmptyL
+import com.github.m50d.paperdoll.queue.:<
 
 class QueueTest {
   @Test def basicFunctionality(): Unit = {
