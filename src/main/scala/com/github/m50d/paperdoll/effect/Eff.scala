@@ -5,7 +5,7 @@ import shapeless.ops.coproduct.Inject
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
 import com.github.m50d.paperdoll.queue.Queue
-import com.github.m50d.paperdoll.Layers
+import com.github.m50d.paperdoll.layer.Layers
 
 /**
  * A lazy value of type A with a (possibly empty) stack of effects from the list given by R/L
@@ -141,4 +141,10 @@ object Eff {
         sys.error("This case is only called for CNil, which is supposed to be impossible")
     }
   })
+  
+//  def embed[S <: CNil](implicit ls: Layers[S]) = {
+//      def apply[R, L <: Layers[R], A](eff: Eff[R, L, A])(
+//          implicit br: Basis[S, R], bl: Basis[ls.L]
+//      )
+//    }
 }

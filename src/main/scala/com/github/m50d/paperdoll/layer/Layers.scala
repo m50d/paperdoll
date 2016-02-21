@@ -1,6 +1,7 @@
-package com.github.m50d.paperdoll
+package com.github.m50d.paperdoll.layer
 
-import shapeless.{ CNil, Coproduct, :+: }
+import shapeless.{CNil, Coproduct, :+:}
+import scala.annotation.implicitNotFound
 
 /**
  * An effect, represented as a functor-like type F[X]
@@ -14,6 +15,7 @@ sealed trait Layer {
 /**
  * A stack of several possible effects. Each component of R is subtype of Layer 
  */
+@implicitNotFound("${R} is not a stack of layers")
 sealed trait Layers[R <: Coproduct] {
   /**
    * The functor-like type of a concrete value for this stack of layers

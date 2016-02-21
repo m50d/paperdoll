@@ -5,7 +5,7 @@ import shapeless.ops.coproduct.Inject
 import scalaz.syntax.monad._
 import scalaz.{ Forall, Leibniz }
 import scalaz.Leibniz.===
-import com.github.m50d.paperdoll.Layers
+import com.github.m50d.paperdoll.layer.Layers
 import com.github.m50d.paperdoll.effect.{ Eff, Eff_, Arr }
 
 /**

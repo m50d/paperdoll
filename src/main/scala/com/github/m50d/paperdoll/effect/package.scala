@@ -3,6 +3,7 @@ package com.github.m50d.paperdoll
 import shapeless.Coproduct
 import com.github.m50d.paperdoll.reader.Reader
 import com.github.m50d.paperdoll.queue.Queue
+import com.github.m50d.paperdoll.layer.Layers
 
 package object effect {
   /**

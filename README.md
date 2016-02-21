@@ -36,7 +36,8 @@ This also makes it possible to hide trait implementation subtypes.
   * The original idea (and reason for the project name) was for an extended metaphor
   of adding and removing layers of clothing on a FrenchKISS-style paper doll
    * Rename pure/impure to naked/wrapped or some such?
-   * send -> wrap?
+    * Top layer / remainder is potentially clearer than eff / continuation terminology
+   * send -> wrap? It's not exactly that though. Maybe clothedDoll?
    * handleRelay -> takeOffOneLayer?
    * run -> something you can only do when the doll is naked? 
  * Get into Maven Central
