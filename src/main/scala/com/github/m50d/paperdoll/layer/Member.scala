@@ -1,6 +1,6 @@
 package com.github.m50d.paperdoll.layer
 
-import shapeless.Coproduct
+import shapeless.{ Coproduct, :+:, Inl, Inr }
 
 sealed trait Member[R <: Coproduct, L <: Layers[R], R1 <: Layer] {
   type RestR <: Coproduct
@@ -9,5 +9,14 @@ sealed trait Member[R <: Coproduct, L <: Layers[R], R1 <: Layer] {
 }
 
 object Member {
-  
+//  implicit def base[R <: Coproduct, L <: Layers[R], R1 <: Layer](
+//    implicit l1l: Layers[R1 :+: R]) = new Member[R1 :+: R, Layers.Aux[R1 :+: R, l1l.O], R1] {
+//    override type RestR = R
+//    override type RestL = L
+//    override def remove[X](value: l1l.O[X]) =
+//      value match {
+//        case Inl(x) => Left(x)
+//        case Inr(r) => Right(r)
+//      }
+//  }
 }

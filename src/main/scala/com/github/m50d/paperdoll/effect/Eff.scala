@@ -144,7 +144,7 @@ object Eff {
   
 //  def embed[S <: CNil](implicit ls: Layers[S]) = {
 //      def apply[R, L <: Layers[R], A](eff: Eff[R, L, A])(
-//          implicit br: Basis[S, R], bl: Basis[ls.L]
-//      )
+//          implicit br: Basis[S, R], bl: Basis[ls.O, L]
+//      ): Eff[S, ls.O]
 //    }
 }
