@@ -40,31 +40,19 @@ object Reader {
     implicit l: Layers.Aux[R, F], inj: Inject[F[Int], Reader_[Int]#F[Int]]): Eff[R, Layers.Aux[R, F], Int] =
     Eff.monadEff.bind(ask[Int, R, F](l, inj)) { i => (i + x).point[Eff_[R, Layers.Aux[R, F]]#O] }
   /**
-   * Run the reader effect in the stack Reader_[I] :+: R by passing the input i
+   * Run the reader effect in the stack R by passing the input i
    * (i.e. giving the value i to any reads in the "lazy effectful value" e),
    * removing Reader_[I] from the stack of effects in the result.
    */
-  //  def runReader[I, R <: Coproduct, M[_] <: Coproduct, A](i: I, e: Eff[Reader_[I] :+: R, Layers[Reader_[I] :+: R] {
-  //    type O[X] = Reader[I, X] :+: M[X]
-  //  }, A])(implicit l: Layers.Aux[R, M]): Eff[R, Layers.Aux[R, M], A] =
-  //    Eff.handleRelay[Reader_[I], Reader_[I] :+: R, R, Layers.Aux[R, M], A](
-  //      new Forall[({ type L[V] = (Reader[I, V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A] })#L] {
-  //        override def apply[V] = {
-  //          (reader: Reader[I, V], arr: Arr[R, Layers.Aux[R, M], V, A]) =>
-  //            reader.fold(witness => arr(witness(i)))
-  //        }
-  //      }).apply(e)
-  def runReader[I, R <: Coproduct, L0 <: Layers[R], MERR <: Coproduct, MERL <: Layers[MERR], L1 <: Layers[R], A](i: I, e: Eff[R, L1, A])(
+  def runReader[I, R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](i: I, e: Eff[R, L1, A])(
     implicit me: Member[R, Reader_[I]] {
-      type L = L0
-      type RestR = MERR
-      type RestL = MERL
-    }, le: Leibniz[Nothing, Layers[R], L1, L0]): Eff[MERR, MERL, A] =
-    Eff.handleRelay[Reader_[I], R, MERR, MERL, A](
-      new Forall[({ type L[V] = (Reader[I, V], Arr[MERR, MERL, V, A]) => Eff[MERR, MERL, A] })#L] {
+      type L = L2
+    }, le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, A] =
+    Eff.handleRelay[Reader_[I], R, me.RestR, me.RestL, A](
+      new Forall[({ type L[V] = (Reader[I, V], Arr[me.RestR, me.RestL, V, A]) => Eff[me.RestR, me.RestL, A] })#L] {
         override def apply[V] = {
-          (reader: Reader[I, V], arr: Arr[MERR, MERL, V, A]) =>
+          (reader: Reader[I, V], arr: Arr[me.RestR, me.RestL, V, A]) =>
             reader.fold(witness => arr(witness(i)))
         }
-      }).apply(le.subst[({type L[X <: Layers[R]] = Eff[R, X, A]})#L](e))
+      })(me).apply(le.subst[({type L[X <: Layers[R]] = Eff[R, X, A]})#L](e))
 }

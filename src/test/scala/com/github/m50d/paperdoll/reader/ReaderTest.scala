@@ -19,8 +19,7 @@ class ReaderTest {
       } yield fst + snd
 
     val lr = Layers[Reader_[Int] :+: CNil]
-    val l0 = Layers[CNil]
-    val pure = runReader[Int, Reader_[Int] :+: CNil, Layers.Aux[Reader_[Int] :+: CNil, lr.O], CNil, Layers.Aux[CNil, l0.O], Layers.Aux[Reader_[Int] :+: CNil, lr.O], Int](4, reader)(
+    val pure = runReader[Int, Reader_[Int] :+: CNil, Layers.Aux[Reader_[Int] :+: CNil, lr.O], Int, Layers.Aux[Reader_[Int] :+: CNil, lr.O]](4, reader)(
         Member.nil[Reader_[Int], CNil], Leibniz.refl)
     val result = Eff.run(pure)
     assertThat(result).isEqualTo(8)
