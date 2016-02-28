@@ -19,4 +19,19 @@ object Member {
       case Inr(r) => Right(r)
     }
   }
+
+  implicit def cons[R2 <: Layer, R <: Coproduct, L <: Layers[R], R1 <: Layer](
+    implicit rest: Member[R, L, R1]) =
+    new Member[R2 :+: R, Layers[R2 :+: R] {
+      type O[X] = R2#F[X] :+: L#O[X]
+    }, R1] {
+	  override type RestR = R2 :+: rest.RestR
+	  override type RestL = Layers[RestR] {
+	    type O[X] = R2#F[X] :+: rest.RestL#O[X]
+	  }
+	  override def remove[X](value: R2#F[X] :+: L#O[X]) = value match {
+	    case Inl(x) => Right(Inl(x))
+	    case Inr(r) => rest.remove(r).right.map(Inr(_))
+	  }
+    }
 }
