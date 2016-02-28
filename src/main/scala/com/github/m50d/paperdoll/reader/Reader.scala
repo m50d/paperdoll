@@ -8,6 +8,7 @@ import scalaz.Leibniz.===
 import com.github.m50d.paperdoll.layer.Layers
 import com.github.m50d.paperdoll.effect.{ Eff, Eff_, Arr }
 import com.github.m50d.paperdoll.layer.Member
+import com.github.m50d.paperdoll.effect.Bind
 
 /**
  * The type representing an effectful value of type X
@@ -49,10 +50,8 @@ object Reader {
       type L = L2
     }, le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, A] =
     Eff.handleRelay[Reader_[I], R, me.RestR, me.RestL, A](
-      new Forall[({ type L[V] = (Reader[I, V], Arr[me.RestR, me.RestL, V, A]) => Eff[me.RestR, me.RestL, A] })#L] {
-        override def apply[V] = {
-          (reader: Reader[I, V], arr: Arr[me.RestR, me.RestL, V, A]) =>
-            reader.fold(witness => arr(witness(i)))
-        }
-      })(me).apply(le.subst[({type L[X <: Layers[R]] = Eff[R, X, A]})#L](e))
+      new Bind[Reader_[I]] {
+        override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](reader: Reader[I, V], arr: Arr[RR, RL, V, A]) =
+          reader.fold(witness => arr(witness(i)))
+      })(me).apply(le.subst[({ type L[X <: Layers[R]] = Eff[R, X, A] })#L](e))
 }

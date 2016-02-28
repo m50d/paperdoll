@@ -44,6 +44,11 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
   override def fold[B](pure: A => B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => B })#K]) =
     impure.apply[X](eff, cont)
 }
+
+trait Bind[L <: Layer] {
+  def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: L#F[V], cont: Arr[RR, RL, V, A]):  Eff[RR, RL, A]
+}
+
 sealed trait Eff_[R <: Coproduct, L <: Layers[R]] {
   final type O[A] = Eff[R, L, A]
 }
@@ -114,9 +119,7 @@ object Eff {
    * Curried for ease of implementation and to match the Haskell
    */
   def handleRelay[R1 <: Layer, R <: Coproduct, MERR <: Coproduct, MERL <: Layers[MERR], A](
-    bind: Forall[({
-      type L[V] = (R1#F[V], Arr[MERR, MERL, V, A]) => Eff[MERR, MERL, A]
-    })#L])(implicit me: Member[R, R1] {
+    bind: Bind[R1])(implicit me: Member[R, R1] {
       type RestR = MERR
       type RestL = MERL
     }): Eff[R, me.L, A] => Eff[MERR, MERL, A] =
@@ -133,7 +136,7 @@ object Eff {
                 override val cont = Queue.one[Arr_[MERR, MERL]#O, X0, A](cont1)
               }
           }, {
-            tEffect => bind[X0](tEffect, cont1)
+            tEffect => bind[X0, MERR, MERL, A](tEffect, cont1)
           })
       }
     })
