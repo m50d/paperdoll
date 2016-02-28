@@ -34,4 +34,6 @@ object Member {
 	    case Inr(r) => rest.remove(r).right.map(Inr(_))
 	  }
     }
+  
+  def apply[R <: Coproduct, L <: Layers[R], R1 <: Layer](implicit m: Member[R, L, R1]) = m
 }

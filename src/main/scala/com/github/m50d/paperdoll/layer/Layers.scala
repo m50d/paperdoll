@@ -59,8 +59,5 @@ object Layers {
           case Inr(x) => t.handle(x, h.tail)
         }
     }
+  def apply[R <: Coproduct](implicit l: Layers[R]): Aux[R, l.O] = l
 }
-
-//sealed trait Leib1[F[_], G[_]] {
-//  
-//}
