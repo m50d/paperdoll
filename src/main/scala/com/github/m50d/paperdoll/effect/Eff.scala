@@ -138,7 +138,7 @@ object Eff {
   def run[A](eff: Eff[CNil, Layers[CNil] { type O[X] = CNil }, A]): A = eff.fold(identity, new Forall[({ type K[X] = (CNil, Arrs[CNil, Layers[CNil] { type O[X] = CNil }, X, A]) => A })#K] {
     override def apply[X] = {
       (eff, cont) =>
-        sys.error("This case is only called for CNil, which is supposed to be impossible")
+        eff.impossible
     }
   })
   
