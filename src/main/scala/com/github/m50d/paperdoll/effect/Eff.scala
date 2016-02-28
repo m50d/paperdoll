@@ -108,30 +108,30 @@ object Eff {
   /**
    * Handle the effect R1/T, using the supplied handler bind
    * that knows how to translate a T[V] (the concrete effect) and an
-   * effectful continuation from V to A with effects R/M
+   * effectful continuation from V to A with effects R
    * into a single effectful lazy value of type A
    * (usually by somehow "running" the T[V] to obtain a V and then passing it to the continuation)
    * Curried for ease of implementation and to match the Haskell
    */
-  def handleRelay[R1 <: Layer, R <: Coproduct, M[_] <: Coproduct, A](
+  def handleRelay[R1 <: Layer, R <: Coproduct, MERL <: Layers[R], A](
     bind: Forall[({
-      type L[V] = (R1#F[V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A]
-    })#L])(implicit l: Layers.Aux[R, M], me: Member[R1 :+: R, R1] {
-      type L = Layers[R1 :+: R] { type O[X] = R1#F[X] :+: M[X] }
+      type L[V] = (R1#F[V], Arr[R, MERL, V, A]) => Eff[R, MERL, A]
+    })#L])(implicit me: Member[R1 :+: R, R1] {
+//      type L = Layers[R1 :+: R] { type O[X] = R1#F[X] :+: MERR#O[X] }
       type RestR = R
-      type RestL = Layers.Aux[R, M]
-    }): Eff[R1 :+: R, Layers[R1 :+: R] { type O[X] = R1#F[X] :+: M[X] }, A] => Eff[R, Layers.Aux[R, M], A] =
-    _.fold({ a0 => new Pure[R, Layers.Aux[R, M], A] { val a = a0 } }, new Forall[({ type K[X] = (R1#F[X] :+: M[X], Arrs[R1 :+: R, Layers[R1 :+: R] { type O[X] = R1#F[X] :+: M[X] }, X, A]) => Eff[R, Layers.Aux[R, M], A] })#K] {
+      type RestL = MERL
+    }): Eff[R1 :+: R, me.L, A] => Eff[me.RestR, me.RestL, A] =
+    _.fold({ a0 => new Pure[R, me.RestL, A] { val a = a0 } }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R1 :+: R, me.L, X, A]) => Eff[me.RestR, me.RestL, A] })#K] {
       override def apply[X0] = { (eff, cont0) =>
         //New continuation is: recursively call handleRelay(bind) on the result of the old continuation 
-        val cont1 = compose(cont0) andThen handleRelay[R1, R, M, A](bind)
+        val cont1 = compose(cont0) andThen handleRelay[R1, R, MERL, A](bind)
         me.remove(eff).fold(
           {
             otherEffect =>
-              new Impure[R, Layers.Aux[R, M], A] {
+              new Impure[me.RestR, me.RestL, A] {
                 override type X = X0
                 override val eff = otherEffect
-                override val cont = Queue.one[Arr_[R, Layers.Aux[R, M]]#O, X0, A](cont1)
+                override val cont = Queue.one[Arr_[me.RestR, me.RestL]#O, X0, A](cont1)
               }
           }, {
             tEffect => bind[X0](tEffect, cont1)
