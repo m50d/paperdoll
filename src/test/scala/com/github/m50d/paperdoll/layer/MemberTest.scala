@@ -8,6 +8,6 @@ class MemberTest {
 
   @Test def basicFunctionality(): Unit = {
     val l = Layers[Reader_[Int] :+: CNil]
-    Member[Reader_[Int] :+: CNil, l.type, Reader_[Int]]
+    Member[Reader_[Int] :+: CNil, Layers.Aux[Reader_[Int] :+: CNil, l.O], Reader_[Int]]
   }
 }
