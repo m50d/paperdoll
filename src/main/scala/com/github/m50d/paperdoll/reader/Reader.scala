@@ -49,9 +49,9 @@ object Reader {
     implicit me: Member[R, Reader_[I]] {
       type L = L2
     }, le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, A] =
-    Eff.handleRelay[Reader_[I], R, me.RestR, me.RestL, A](
+    Eff.handleRelay[Reader_[I], R, A](
       new Bind[Reader_[I]] {
         override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](reader: Reader[I, V], arr: Arr[RR, RL, V, A]) =
           reader.fold(witness => arr(witness(i)))
-      })(me).apply(le.subst[({ type L[X <: Layers[R]] = Eff[R, X, A] })#L](e))
+      }).apply(le.subst[({ type L[X <: Layers[R]] = Eff[R, X, A] })#L](e))
 }

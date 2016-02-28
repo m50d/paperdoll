@@ -46,7 +46,7 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
 }
 
 trait Bind[L <: Layer] {
-  def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: L#F[V], cont: Arr[RR, RL, V, A]):  Eff[RR, RL, A]
+  def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: L#F[V], cont: Arr[RR, RL, V, A]): Eff[RR, RL, A]
 }
 
 sealed trait Eff_[R <: Coproduct, L <: Layers[R]] {
@@ -118,25 +118,22 @@ object Eff {
    * (usually by somehow "running" the T[V] to obtain a V and then passing it to the continuation)
    * Curried for ease of implementation and to match the Haskell
    */
-  def handleRelay[R1 <: Layer, R <: Coproduct, MERR <: Coproduct, MERL <: Layers[MERR], A](
-    bind: Bind[R1])(implicit me: Member[R, R1] {
-      type RestR = MERR
-      type RestL = MERL
-    }): Eff[R, me.L, A] => Eff[MERR, MERL, A] =
-    _.fold({ a0 => new Pure[MERR, MERL, A] { val a = a0 } }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) => Eff[MERR, MERL, A] })#K] {
+  def handleRelay[R1 <: Layer, R <: Coproduct, A](
+    bind: Bind[R1])(implicit me: Member[R, R1]): Eff[R, me.L, A] => Eff[me.RestR, me.RestL, A] =
+    _.fold({ a0 => new Pure[me.RestR, me.RestL, A] { val a = a0 } }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) => Eff[me.RestR, me.RestL, A] })#K] {
       override def apply[X0] = { (eff, cont0) =>
         //New continuation is: recursively call handleRelay(bind) on the result of the old continuation 
-        val cont1 = compose(cont0) andThen handleRelay[R1, R, MERR, MERL, A](bind)
+        val cont1 = compose(cont0) andThen handleRelay[R1, R, A](bind)
         me.remove(eff).fold(
           {
             otherEffect =>
-              new Impure[MERR, MERL, A] {
+              new Impure[me.RestR, me.RestL, A] {
                 override type X = X0
                 override val eff = otherEffect
-                override val cont = Queue.one[Arr_[MERR, MERL]#O, X0, A](cont1)
+                override val cont = Queue.one[Arr_[me.RestR, me.RestL]#O, X0, A](cont1)
               }
           }, {
-            tEffect => bind[X0, MERR, MERL, A](tEffect, cont1)
+            tEffect => bind[X0, me.RestR, me.RestL, A](tEffect, cont1)
           })
       }
     })
