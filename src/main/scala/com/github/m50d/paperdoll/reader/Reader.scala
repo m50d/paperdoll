@@ -47,7 +47,7 @@ object Reader {
   def runReader[I, R <: Coproduct, M[_] <: Coproduct, A](i: I, e: Eff[Reader_[I] :+: R, Layers[Reader_[I] :+: R] {
     type O[X] = Reader[I, X] :+: M[X]
   }, A])(implicit l: Layers.Aux[R, M]): Eff[R, Layers.Aux[R, M], A] =
-    Eff.handleRelay[Reader_[I], R, Layers.Aux[R, M], A](
+    Eff.handleRelay[Reader_[I], Reader_[I] :+: R, R, Layers.Aux[R, M], A](
       new Forall[({ type L[V] = (Reader[I, V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A] })#L] {
         override def apply[V] = {
           (reader: Reader[I, V], arr: Arr[R, Layers.Aux[R, M], V, A]) =>

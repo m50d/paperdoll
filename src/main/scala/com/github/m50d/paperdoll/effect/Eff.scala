@@ -113,24 +113,24 @@ object Eff {
    * (usually by somehow "running" the T[V] to obtain a V and then passing it to the continuation)
    * Curried for ease of implementation and to match the Haskell
    */
-  def handleRelay[R1 <: Layer, R <: Coproduct, MERL <: Layers[R], A](
+  def handleRelay[R1 <: Layer, R <: Coproduct, MERR <: Coproduct, MERL <: Layers[MERR], A](
     bind: Forall[({
-      type L[V] = (R1#F[V], Arr[R, MERL, V, A]) => Eff[R, MERL, A]
-    })#L])(implicit me: Member[R1 :+: R, R1] {
-      type RestR = R
+      type L[V] = (R1#F[V], Arr[MERR, MERL, V, A]) => Eff[MERR, MERL, A]
+    })#L])(implicit me: Member[R, R1] {
+      type RestR = MERR
       type RestL = MERL
-    }): Eff[R1 :+: R, me.L, A] => Eff[me.RestR, me.RestL, A] =
-    _.fold({ a0 => new Pure[R, me.RestL, A] { val a = a0 } }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R1 :+: R, me.L, X, A]) => Eff[me.RestR, me.RestL, A] })#K] {
+    }): Eff[R, me.L, A] => Eff[MERR, MERL, A] =
+    _.fold({ a0 => new Pure[MERR, MERL, A] { val a = a0 } }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) => Eff[MERR, MERL, A] })#K] {
       override def apply[X0] = { (eff, cont0) =>
         //New continuation is: recursively call handleRelay(bind) on the result of the old continuation 
-        val cont1 = compose(cont0) andThen handleRelay[R1, R, MERL, A](bind)
+        val cont1 = compose(cont0) andThen handleRelay[R1, R, MERR, MERL, A](bind)
         me.remove(eff).fold(
           {
             otherEffect =>
-              new Impure[me.RestR, me.RestL, A] {
+              new Impure[MERR, MERL, A] {
                 override type X = X0
                 override val eff = otherEffect
-                override val cont = Queue.one[Arr_[me.RestR, me.RestL]#O, X0, A](cont1)
+                override val cont = Queue.one[Arr_[MERR, MERL]#O, X0, A](cont1)
               }
           }, {
             tEffect => bind[X0](tEffect, cont1)
