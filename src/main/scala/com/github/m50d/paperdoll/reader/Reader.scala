@@ -54,17 +54,17 @@ object Reader {
   //            reader.fold(witness => arr(witness(i)))
   //        }
   //      }).apply(e)
-  def runReader[I, R <: Coproduct, L0 <: Layers[R], MERR <: Coproduct, MERL <: Layers[MERR], L1, A](i: I, e: Eff[R, L1, A])(
+  def runReader[I, R <: Coproduct, L0 <: Layers[R], MERR <: Coproduct, MERL <: Layers[MERR], L1 <: Layers[R], A](i: I, e: Eff[R, L1, A])(
     implicit me: Member[R, Reader_[I]] {
       type L = L0
       type RestR = MERR
       type RestL = MERL
-    }, le: L1 === L0): Eff[MERR, MERL, A] =
+    }, le: Leibniz[Nothing, Layers[R], L1, L0]): Eff[MERR, MERL, A] =
     Eff.handleRelay[Reader_[I], R, MERR, MERL, A](
       new Forall[({ type L[V] = (Reader[I, V], Arr[MERR, MERL, V, A]) => Eff[MERR, MERL, A] })#L] {
         override def apply[V] = {
           (reader: Reader[I, V], arr: Arr[MERR, MERL, V, A]) =>
             reader.fold(witness => arr(witness(i)))
         }
-      }).apply(le.subst(e))
+      }).apply(le.subst[({type L[X <: Layers[R]] = Eff[R, X, A]})#L](e))
 }
