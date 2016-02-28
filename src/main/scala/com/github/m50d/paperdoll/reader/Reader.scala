@@ -46,10 +46,8 @@ object Reader {
    * (i.e. giving the value i to any reads in the "lazy effectful value" e),
    * removing Reader_[I] from the stack of effects in the result.
    */
-  def runReader[I](i: I): Handler[Reader_[I]] =
-    Eff.handle[Reader_[I]](
-      new Bind[Reader_[I]] {
-        override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](reader: Reader[I, V], arr: Arr[RR, RL, V, A]) =
-          reader.fold(witness => arr(witness(i)))
-      })
+  def runReader[I](i: I): Handler[Reader_[I]] = Eff.handle(new Bind[Reader_[I]] {
+    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](reader: Reader[I, V], arr: Arr[RR, RL, V, A]) =
+      reader.fold(witness => arr(witness(i)))
+  })
 }

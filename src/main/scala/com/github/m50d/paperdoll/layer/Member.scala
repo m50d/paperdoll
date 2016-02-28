@@ -6,7 +6,7 @@ import shapeless.{ Coproduct, :+:, Inl, Inr, CNil }
  * Typeclass representing that R1 is a member of the layer stack R, and bridging between the
  * layer stack world and the effectful value world.
  * This probably duplicates some functionality that's present in more general form in shapeless.
- * However, if so, I can't understand that general form well enough to express this in tertms of it.
+ * However, if so, I can't understand that general form well enough to express this in terms of it.
  */
 sealed trait Member[R <: Coproduct, R1 <: Layer] {
   type L <: Layers[R]
@@ -16,7 +16,6 @@ sealed trait Member[R <: Coproduct, R1 <: Layer] {
   type RestR <: Coproduct
   type RestL <: Layers[RestR]
   def inject[X](value: R1#F[X]): L#O[X]
-  def lift[X](value: RestL#O[X]): L#O[X]
   def remove[X](value: L#O[X]): Either[RestL#O[X], R1#F[X]]
 }
 
@@ -28,7 +27,6 @@ object Member {
     override type RestR = R
     override type RestL = Layers.Aux[R, rest.O] // i.e. rest.type
     override def inject[X](value: R1#F[X]) = Inl(value)
-    override def lift[X](value: rest.O[X]) = Inr(value)
     override def remove[X](value: R1#F[X] :+: rest.O[X]) = value match {
       case Inl(x) => Right(x)
       case Inr(r) => Left(r)
@@ -46,10 +44,6 @@ object Member {
         type O[X] = R2#F[X] :+: rest.RestL#O[X]
       }
       override def inject[X](value: R1#F[X]) = Inr(rest.inject(value))
-      override def lift[X](value: R2#F[X] :+: rest.RestL#O[X]) = value match {
-        case Inl(x) => Inl(x)
-        case Inr(r) => Inr(rest.lift(r))
-      }
       override def remove[X](value: R2#F[X] :+: rest.L#O[X]) = value match {
         case Inl(x) => Left(Inl(x))
         case Inr(r) => rest.remove(r).left.map(Inr(_))

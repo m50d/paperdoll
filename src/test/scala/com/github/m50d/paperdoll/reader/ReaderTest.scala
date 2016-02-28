@@ -9,6 +9,7 @@ import org.fest.assertions.Assertions.assertThat
 import com.github.m50d.paperdoll.layer.Layers
 import com.github.m50d.paperdoll.layer.Member
 import scalaz.Leibniz
+import com.github.m50d.paperdoll.layer.Layer
 
 class ReaderTest {
   @Test def basicFunctionality(): Unit = {
@@ -18,12 +19,14 @@ class ReaderTest {
         snd <- askReaderOnly[Int]
       } yield fst + snd
 
-//    val lr = Layers[Reader_[Int] :+: CNil]
     val pure = runReader(4)(reader)
-    //[Int, Reader_[Int] :+: CNil, Layers.Aux[Reader_[Int] :+: CNil, lr.O], Int, Layers.Aux[Reader_[Int] :+: CNil, lr.O]]
-    //(
-      //  Member.nil[Reader_[Int], CNil], Leibniz.refl)
     val result = Eff.run(pure)
     assertThat(result).isEqualTo(8)
   }
+//  @Test def differingOrders(): Unit = {
+//    val ourLayers = Layers[Reader_[String] :+: Reader_[Int] :+: CNil]
+//    for {
+//      count <- ask[Int, ]
+//    }
+//  }
 }

@@ -8,6 +8,7 @@ import scalaz.Leibniz.===
  * Either nil (in which case X === Y)
  * or a head element C[X, A] and a tail S[C, A, Y]
  * for some unknown type A (which is deliberately not exposed outside)
+ * Arguably excessively generic (since we only actually use this with S = Queue)
  */
 sealed trait DestructuredHead[S[_[_, _], _, _], C[_, _], X, Y] {
   def fold[A](nil: (Y === X) => A, cons: Forall[({type L[W] = (C[X, W], S[C, W, Y]) => A})#L]): A
