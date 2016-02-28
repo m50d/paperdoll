@@ -17,7 +17,7 @@ sealed trait Member[R <: Coproduct, R1 <: Layer] {
   type RestL <: Layers[RestR]
   def inject[X](value: R1#F[X]): L#O[X]
   def lift[X](value: RestL#O[X]): L#O[X]
-  def remove[X](value: L#O[X]): Either[R1#F[X], RestL#O[X]]
+  def remove[X](value: L#O[X]): Either[RestL#O[X], R1#F[X]]
 }
 
 object Member {
@@ -30,8 +30,8 @@ object Member {
     override def inject[X](value: R1#F[X]) = Inl(value)
     override def lift[X](value: rest.O[X]) = Inr(value)
     override def remove[X](value: R1#F[X] :+: rest.O[X]) = value match {
-      case Inl(x) => Left(x)
-      case Inr(r) => Right(r)
+      case Inl(x) => Right(x)
+      case Inr(r) => Left(r)
     }
   }
 
@@ -51,8 +51,8 @@ object Member {
         case Inr(r) => Inr(rest.lift(r))
       }
       override def remove[X](value: R2#F[X] :+: rest.L#O[X]) = value match {
-        case Inl(x) => Right(Inl(x))
-        case Inr(r) => rest.remove(r).right.map(Inr(_))
+        case Inl(x) => Left(Inl(x))
+        case Inr(r) => rest.remove(r).left.map(Inr(_))
       }
     }
 

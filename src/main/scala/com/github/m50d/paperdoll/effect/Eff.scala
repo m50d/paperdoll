@@ -6,6 +6,8 @@ import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
 import com.github.m50d.paperdoll.queue.Queue
 import com.github.m50d.paperdoll.layer.Layers
+import com.github.m50d.paperdoll.layer.Member
+import com.github.m50d.paperdoll.layer.Layer
 
 /**
  * A lazy value of type A with a (possibly empty) stack of effects from the list given by R/L
@@ -111,24 +113,29 @@ object Eff {
    * (usually by somehow "running" the T[V] to obtain a V and then passing it to the continuation)
    * Curried for ease of implementation and to match the Haskell
    */
-  def handleRelay[R1, R <: Coproduct, T[_], M[_] <: Coproduct, A](
+  def handleRelay[R1 <: Layer, R <: Coproduct, M[_] <: Coproduct, A](
     bind: Forall[({
-      type L[V] = (T[V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A]
-    })#L])(implicit l: Layers.Aux[R, M]): Eff[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, A] => Eff[R, Layers.Aux[R, M], A] =
-    _.fold({ a0 => new Pure[R, Layers.Aux[R, M], A] { val a = a0 } }, new Forall[({ type K[X] = (T[X] :+: M[X], Arrs[R1 :+: R, Layers[R1 :+: R] { type O[X] = T[X] :+: M[X] }, X, A]) => Eff[R, Layers.Aux[R, M], A] })#K] {
+      type L[V] = (R1#F[V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A]
+    })#L])(implicit l: Layers.Aux[R, M], me: Member[R1 :+: R, R1] {
+      type L = Layers[R1 :+: R] { type O[X] = R1#F[X] :+: M[X] }
+      type RestR = R
+      type RestL = Layers.Aux[R, M]
+    }): Eff[R1 :+: R, Layers[R1 :+: R] { type O[X] = R1#F[X] :+: M[X] }, A] => Eff[R, Layers.Aux[R, M], A] =
+    _.fold({ a0 => new Pure[R, Layers.Aux[R, M], A] { val a = a0 } }, new Forall[({ type K[X] = (R1#F[X] :+: M[X], Arrs[R1 :+: R, Layers[R1 :+: R] { type O[X] = R1#F[X] :+: M[X] }, X, A]) => Eff[R, Layers.Aux[R, M], A] })#K] {
       override def apply[X0] = { (eff, cont0) =>
         //New continuation is: recursively call handleRelay(bind) on the result of the old continuation 
-        val cont1 = compose(cont0) andThen handleRelay[R1, R, T, M, A](bind)
-        eff.removeElem[T[X0]].fold({
-          tEffect => bind[X0](tEffect, cont1)
-        }, {
-          otherEffect =>
-            new Impure[R, Layers.Aux[R, M], A] {
-              override type X = X0
-              override val eff = otherEffect
-              override val cont = Queue.one[Arr_[R, Layers.Aux[R, M]]#O, X0, A](cont1)
-            }
-        })
+        val cont1 = compose(cont0) andThen handleRelay[R1, R, M, A](bind)
+        me.remove(eff).fold(
+          {
+            otherEffect =>
+              new Impure[R, Layers.Aux[R, M], A] {
+                override type X = X0
+                override val eff = otherEffect
+                override val cont = Queue.one[Arr_[R, Layers.Aux[R, M]]#O, X0, A](cont1)
+              }
+          }, {
+            tEffect => bind[X0](tEffect, cont1)
+          })
       }
     })
   /**
@@ -141,10 +148,10 @@ object Eff {
         eff.impossible
     }
   })
-  
-//  def embed[S <: CNil](implicit ls: Layers[S]) = {
-//      def apply[R, L <: Layers[R], A](eff: Eff[R, L, A])(
-//          implicit br: Basis[S, R], bl: Basis[ls.O, L]
-//      ): Eff[S, ls.O]
-//    }
+
+  //  def embed[S <: CNil](implicit ls: Layers[S]) = {
+  //      def apply[R, L <: Layers[R], A](eff: Eff[R, L, A])(
+  //          implicit br: Basis[S, R], bl: Basis[ls.O, L]
+  //      ): Eff[S, ls.O]
+  //    }
 }
