@@ -12,13 +12,16 @@ sealed trait Layer {
   type F[X]
 }
 
+object Layer {
+  type Aux[F0[_]] = Layer {
+    type F[X] = F0[X]
+  }
+}
+
 /**
  * A stack of several possible effects. Each component of R is subtype of Layer
  * TODO: needs a fold-like method that says: if for every component L of R
  * you can handle L#F[X] then you can handle O[X].
- * Consider type-level CPS: rather than having a type O as a member
- * we have a type P[_[_]] to which we pass O.
- * (At least I think that's what that is?)
  */
 @implicitNotFound("${R} is not a stack of layers")
 sealed trait Layers[R <: Coproduct] {
@@ -57,3 +60,7 @@ object Layers {
         }
     }
 }
+
+//sealed trait Leib1[F[_], G[_]] {
+//  
+//}
