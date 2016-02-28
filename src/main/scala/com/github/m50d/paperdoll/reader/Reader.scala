@@ -44,13 +44,26 @@ object Reader {
    * (i.e. giving the value i to any reads in the "lazy effectful value" e),
    * removing Reader_[I] from the stack of effects in the result.
    */
-  def runReader[I, R <: Coproduct, M[_] <: Coproduct, A](i: I, e: Eff[Reader_[I] :+: R, Layers[Reader_[I] :+: R] {
-    type O[X] = Reader[I, X] :+: M[X]
-  }, A])(implicit l: Layers.Aux[R, M]): Eff[R, Layers.Aux[R, M], A] =
-    Eff.handleRelay[Reader_[I], Reader_[I] :+: R, R, Layers.Aux[R, M], A](
-      new Forall[({ type L[V] = (Reader[I, V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A] })#L] {
+  //  def runReader[I, R <: Coproduct, M[_] <: Coproduct, A](i: I, e: Eff[Reader_[I] :+: R, Layers[Reader_[I] :+: R] {
+  //    type O[X] = Reader[I, X] :+: M[X]
+  //  }, A])(implicit l: Layers.Aux[R, M]): Eff[R, Layers.Aux[R, M], A] =
+  //    Eff.handleRelay[Reader_[I], Reader_[I] :+: R, R, Layers.Aux[R, M], A](
+  //      new Forall[({ type L[V] = (Reader[I, V], Arr[R, Layers.Aux[R, M], V, A]) => Eff[R, Layers.Aux[R, M], A] })#L] {
+  //        override def apply[V] = {
+  //          (reader: Reader[I, V], arr: Arr[R, Layers.Aux[R, M], V, A]) =>
+  //            reader.fold(witness => arr(witness(i)))
+  //        }
+  //      }).apply(e)
+  def runReader[I, R <: Coproduct, L0 <: Layers[R], MERR <: Coproduct, MERL <: Layers[MERR], A](i: I, e: Eff[R, L0, A])(
+    implicit me: Member[R, Reader_[I]] {
+      type L = L0
+      type RestR = MERR
+      type RestL = MERL
+    }): Eff[MERR, MERL, A] =
+    Eff.handleRelay[Reader_[I], R, MERR, MERL, A](
+      new Forall[({ type L[V] = (Reader[I, V], Arr[MERR, MERL, V, A]) => Eff[MERR, MERL, A] })#L] {
         override def apply[V] = {
-          (reader: Reader[I, V], arr: Arr[R, Layers.Aux[R, M], V, A]) =>
+          (reader: Reader[I, V], arr: Arr[MERR, MERL, V, A]) =>
             reader.fold(witness => arr(witness(i)))
         }
       }).apply(e)
