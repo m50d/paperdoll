@@ -9,6 +9,7 @@ import com.github.m50d.paperdoll.layer.Layers
 import com.github.m50d.paperdoll.effect.{ Eff, Eff_, Arr }
 import com.github.m50d.paperdoll.layer.Member
 import com.github.m50d.paperdoll.effect.Bind
+import com.github.m50d.paperdoll.effect.Handler
 
 /**
  * The type representing an effectful value of type X
@@ -45,13 +46,10 @@ object Reader {
    * (i.e. giving the value i to any reads in the "lazy effectful value" e),
    * removing Reader_[I] from the stack of effects in the result.
    */
-  def runReader[I, R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](i: I, e: Eff[R, L1, A])(
-    implicit me: Member[R, Reader_[I]] {
-      type L = L2
-    }, le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, A] =
-    Eff.handleRelay[Reader_[I], R, A](
+  def runReader[I](i: I): Handler[Reader_[I]] =
+    Eff.handle[Reader_[I]](
       new Bind[Reader_[I]] {
         override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](reader: Reader[I, V], arr: Arr[RR, RL, V, A]) =
           reader.fold(witness => arr(witness(i)))
-      }).apply(le.subst[({ type L[X <: Layers[R]] = Eff[R, X, A] })#L](e))
+      })
 }
