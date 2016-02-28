@@ -1,6 +1,7 @@
 package com.github.m50d.paperdoll.layer
 
 import shapeless.{Coproduct, :+:, CNil, Inl, Inr}
+import scalaz.Leibniz
 
 /**
  * Typeclass representing that the layer stack T is a subset of the layer stack S, and bridging between the
@@ -22,14 +23,15 @@ object Subset {
     override def inject[X](value: CNil) = value.impossible
   }
   implicit def cons[S <: Coproduct, TH <: Layer, LS1 <: Layers[S], TT <: Coproduct, LS2 <: Layers[S]](
-      implicit me: Member[S, TH], tl: Subset[S, TT]) =
+      implicit me: Member[S, TH]{type L = LS1}, tl: Subset[S, TT]{type M = LS2}, le: Leibniz[Nothing, Layers[S], LS1, LS2]) =
     new Subset[S, TH :+: TT] {
-    override type M = tl.M
+    override type M = LS2
     override type N = Layers[TH :+: TT] {
       type O[X] = TH#F[X] :+: tl.N#O[X]
     }
     override def inject[X](value: TH#F[X] :+: tl.N#O[X]) = value match {
-      case Inl(x) => me.inject(x)
+      case Inl(x) => le.subst[({type K[Y] = Member[S, TH]{type L = Y}})#K](me).inject(x)
+      case Inr(r) => tl.inject(r)
     }
   }
 }

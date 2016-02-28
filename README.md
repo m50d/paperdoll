@@ -30,23 +30,26 @@ This also makes it possible to hide trait implementation subtypes.
 
 ## Future tasks
 
+ * Test Subset, make sure it works
+ * Finish implementing Eff#extend[S], which lifts Eff into the effect stack S
+  * Maybe better called lift?
+ * Add a test to ReaderTest that creates a stack of two readers and runs in both orders
  * Implement more effect types
- * Make sure it's possible to realign an effect stack (use shapeless.Align)
- * Rename the eff methods (e.g. send and handleRelay) to something easier to understand
-  * The original idea (and reason for the project name) was for an extended metaphor
-  of adding and removing layers of clothing on a FrenchKISS-style paper doll
-   * Rename pure/impure to naked/wrapped or some such?
-    * Top layer / remainder is potentially clearer than eff / continuation terminology
-   * send -> wrap? It's not exactly that though. Maybe clothedDoll?
-   * handleRelay -> takeOffOneLayer?
-   * run -> something you can only do when the doll is naked? 
+ * Create a test that demonstrates combining two unrelated effect monads and running in either order.
+ * Make sure it's possible to interpret effects in any order
  * Get into Maven Central
-  * GPG signing in build (I know how to do this, it's just a matter of doing it)
+  * GPG signing in build (trivial)
+ * Review consistency of when we use an R, L pair vs. when we have L as a member
+ * Check for cases where a polymorphic method would be more idiomatic in scala than a fold
+  * Particularly Eff#fold could probably be replaced with something that handled mapping from one layer to another
  * Release 1.0
  * Binary compatibility checking in the build (using MiMA or similar)
  * Port to Cats if it:
   * Adds Leibniz or equivalent
   * Becomes 1.0
+ * Ensure naming is as easy to understand as possible
+  * The original idea (and reason for the project name) was for an extended metaphor
+  of adding and removing layers of clothing on a FrenchKISS-style paper doll
   
 ## Notices
 
