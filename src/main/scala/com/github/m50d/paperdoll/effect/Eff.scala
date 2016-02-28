@@ -117,7 +117,6 @@ object Eff {
     bind: Forall[({
       type L[V] = (R1#F[V], Arr[R, MERL, V, A]) => Eff[R, MERL, A]
     })#L])(implicit me: Member[R1 :+: R, R1] {
-//      type L = Layers[R1 :+: R] { type O[X] = R1#F[X] :+: MERR#O[X] }
       type RestR = R
       type RestL = MERL
     }): Eff[R1 :+: R, me.L, A] => Eff[me.RestR, me.RestL, A] =

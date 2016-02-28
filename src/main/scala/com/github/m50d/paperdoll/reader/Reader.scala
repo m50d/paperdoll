@@ -53,5 +53,5 @@ object Reader {
           (reader: Reader[I, V], arr: Arr[R, Layers.Aux[R, M], V, A]) =>
             reader.fold(witness => arr(witness(i)))
         }
-      })(Member.nil[Reader_[I], R]).apply(e)
+      }).apply(e)
 }
