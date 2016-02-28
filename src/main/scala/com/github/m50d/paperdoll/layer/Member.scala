@@ -9,15 +9,14 @@ sealed trait Member[R <: Coproduct, L <: Layers[R], R1 <: Layer] {
 }
 
 object Member {
-  type CNil_[X] = CNil
-  implicit def baseBase[R1 <: Layer] = new Member[R1 :+: CNil, Layers[R1 :+: CNil] {
-    type O[X] = R1#F[X] :+: CNil
+  implicit def nil[R1 <: Layer, R <: Coproduct](implicit rest: Layers[R]) = new Member[R1 :+: R, Layers[R1 :+: R] {
+    type O[X] = R1#F[X] :+: rest.O[X]
   }, R1] {
-    override type RestR = CNil
-    override type RestL = Layers.Aux[CNil, CNil_]
-    def remove[X](value: R1#F[X] :+: CNil) = value match {
+    override type RestR = R
+    override type RestL = Layers.Aux[R, rest.O] // i.e. rest.type
+    def remove[X](value: R1#F[X] :+: rest.O[X]) = value match {
       case Inl(x) => Left(x)
-      case Inr(cn) => Right(cn)
+      case Inr(r) => Right(r)
     }
   }
 }
