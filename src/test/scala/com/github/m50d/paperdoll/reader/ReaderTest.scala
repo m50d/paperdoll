@@ -15,8 +15,8 @@ class ReaderTest {
   @Test def basicFunctionality(): Unit = {
     val reader =
       for {
-        fst <- askReaderOnly[Int]
-        snd <- askReaderOnly[Int]
+        fst <- ask[Int]
+        snd <- ask[Int]
       } yield fst + snd
 
     val pure = runReader(4)(reader)

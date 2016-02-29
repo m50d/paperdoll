@@ -1,6 +1,6 @@
 package com.github.m50d.paperdoll.effect
 
-import shapeless.{ Coproduct, CNil, :+: }
+import shapeless.{ Coproduct, CNil, :+:, Inl }
 import shapeless.ops.coproduct.Inject
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
@@ -23,7 +23,7 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
 
   final def extend[S <: Coproduct] = {
     def apply[L1 <: Layers[R]](implicit su: Subset[S, R] { type N = L1 }, le: Leibniz[Nothing, Layers[R], L, L1]): Eff[S, su.M, A] =
-      le.subst[({type K[X <: Layers[R]] = Eff[R, X, A]})#K](this).inject(su)
+      le.subst[({ type K[X <: Layers[R]] = Eff[R, X, A] })#K](this).inject(su)
   }
 }
 /**
@@ -58,7 +58,7 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
 
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) =
     impure.apply[X](eff, cont)
-  
+
   override def inject[S <: Coproduct, M1 <: Layers[S]](implicit su: Subset[S, R] { type M = M1; type N = L }) = {
     val eff1 = su.inject(eff)
     val cont1 = Eff.compose(cont) andThen { _.inject[S, M1] }
@@ -121,14 +121,20 @@ object Eff {
     override val leibniz = Leibniz.refl[Eff[R, L, A0]]
   }
   /**
-   * Lift a single effectful value F[V] into an Eff[F, R, V].
+   * Lift an effectful value L#F[V] to an Eff[L :+: CNil, ..., V].
+   * Usually followed by a .extend to further lift this into a complete effect stack
    */
-  def send[F[_], R <: Coproduct, N[_] <: Coproduct, V](value: F[V])(
-    implicit l: Layers.Aux[R, N], inj: Inject[N[V], F[V]]): Eff[R, Layers.Aux[R, N], V] =
-    new Impure[R, Layers[R] { type O[X] = N[X] }, V] {
+  def send[L <: Layer, V](value: L#F[V]): Eff[L :+: CNil, Layers[L :+: CNil] {
+    type O[X] = L#F[X] :+: CNil
+  }, V] =
+    new Impure[L :+: CNil, Layers[L :+: CNil] {
+      type O[X] = L#F[X] :+: CNil
+    }, V] {
       override type X = V
-      override val eff = Coproduct[N[V]](value)
-      override val cont = Queue.empty[Arr_[R, Layers[R] { type O[X] = N[X] }]#O, V]
+      override val eff = Inl(value)
+      override val cont = Queue.empty[Arr_[L :+: CNil, Layers[L :+: CNil] {
+        type O[X] = L#F[X] :+: CNil
+      }]#O, V]
     }
 
   /**
@@ -198,10 +204,4 @@ object Eff {
         eff.impossible
     }
   })
-
-  //  def embed[S <: CNil](implicit ls: Layers[S]) = {
-  //      def apply[R, L <: Layers[R], A](eff: Eff[R, L, A])(
-  //          implicit br: Basis[S, R], bl: Basis[ls.O, L]
-  //      ): Eff[S, ls.O]
-  //    }
 }
