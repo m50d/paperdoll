@@ -10,23 +10,21 @@ import scalaz.Leibniz
  * However, if so, I can't understand that general form well enough to express this in terms of it.
  * It also definitely duplicates some functionality from Member
  * but I couldn't get the type inference right without it
+ * TODO: Try making L a type parameter of Element (not a type member) for reasons
  */
 sealed trait Element[R <: Coproduct, R1 <: Layer] {
   type L <: Layers[R]
   def inject[X](value: R1#F[X]): L#O[X]
 }
 
-trait Element1 {
-  implicit def nil[R1 <: Layer, R <: Coproduct](implicit rest: Layers[R]) = new Element[R1 :+: R, R1] {
-    override type L = Layers[R1 :+: R] {
-      type O[X] = R1#F[X] :+: rest.O[X]
-    }
-    override def inject[X](value: R1#F[X]) = Inl(value)
-  }
-}
-
-object Element extends Element1 {
-  implicit def cons[R2 <: Layer, R <: Coproduct, R1 <: Layer](
+object Element {
+	implicit def nilElement[R1 <: Layer, R <: Coproduct](implicit rest: Layers[R]) = new Element[R1 :+: R, R1] {
+		override type L = Layers[R1 :+: R] {
+			type O[X] = R1#F[X] :+: rest.O[X]
+		}
+		override def inject[X](value: R1#F[X]) = Inl(value)
+	}
+  implicit def consElement[R2 <: Layer, R <: Coproduct, R1 <: Layer](
     implicit rest: Element[R, R1]) =
     new Element[R2 :+: R, R1] {
       override type L = Layers[R2 :+: R] {
@@ -49,46 +47,27 @@ sealed trait Subset[S <: Coproduct, T <: Coproduct] {
   def inject[X](value: N#O[X]): M#O[X]
 }
 object Subset {
-  implicit def nil[S <: Coproduct](implicit ls: Layers[S]) = new Subset[S, CNil] {
+  implicit def nilSubset[S <: Coproduct](implicit ls: Layers[S]) = new Subset[S, CNil] {
     override type M = Layers.Aux[S, ls.O]
     override type N = Layers[CNil] {
       type O[X] = CNil
     }
     override def inject[X](value: CNil) = value.impossible
   }
-  implicit def cons[S <: Coproduct, TH <: Layer, TT <: Coproduct](
-    implicit sh: SubsetHelper[S, TH, TT]) =
+  implicit def consSubset[S <: Coproduct, TH <: Layer, TT <: Coproduct, LS1 <: Layers[S], LS2 <: Layers[S]](
+    implicit e: Element[S, TH] { type L = LS1 }, tl: Subset[S, TT] { type M = LS2 }, le: Leibniz[Nothing, Layers[S], LS1, LS2]) =
     new Subset[S, TH :+: TT] {
-      override type M = sh.J
+      override type M = LS2
       override type N = Layers[TH :+: TT] {
-        type O[X] = TH#F[X] :+: sh.LTT#O[X]
+        type O[X] = TH#F[X] :+: tl.N#O[X]
       }
-      override def inject[X](value: TH#F[X] :+: sh.LTT#O[X]) = value match {
-        case Inl(x) ⇒ sh.e.inject(x)
-        case Inr(r) ⇒ sh.tl.inject(r)
+      override def inject[X](value: TH#F[X] :+: tl.N#O[X]) = value match {
+        case Inl(x) ⇒ le.subst[({ type K[Y] = Element[S, TH] { type L = Y } })#K](e).inject(x)
+        case Inr(r) ⇒ tl.inject(r)
       }
     }
   def apply[S <: Coproduct, T <: Coproduct](implicit s: Subset[S, T]): Subset[S, T] {
     type M = s.M
     type N = s.N
   } = s
-}
-sealed trait SubsetHelper[S <: Coproduct, TH <: Layer, TT <: Coproduct] {
-  type J <: Layers[S]
-  type LTT <: Layers[TT]
-  val e: Element[S, TH] { type L = J }
-  val tl: Subset[S, TT] { type M = J; type N = LTT }
-}
-object SubsetHelper {
-  implicit def help[S <: Coproduct, TH <: Layer, TT <: Coproduct, L1 <: Layers[S], L2 <: Layers[S]](
-    implicit e0: Element[S, TH] { type L = L1 }, tl0: Subset[S, TT] { type M = L2 }, le: Leibniz[Nothing, Layers[S], L1, L2]) =
-    new SubsetHelper[S, TH, TT] {
-      type J = L2
-      type LTT = tl0.N
-      val e = le.subst[({ type K[Y] = Element[S, TH] { type L = Y } })#K](e0)
-      val tl = tl0: Subset[S, TT] {
-        type M = L2
-        type N = tl0.N
-      }
-    }
 }

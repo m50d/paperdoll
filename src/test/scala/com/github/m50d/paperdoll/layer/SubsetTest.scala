@@ -10,7 +10,7 @@ class SubsetTest {
     val li = Layers[Reader_[Int] :+: CNil]
     
     Subset[Reader_[String] :+: Reader_[Int] :+: CNil, CNil]
-//    Subset[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int] :+: CNil](
+//    Subset[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int] :+: CNil]
 //      Subset.cons[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int], CNil](
 //        SubsetHelper.help    
 //      )
