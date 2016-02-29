@@ -21,9 +21,9 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
 
   private[effect] def inject[S <: Coproduct, M1 <: Layers[S]](implicit su: Subset[S, R] { type M = M1; type N = L }): Eff[S, M1, A]
 
-  final def extend[S <: Coproduct] = {
+  final def extend[S <: Coproduct] = new {
     def apply[L1 <: Layers[R]](implicit su: Subset[S, R] { type N = L1 }, le: Leibniz[Nothing, Layers[R], L, L1]): Eff[S, su.M, A] =
-      le.subst[({ type K[X <: Layers[R]] = Eff[R, X, A] })#K](this).inject(su)
+      le.subst[({ type K[X <: Layers[R]] = Eff[R, X, A] })#K](Eff.this).inject(su)
   }
 }
 /**

@@ -10,5 +10,6 @@ class MemberTest {
     Member[Reader_[Int] :+: CNil, Reader_[Int]]
     Member[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[String]]
     Member[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int]]
+    implicitly[Member[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int]]]
   }
 }

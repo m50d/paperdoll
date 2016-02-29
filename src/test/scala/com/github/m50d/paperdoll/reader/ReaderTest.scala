@@ -23,10 +23,11 @@ class ReaderTest {
     val result = Eff.run(pure)
     assertThat(result).isEqualTo(8)
   }
+  
 //  @Test def differingOrders(): Unit = {
-//    val ourLayers = Layers[Reader_[String] :+: Reader_[Int] :+: CNil]
 //    for {
-//      count <- ask[Int, ]
-//    }
+//      count <- ask[Int].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
+//      label <- ask[String].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
+//    } yield f"There are $count%d $label%s"
 //  }
 }
