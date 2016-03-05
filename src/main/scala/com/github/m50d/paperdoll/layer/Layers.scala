@@ -61,3 +61,13 @@ object Layers {
     }
   def apply[R <: Coproduct](implicit l: Layers[R]): Aux[R, l.O] = l
 }
+
+sealed trait WrappedLayers[R] {
+  type L <: Layers[R]
+}
+object WrappedLayers {
+  implicit def wrap[R <: Coproduct](implicit l: Layers[R]) =
+    new WrappedLayers[R] {
+    type L = Layers.Aux[R, l.O]
+  }
+}

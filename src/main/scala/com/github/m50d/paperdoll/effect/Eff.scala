@@ -19,11 +19,10 @@ import scalaz.Leibniz
 sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
   def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]): B
 
-  private[effect] def inject[S <: Coproduct, M1 <: Layers[S]](implicit su: Subset[S, R] { type M = M1; type N = L }): Eff[S, M1, A]
+  private[effect] def inject[S <: Coproduct, M <: Layers[S]](implicit su: Subset[S, M, R, L]): Eff[S, M, A]
 
-  final def extend[S <: Coproduct] = new {
-    def apply[L1 <: Layers[R]](implicit su: Subset[S, R] { type N = L1 }, le: Leibniz[Nothing, Layers[R], L, L1]): Eff[S, su.M, A] =
-      le.subst[({ type K[X <: Layers[R]] = Eff[R, X, A] })#K](Eff.this).inject(su)
+  final def extend[S <: Coproduct](implicit ls: Layers[S]) = new {
+    def apply(implicit su: Subset[S, Layers.Aux[S, ls.O], R, L]) = inject(su)
   }
 }
 /**
@@ -32,9 +31,9 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
 private[effect] sealed trait Pure[R <: Coproduct, L <: Layers[R], A] extends Eff[R, L, A] {
   val a: A
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) = pure(a)
-  override def inject[S <: Coproduct, M1 <: Layers[S]](implicit su: Subset[S, R] { type M = M1; type N = L }) = {
+  override def inject[S <: Coproduct, M <: Layers[S]](implicit su: Subset[S, M, R, L]) = {
     val a0 = a
-    new Pure[S, M1, A] {
+    new Pure[S, M, A] {
       override val a = a0
     }
   }
@@ -59,14 +58,14 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) =
     impure.apply[X](eff, cont)
 
-  override def inject[S <: Coproduct, M1 <: Layers[S]](implicit su: Subset[S, R] { type M = M1; type N = L }) = {
+  override def inject[S <: Coproduct, M <: Layers[S]](implicit su: Subset[S, M, R, L]) = {
     val eff1 = su.inject(eff)
-    val cont1 = Eff.compose(cont) andThen { _.inject[S, M1] }
+    val cont1 = Eff.compose(cont) andThen { _.inject[S, M] }
     type X0 = X
-    new Impure[S, M1, A] {
+    new Impure[S, M, A] {
       override type X = X0
       override val eff = eff1
-      override val cont = Queue.one[Arr_[S, M1]#O, X0, A](cont1)
+      override val cont = Queue.one[Arr_[S, M]#O, X0, A](cont1)
     }
   }
 }
