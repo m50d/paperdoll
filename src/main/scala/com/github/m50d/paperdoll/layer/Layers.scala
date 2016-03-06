@@ -29,11 +29,6 @@ sealed trait Layers[R <: Coproduct] {
    * The functor-like type of a concrete value for this stack of layers
    */
   type O[X] <: Coproduct
-  /**
-   * The type of a suitable product of functions to map an O[X] to an A.
-   */
-  type OHandler[X, A] <: HList
-  def handle[X, A](o: O[X], h: OHandler[X, A]): A
 }
 object Layers {
   /**
@@ -46,28 +41,10 @@ object Layers {
   }
   implicit def cnil = new Layers[CNil] {
     type O[X] = CNil
-    type OHandler[X, A] = HNil
-    def handle[X, A](o: CNil, h: HNil) = sys.error("CNil doesn't exist")
   }
   implicit def ccons[H <: Layer, T <: Coproduct](implicit t: Layers[T]) =
     new Layers[H :+: T] {
       type O[X] = H#F[X] :+: t.O[X]
-      type OHandler[X, A] = (H#F[X] => A) :: t.OHandler[X, A]
-      def handle[X, A](o: H#F[X] :+: t.O[X], h: (H#F[X] => A) :: t.OHandler[X, A]) =
-        o match {
-          case Inl(x) => h.head(x)
-          case Inr(x) => t.handle(x, h.tail)
-        }
     }
   def apply[R <: Coproduct](implicit l: Layers[R]): Aux[R, l.O] = l
-}
-
-sealed trait WrappedLayers[R] {
-  type L <: Layers[R]
-}
-object WrappedLayers {
-  implicit def wrap[R <: Coproduct](implicit l: Layers[R]) =
-    new WrappedLayers[R] {
-    type L = Layers.Aux[R, l.O]
-  }
 }
