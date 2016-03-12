@@ -6,6 +6,7 @@
 	<version>0.1-SNAPSHOT</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<scala.version>2.11.7</scala.version>
 	</properties>
 	<build>
 		<plugins>
@@ -56,4 +57,13 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>org.scala-lang</groupId>
+				<artifactId>scala-library</artifactId>
+				<version>${scala.version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
