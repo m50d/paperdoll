@@ -23,11 +23,11 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
     type N[X] = L#O[X]
   }): Eff[S, Layers.Aux[S, su.M], A]
 
-  final def extend[S <: Coproduct](implicit ls: Layers[S]) = new {
-    def apply[N0[_]](implicit su: Subset[S, R]{
-      type N[X] = N0[X]
-    }, le: Leibniz[Nothing, Layers[R], L, Layers.Aux[R, N0]]) = le.subst[({type E[L] = Eff[R, L, A]})#E](Eff.this).inject(su)
-  }
+//  final def extend[S <: Coproduct](implicit su: Subset[S, R]) = new {
+//    def apply[N0[_]](implicit su: Subset[S, R]{
+//      type N[X] = N0[X]
+//    }, le: Leibniz[Nothing, Layers[R], L, Layers.Aux[R, N0]]) = le.subst[({type E[L] = Eff[R, L, A]})#E](Eff.this).inject(su)
+//  }
 }
 /**
  * An actual A - this is the "nil" case of Eff
@@ -70,7 +70,7 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
       override type X = X0
       override val eff = eff1
       override val cont = Queue.one[Arr_[S, Layers.Aux[S, su.M]]#O, X0, A](cont1)
-    }
+    }: Eff[S, Layers.Aux[S, su.M], A]
   }
 }
 

@@ -14,7 +14,8 @@ sealed trait Subset[S <: Coproduct, T <: Coproduct] {
   type N[X] <: Coproduct // Layers[T]#O
   def inject[X](value: N[X]): M[X]
 }
-//object Subset {
+object Subset {
+//  type Aux1[S, T, N[_]]
 //  implicit def nilSubset[S <: Coproduct](implicit l: Layers[S]) = new Subset[S, Layers.Aux[S, l.O], CNil, Layers[CNil]{type O[X] = CNil}] {
 //    override def inject[X](value: CNil) = value.impossible
 //  }
@@ -29,4 +30,4 @@ sealed trait Subset[S <: Coproduct, T <: Coproduct] {
 //      }
 //  }
 //  def apply[S <: Coproduct, M <: Layers[S], T <: Coproduct, N <: Layers[T]](implicit s: Subset[S, M, T, N]) = s
-//}
+}
