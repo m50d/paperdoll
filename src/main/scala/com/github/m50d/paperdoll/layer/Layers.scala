@@ -20,31 +20,21 @@ object Layer {
 
 /**
  * A stack of several possible effects. Each component of R is subtype of Layer
- * TODO: needs a fold-like method that says: if for every component L of R
- * you can handle L#F[X] then you can handle O[X].
  */
 @implicitNotFound("${R} is not a stack of layers")
-sealed trait Layers[R <: Coproduct] {
+sealed trait Layers[R <: Coproduct, F[_[_] <: Coproduct]] {
   /**
-   * The functor-like type of a concrete value for this stack of layers
+   * The type of a concrete value of type X in this stack of layers
    */
   type O[X] <: Coproduct
+  final type FO = F[O]
 }
 object Layers {
-  /**
-   * This is sadly less useful than it might otherwise be because F's kind
-   * generally means it has to be expressed as a type lambda, at which point
-   * one might as well just define an explicit Layers instead
-   */
-  type Aux[R <: Coproduct, F[_] <: Coproduct] = Layers[R] {
-    type O[X] = F[X]
-  }
-  implicit def cnil = new Layers[CNil] {
+  implicit def cnil[F[_[_] <: Coproduct]] = new Layers[CNil, F] {
     type O[X] = CNil
   }
-  implicit def ccons[H <: Layer, T <: Coproduct](implicit t: Layers[T]) =
-    new Layers[H :+: T] {
+  implicit def ccons[H <: Layer, T <: Coproduct, F[_[_] <: Coproduct]](implicit t: Layers[T, F]) =
+    new Layers[H :+: T, F] {
       type O[X] = H#F[X] :+: t.O[X]
     }
-  def apply[R <: Coproduct](implicit l: Layers[R]): Aux[R, l.O] = l
 }
