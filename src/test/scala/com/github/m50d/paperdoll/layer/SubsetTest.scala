@@ -9,9 +9,9 @@ class SubsetTest {
     val lsi = Layers[Reader_[String] :+: Reader_[Int] :+: CNil]
     val li = Layers[Reader_[Int] :+: CNil]
 
-    Subset[Reader_[String] :+: Reader_[Int] :+: CNil, Layers.Aux[Reader_[String] :+: Reader_[Int] :+: CNil, lsi.O], CNil, Layers[CNil] {
-      type O[X] = CNil
-    }]
+//    Subset[Reader_[String] :+: Reader_[Int] :+: CNil, Layers.Aux[Reader_[String] :+: Reader_[Int] :+: CNil, lsi.O], CNil, Layers[CNil] {
+//      type O[X] = CNil
+//    }]
 //    Element[Reader_[String] :+: Reader_[Int] :+: CNil, Layers.Aux[Reader_[String] :+: Reader_[Int] :+: CNil, lsi.O], Reader_[Int]]
 //    Subset[Reader_[String] :+: Reader_[Int] :+: CNil, Layers.Aux[Reader_[String] :+: Reader_[Int] :+: CNil, li.O], Reader_[Int] :+: CNil, Layers.Aux[Reader_[Int] :+: CNil, li.O]](
 //      Subset.consSubset[Reader_[String] :+: Reader_[Int] :+: CNil, Layers.Aux[Reader_[String] :+: Reader_[Int] :+: CNil, li.O], Reader_[Int], CNil, Layers[CNil] {

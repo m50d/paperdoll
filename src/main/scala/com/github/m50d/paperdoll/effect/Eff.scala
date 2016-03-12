@@ -19,10 +19,10 @@ import scalaz.Leibniz
 sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
   def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]): B
 
-  private[effect] def inject[S <: Coproduct, M <: Layers[S]](implicit su: Subset[S, M, R, L]): Eff[S, M, A]
+  private[effect] def inject[S <: Coproduct](implicit su: Subset[S, R]): Eff[S, Layers.Aux[S, su.M], A]
 
   final def extend[S <: Coproduct](implicit ls: Layers[S]) = new {
-    def apply(implicit su: Subset[S, Layers.Aux[S, ls.O], R, L]) = inject(su)
+    def apply(implicit su: Subset[S, R]) = inject(su)
   }
 }
 /**
@@ -31,9 +31,9 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
 private[effect] sealed trait Pure[R <: Coproduct, L <: Layers[R], A] extends Eff[R, L, A] {
   val a: A
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) = pure(a)
-  override def inject[S <: Coproduct, M <: Layers[S]](implicit su: Subset[S, M, R, L]) = {
+  override def inject[S <: Coproduct](implicit su: Subset[S, R]) = {
     val a0 = a
-    new Pure[S, M, A] {
+    new Pure[S, Layers.Aux[S, su.M], A] {
       override val a = a0
     }
   }
@@ -58,7 +58,7 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) =
     impure.apply[X](eff, cont)
 
-  override def inject[S <: Coproduct, M <: Layers[S]](implicit su: Subset[S, M, R, L]) = {
+  override def inject[S <: Coproduct, M <: Layers[S]](implicit su: Subset[S, R]) = {
     val eff1 = su.inject(eff)
     val cont1 = Eff.compose(cont) andThen { _.inject[S, M] }
     type X0 = X
