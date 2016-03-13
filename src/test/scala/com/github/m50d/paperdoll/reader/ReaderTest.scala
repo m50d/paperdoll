@@ -25,9 +25,9 @@ class ReaderTest {
   }
   
   @Test def differingOrders(): Unit = {
-//    for {
-//      count <- ask[Int].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
+    for {
+      count <- ask[Int].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
 //      label <- ask[String].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
-//    } yield f"There are $count%d $label%s"
+    } yield {} //f"There are $count%d $label%s"
   }
 }

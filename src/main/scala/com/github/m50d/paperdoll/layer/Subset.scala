@@ -30,7 +30,7 @@ object Subset {
       }
       override type O[X] = tl.O[X]
       override def inject[X](value: TH#F[X] :+: tl.LT#O[X]) = value match {
-        case Inl(x) ⇒ m.inject(x).asInstanceOf //TODO
+        case Inl(x) ⇒ m.inject(x).asInstanceOf[tl.O[X]] //TODO
         case Inr(r) ⇒ tl.inject(r)
       }
     }

@@ -8,5 +8,7 @@ class SubsetTest {
   @Test def basicFunctionality(): Unit = {
     Subset[Reader_[String] :+: Reader_[Int] :+: CNil, CNil]
     Subset[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int] :+: CNil]
+    Subset[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[String] :+: CNil]
+    Subset[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int] :+: Reader_[String] :+: CNil]
   }
 }
