@@ -23,7 +23,10 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
     type N[X] = L#O[X]
   }): Eff[S, Layers.Aux[S, su.M], A]
 
-  //  final def extend[S <: Coproduct](implicit su: Subset[S, R]) = new {
+    final def extend[S <: Coproduct](implicit su: Subset[S, R]{
+        type N[X] = L#O[X]
+      }) = inject(su)
+//        new {
   //    def apply[N0[_]](implicit su: Subset[S, R]{
   //      type N[X] = N0[X]
   //    }, le: Leibniz[Nothing, Layers[R], L, Layers.Aux[R, N0]]) = le.subst[({type E[L] = Eff[R, L, A]})#E](Eff.this).inject(su)

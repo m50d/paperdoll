@@ -15,19 +15,20 @@ sealed trait Subset[S <: Coproduct, T <: Coproduct] {
   def inject[X](value: N[X]): M[X]
 }
 object Subset {
-//  type Aux1[S, T, N[_]]
-//  implicit def nilSubset[S <: Coproduct](implicit l: Layers[S]) = new Subset[S, Layers.Aux[S, l.O], CNil, Layers[CNil]{type O[X] = CNil}] {
-//    override def inject[X](value: CNil) = value.impossible
-//  }
-//  implicit def consSubset[S <: Coproduct, M <: Layers[S], TH <: Layer, TT <: Coproduct, NT <: Layers[TT]](
-//    implicit e: Element[S, M, TH], tl: Subset[S, M, TT, NT]) =
-//      new Subset[S, M, TH :+: TT, Layers[TH :+: TT]{
-//        type O[X] = TH#F[X] :+: NT#O[X]
-//      }] {
-//    override def inject[X](value: TH#F[X] :+: NT#O[X]) = value match {
-//        case Inl(x) ⇒ e.inject(x).asInstanceOf
+  implicit def nilSubset[S <: Coproduct](implicit l: Layers[S]) = new Subset[S, CNil] {
+    override type M[X] = l.O[X]
+    override type N[X] = CNil
+    override def inject[X](value: CNil) = value.impossible
+  }
+//  implicit def consSubset[S <: Coproduct, TH <: Layer, TT <: Coproduct](
+//    implicit m: Member[S, TH], tl: Subset[S, TT]) =
+//    new Subset[S, TH :+: TT] {
+//      override type M[X] = tl.M[X]
+//      override type N[X] = TH#F[X] :+: tl.N[X]
+//      override def inject[X](value: TH#F[X] :+: tl.N[X]) = value match {
+//        case Inl(x) ⇒ m.inject(x)
 //        case Inr(r) ⇒ tl.inject(r)
 //      }
-//  }
-//  def apply[S <: Coproduct, M <: Layers[S], T <: Coproduct, N <: Layers[T]](implicit s: Subset[S, M, T, N]) = s
+//    }
+  //  def apply[S <: Coproduct, M <: Layers[S], T <: Coproduct, N <: Layers[T]](implicit s: Subset[S, M, T, N]) = s
 }
