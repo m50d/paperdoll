@@ -20,11 +20,11 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
   def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]): B
 
   private[effect] def inject[S <: Coproduct](implicit su: Subset[S, R] {
-    type N[X] = L#O[X]
-  }): Eff[S, Layers.Aux[S, su.M], A]
+    type LT = L
+  }): Eff[S, Layers.Aux[S, su.O], A]
 
     final def extend[S <: Coproduct](implicit su: Subset[S, R]{
-        type N[X] = L#O[X]
+        type LT = L
       }) = inject(su)
 //        new {
   //    def apply[N0[_]](implicit su: Subset[S, R]{
@@ -39,10 +39,10 @@ private[effect] sealed trait Pure[R <: Coproduct, L <: Layers[R], A] extends Eff
   val a: A
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) = pure(a)
   override def inject[S <: Coproduct](implicit su: Subset[S, R] {
-    type N[X] = L#O[X]
-  }): Eff[S, Layers.Aux[S, su.M], A] = {
+    type LT = L
+  }): Eff[S, Layers.Aux[S, su.O], A] = {
     val a0 = a
-    new Pure[S, Layers.Aux[S, su.M], A] {
+    new Pure[S, Layers.Aux[S, su.O], A] {
       override val a = a0
     }
   }
@@ -67,14 +67,14 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) =
     impure.apply[X](eff, cont)
 
-  override def inject[S <: Coproduct](implicit su: Subset[S, R] { type N[X] = L#O[X] }): Eff[S, Layers.Aux[S, su.M], A] = {
+  override def inject[S <: Coproduct](implicit su: Subset[S, R] { type LT = L }): Eff[S, Layers.Aux[S, su.O], A] = {
     val eff1 = su.inject(eff)
     val cont1 = Eff.compose(cont) andThen { _.inject[S] }
     type X0 = X
-    new Impure[S, Layers.Aux[S, su.M], A] {
+    new Impure[S, Layers.Aux[S, su.O], A] {
       override type X = X0
       override val eff = eff1
-      override val cont = Queue.one[Arr_[S, Layers.Aux[S, su.M]]#O, X0, A](cont1)
+      override val cont = Queue.one[Arr_[S, Layers.Aux[S, su.O]]#O, X0, A](cont1)
     }
   }
 }

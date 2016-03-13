@@ -10,25 +10,28 @@ import scalaz.Leibniz
  * However, if so, I can't understand that general form well enough to express this in terms of it.
  */
 sealed trait Subset[S <: Coproduct, T <: Coproduct] {
-  type M[X] <: Coproduct // Layers[S]#O
-  type N[X] <: Coproduct // Layers[T]#O
-  def inject[X](value: N[X]): M[X]
+  type LT <: Layers[T]
+  type O[X] <: Coproduct // Layers[S]#O
+  def inject[X](value: LT#O[X]): O[X]
 }
 object Subset {
   implicit def nilSubset[S <: Coproduct](implicit l: Layers[S]) = new Subset[S, CNil] {
-    override type M[X] = l.O[X]
-    override type N[X] = CNil
+    override type LT = Layers[CNil] {
+      type O[X] = CNil
+    }
+    override type O[X] = l.O[X]
     override def inject[X](value: CNil) = value.impossible
   }
-  implicit def consSubset[S <: Coproduct, TH <: Layer, L0 <: Layers[S], TT <: Coproduct, M0[_] <: Coproduct](
-    implicit m: Member[S, TH] { type L = L0 }, tl: Subset[S, TT] { type M[X] = M0[X] }, leib: Leibniz[Nothing, Layers[S], L0, Layers.Aux[S, M0]]) =
-    new Subset[S, TH :+: TT] {
-      override type M[X] = M0[X]
-      override type N[X] = TH#F[X] :+: tl.N[X]
-      override def inject[X](value: TH#F[X] :+: tl.N[X]) = value match {
-        case Inl(x) ⇒ leib.subst[({ type K[LL] = Member[S, TH] { type L = LL } })#K](m).inject(x)
-        case Inr(r) ⇒ tl.inject(r)
-      }
-    }
+//  implicit def consSubset[S <: Coproduct, TH <: Layer, TT <: Coproduct](
+//    implicit m: Member[S, TH], tl: Subset[S, TT]) =
+//    new Subset[S, TH :+: TT] {
+//      override type L = Layers[TH :+: TT] {
+//        type O[X] = TH#F[X] :+: tl.L#O[X]
+//      }
+//      override def inject[X](value: TH#F[X] :+: tl.L#O[X]) = value match {
+//        case Inl(x) ⇒ leib.subst[({ type K[LL] = Member[S, TH] { type L = LL } })#K](m).inject(x)
+//        case Inr(r) ⇒ tl.inject(r)
+//      }
+//    }
     def apply[S <: Coproduct, T <: Coproduct](implicit s: Subset[S, T]) = s
 }
