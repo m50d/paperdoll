@@ -28,9 +28,9 @@ object Subset {
       override type LT = Layers[TH :+: TT] {
         type O[X] = TH#F[X] :+: tl.LT#O[X]
       }
-      override type O[X] = Coproduct //TODO
+      override type O[X] = tl.O[X]
       override def inject[X](value: TH#F[X] :+: tl.LT#O[X]) = value match {
-        case Inl(x) ⇒ m.inject(x)
+        case Inl(x) ⇒ m.inject(x).asInstanceOf //TODO
         case Inr(r) ⇒ tl.inject(r)
       }
     }

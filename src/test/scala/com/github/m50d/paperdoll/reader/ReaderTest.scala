@@ -24,10 +24,10 @@ class ReaderTest {
     assertThat(result).isEqualTo(8)
   }
   
-//  @Test def differingOrders(): Unit = {
+  @Test def differingOrders(): Unit = {
 //    for {
 //      count <- ask[Int].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
 //      label <- ask[String].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
 //    } yield f"There are $count%d $label%s"
-//  }
+  }
 }
