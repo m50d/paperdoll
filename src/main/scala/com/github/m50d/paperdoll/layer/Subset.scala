@@ -22,16 +22,17 @@ object Subset {
     override type O[X] = l.O[X]
     override def inject[X](value: CNil) = value.impossible
   }
-//  implicit def consSubset[S <: Coproduct, TH <: Layer, TT <: Coproduct](
-//    implicit m: Member[S, TH], tl: Subset[S, TT]) =
-//    new Subset[S, TH :+: TT] {
-//      override type L = Layers[TH :+: TT] {
-//        type O[X] = TH#F[X] :+: tl.L#O[X]
-//      }
-//      override def inject[X](value: TH#F[X] :+: tl.L#O[X]) = value match {
-//        case Inl(x) ⇒ leib.subst[({ type K[LL] = Member[S, TH] { type L = LL } })#K](m).inject(x)
-//        case Inr(r) ⇒ tl.inject(r)
-//      }
-//    }
-    def apply[S <: Coproduct, T <: Coproduct](implicit s: Subset[S, T]) = s
+  implicit def consSubset[S <: Coproduct, TH <: Layer, TT <: Coproduct](
+    implicit m: Member[S, TH], tl: Subset[S, TT]) =
+    new Subset[S, TH :+: TT] {
+      override type LT = Layers[TH :+: TT] {
+        type O[X] = TH#F[X] :+: tl.LT#O[X]
+      }
+      override type O[X] = Coproduct //TODO
+      override def inject[X](value: TH#F[X] :+: tl.LT#O[X]) = value match {
+        case Inl(x) ⇒ m.inject(x)
+        case Inr(r) ⇒ tl.inject(r)
+      }
+    }
+  def apply[S <: Coproduct, T <: Coproduct](implicit s: Subset[S, T]) = s
 }
