@@ -6,7 +6,7 @@
 	<version>0.1-SNAPSHOT</version>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<scala.version>2.11.7</scala.version>
+		<scala.version>2.11.8</scala.version>
 	</properties>
 	<build>
 		<plugins>
@@ -42,7 +42,7 @@
 		<dependency>
 			<groupId>org.scalaz</groupId>
 			<artifactId>scalaz-core_2.11</artifactId>
-			<version>7.1.1</version>
+			<version>7.2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
