@@ -23,11 +23,11 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
     type N[X] = L#O[X]
   }): Eff[S, Layers.Aux[S, su.M], A]
 
-//  final def extend[S <: Coproduct](implicit su: Subset[S, R]) = new {
-//    def apply[N0[_]](implicit su: Subset[S, R]{
-//      type N[X] = N0[X]
-//    }, le: Leibniz[Nothing, Layers[R], L, Layers.Aux[R, N0]]) = le.subst[({type E[L] = Eff[R, L, A]})#E](Eff.this).inject(su)
-//  }
+  //  final def extend[S <: Coproduct](implicit su: Subset[S, R]) = new {
+  //    def apply[N0[_]](implicit su: Subset[S, R]{
+  //      type N[X] = N0[X]
+  //    }, le: Leibniz[Nothing, Layers[R], L, Layers.Aux[R, N0]]) = le.subst[({type E[L] = Eff[R, L, A]})#E](Eff.this).inject(su)
+  //  }
 }
 /**
  * An actual A - this is the "nil" case of Eff
@@ -35,7 +35,9 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
 private[effect] sealed trait Pure[R <: Coproduct, L <: Layers[R], A] extends Eff[R, L, A] {
   val a: A
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) = pure(a)
-  override def inject[S <: Coproduct](implicit su: Subset[S, R]) = {
+  override def inject[S <: Coproduct](implicit su: Subset[S, R] {
+    type N[X] = L#O[X]
+  }): Eff[S, Layers.Aux[S, su.M], A] = {
     val a0 = a
     new Pure[S, Layers.Aux[S, su.M], A] {
       override val a = a0
@@ -62,7 +64,7 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) =
     impure.apply[X](eff, cont)
 
-  override def inject[S <: Coproduct](implicit su: Subset[S, R] {type N[X] = L#O[X]}) = {
+  override def inject[S <: Coproduct](implicit su: Subset[S, R] { type N[X] = L#O[X] }): Eff[S, Layers.Aux[S, su.M], A] = {
     val eff1 = su.inject(eff)
     val cont1 = Eff.compose(cont) andThen { _.inject[S] }
     type X0 = X
@@ -70,7 +72,7 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
       override type X = X0
       override val eff = eff1
       override val cont = Queue.one[Arr_[S, Layers.Aux[S, su.M]]#O, X0, A](cont1)
-    }: Eff[S, Layers.Aux[S, su.M], A]
+    }
   }
 }
 
