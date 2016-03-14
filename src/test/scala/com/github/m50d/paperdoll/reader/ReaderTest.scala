@@ -15,19 +15,24 @@ class ReaderTest {
   @Test def basicFunctionality(): Unit = {
     val reader =
       for {
-        fst <- ask[Int]
-        snd <- ask[Int]
+        fst ← ask[Int]
+        snd ← ask[Int]
       } yield fst + snd
 
     val pure = runReader(4)(reader)
     val result = Eff.run(pure)
     assertThat(result).isEqualTo(8)
   }
-  
+
   @Test def differingOrders(): Unit = {
-    for {
-      count <- ask[Int].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
-//      label <- ask[String].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
-    } yield {} //f"There are $count%d $label%s"
+    val eff = for {
+      count ← ask[Int].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
+      label ← ask[String].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
+    } yield f"There are $count%d $label%s"
+    
+    val pure1 = runReader(4)(runReader("lights")(eff))
+    assertThat(Eff.run(pure1)).isEqualTo("There are 4 lights")
+    val pure2 = runReader("lights")(runReader(4)(eff))
+    assertThat(Eff.run(pure2)).isEqualTo("There are 4 lights")
   }
 }

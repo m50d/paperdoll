@@ -30,18 +30,16 @@ This also makes it possible to hide trait implementation subtypes.
 
 ## Future tasks
 
- * Test Subset, make sure it works
- * Finish implementing Eff#extend[S], which lifts Eff into the effect stack S
-  * Maybe better called lift?
- * Add a test to ReaderTest that creates a stack of two readers and runs in both orders
+ * Remove the last .asInstanceOf call (in Subset)
+ * Add wartremover?
  * Implement more effect types
- * Create a test that demonstrates combining two unrelated effect monads and running in either order.
+ * Create a test that demonstrates combining two unrelated effect monads and running in either order
+  * Arguably the clearest would be to make this a multi-module project and put each monad in a different one
+  * If doing this, make sure that works with bintray
  * Make sure it's possible to interpret effects in any order
  * Get into Maven Central
   * GPG signing in build (trivial)
- * Review consistency of when we use an R, L pair vs. when we have L as a member
- * Check for cases where a polymorphic method would be more idiomatic in scala than a fold
-  * Particularly Eff#fold could probably be replaced with something that handled mapping from one layer to another
+ * General code review
  * Release 1.0
  * Binary compatibility checking in the build (using MiMA or similar)
  * Port to Cats if it:

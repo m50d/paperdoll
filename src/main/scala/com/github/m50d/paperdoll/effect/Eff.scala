@@ -17,6 +17,11 @@ import scalaz.Leibniz
  * Evaluating this by providing implementations of each effect will eventually yield a value of type A
  */
 sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
+  /**
+   * This is a "shallow" cata. In practice the main use cases for this are recursive,
+   * folding all the way down, but I found it very difficult to express the required type
+   * for that case.
+   */
   def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]): B
 
   private[effect] def inject[S <: Coproduct](implicit su: Subset[S, R] {
@@ -26,7 +31,12 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
   final def extend[S <: Coproduct] = new {
     def apply[L0 <: Layers[R]]()(implicit su: Subset[S, R] {
       type LT = L0
-    }, le: Leibniz[Nothing, Layers[R], L0, L]) = inject(le.subst[({ type K[LL] = Subset[S, R] { type LT = LL } })#K](su))
+    }, le: Leibniz[Nothing, Layers[R], L0, L]): Eff[S, Layers.Aux[S, su.O], A] = inject(le.subst[({
+      type K[LL] = Subset[S, R] {
+        type LT = LL
+        type O[X] = su.O[X]
+      }
+    })#K](su))
   }
 }
 /**
