@@ -1,7 +1,6 @@
 package com.github.m50d.paperdoll.queue
 
 import scalaz.Forall
-import com.github.m50d.paperdoll.{ DestructuredHead, Pair, Pair_ }
 
 /**
  * A type-aligned queue C[A, X] :: C[X, Y] :: ... :: C[Z, B]
