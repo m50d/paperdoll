@@ -10,27 +10,27 @@ import scalaz.Leibniz
  * However, if so, I can't understand that general form well enough to express this in terms of it.
  */
 sealed trait Subset[S <: Coproduct, T <: Coproduct] {
+  type LS <: Layers[S]
   type LT <: Layers[T]
-  type O[X] <: Coproduct // Layers[S]#O
-  def inject[X](value: LT#O[X]): O[X]
+  def inject[X](value: LT#O[X]): LS#O[X]
 }
 object Subset {
   implicit def nilSubset[S <: Coproduct](implicit l: Layers[S]) = new Subset[S, CNil] {
+    override type LS = Layers.Aux[S, l.O]
     override type LT = Layers[CNil] {
       type O[X] = CNil
     }
-    override type O[X] = l.O[X]
     override def inject[X](value: CNil) = value.impossible
   }
-  implicit def consSubset[S <: Coproduct, TH <: Layer, L0 <: Layers[_], TT <: Coproduct](
-    implicit m: Member[S, TH]{type L = L0}, tl: Subset[S, TT]) =
+  implicit def consSubset[S <: Coproduct, TH <: Layer, L1 <: Layers[_], TT <: Coproduct, L2 <: Layers[_]](
+    implicit m: Member[S, TH] { type L = L1 }, tl: Subset[S, TT] { type LS = L2 }, le: Leibniz[Nothing, Any, L1, L2]) =
     new Subset[S, TH :+: TT] {
+      override type LS = Layers.Aux[S, tl.LS#O]
       override type LT = Layers[TH :+: TT] {
         type O[X] = TH#F[X] :+: tl.LT#O[X]
       }
-      override type O[X] = tl.O[X]
       override def inject[X](value: TH#F[X] :+: tl.LT#O[X]) = value match {
-        case Inl(x) ⇒ m.inject(x).asInstanceOf[tl.O[X]] //TODO
+        case Inl(x) ⇒ le.subst[({type K[LL] = Member[S, TH]{type L = LL}})#K](m).inject(x)
         case Inr(r) ⇒ tl.inject(r)
       }
     }

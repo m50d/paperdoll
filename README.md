@@ -30,7 +30,6 @@ This also makes it possible to hide trait implementation subtypes.
 
 ## Future tasks
 
- * Remove the last .asInstanceOf call (in Subset)
  * Add wartremover?
  * Implement more effect types
  * Create a test that demonstrates combining two unrelated effect monads and running in either order
