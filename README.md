@@ -37,6 +37,7 @@ This also makes it possible to hide trait implementation subtypes.
   * Arguably the clearest would be to make this a multi-module project and put each monad in a different one
   * If doing this, make sure that works with bintray
  * Make sure it's possible to interpret effects in any order
+ * Remove vestigal FunctionKK/mapKK functionality
  * Get into Maven Central
   * GPG signing in build (trivial)
  * General code review

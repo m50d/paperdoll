@@ -29,15 +29,6 @@ sealed trait Queue[C[_, _], A, B] {
    * to have on ordinary List, but I'm not aware of it having a standard name
    */
   def destructureHead: DestructuredHead[Queue, C, A, B]
-  def ::[X](l: C[X, A]): Queue[C, X, B] = One(l) ++ this
-  final def ++[X](other: Queue[C, B, X]): Queue[C, A, X] = destructureHead.fold(
-    { witness => witness.subst[({ type L[V] = Queue[C, V, X] })#L](other) },
-    new Forall[({ type L[W] = (C[A, W], Queue[C, W, B]) => Queue[C, A, X] })#L] {
-      override def apply[W] = {
-        (head, tail) =>
-          head :: (tail ++ other)
-      }
-    })
 }
 object Queue {
   def empty[C[_, _], A]: Queue[C, A, A] = Empty()
@@ -49,10 +40,6 @@ object Queue {
 private[queue] final case class Empty[C[_, _], A]() extends Queue[C, A, A] {
   override def :+[Z](e: C[A, Z]) = One(e)
   override def destructureHead = DestructuredHead.nil
-  /**
-   * Break infinite loop when using the parent trait implementation
-   */
-  override def ::[X](l: C[X, A]): Queue[C, X, A] = One(l)
 }
 private[queue] final case class One[C[_, _], A, B](value: C[A, B]) extends Queue[C, A, B] {
   override def :+[Z](e: C[B, Z]) =

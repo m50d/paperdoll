@@ -20,5 +20,6 @@ object Pair {
       f[W](a, b)
     override def map[D[_, _]](f: FunctionKK[C, D]) =
       apply(f(a), f(b))
+    override def toString = f"P($a%s,$b%s)"
   }
 }

@@ -40,4 +40,7 @@ class QueueTest {
         }
       })
   }
+  
+  @Test def longQueue(): Unit =
+    Queue.empty[Function1, Int] :+ identity :+ identity :+ identity :+ identity :+ identity :+ identity
 }

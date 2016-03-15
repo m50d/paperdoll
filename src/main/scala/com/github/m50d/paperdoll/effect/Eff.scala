@@ -161,15 +161,16 @@ object Eff {
         new Forall[({ type K[W] = (Arr[R, L, A, W], Arrs[R, L, W, B]) ⇒ Eff[R, L, B] })#K] {
           override def apply[W] = {
             (head, tail) ⇒
+              val ctail = compose(tail)
               head(value).fold(
-                compose(tail),
+                ctail,
                 new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, W]) ⇒ Eff[R, L, B] })#K] {
                   override def apply[X0] = {
                     (eff0, cont0) ⇒
                       new Impure[R, L, B] {
                         override type X = X0
                         override val eff = eff0
-                        override val cont = cont0 ++ tail
+                        override val cont = cont0 :+ ctail
                       }
                   }
                 })
