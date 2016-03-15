@@ -9,6 +9,8 @@ New effect "layers" can be added onto the stack, or "unpeeled"
 out of the stack, without the implementation of one layer needing to
 be aware of any other layers.
 
+[![Build Status](https://travis-ci.org/m50d/paperdoll.svg?branch=master)](https://travis-ci.org/m50d/paperdoll)
+
 ## How to use
 
 TODO
