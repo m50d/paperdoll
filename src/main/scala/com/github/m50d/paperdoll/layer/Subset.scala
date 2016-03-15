@@ -22,8 +22,8 @@ object Subset {
     override type O[X] = l.O[X]
     override def inject[X](value: CNil) = value.impossible
   }
-  implicit def consSubset[S <: Coproduct, TH <: Layer, TT <: Coproduct](
-    implicit m: Member[S, TH], tl: Subset[S, TT]) =
+  implicit def consSubset[S <: Coproduct, TH <: Layer, L0 <: Layers[_], TT <: Coproduct](
+    implicit m: Member[S, TH]{type L = L0}, tl: Subset[S, TT]) =
     new Subset[S, TH :+: TT] {
       override type LT = Layers[TH :+: TT] {
         type O[X] = TH#F[X] :+: tl.LT#O[X]
