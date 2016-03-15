@@ -1,6 +1,6 @@
 package com.github.m50d.paperdoll.layer
 
-import shapeless.{ CNil, Coproduct, :+:, Inl, Inr, HNil, HList, :: }
+import shapeless.{ CNil, Coproduct, :+: }
 import scala.annotation.implicitNotFound
 
 /**

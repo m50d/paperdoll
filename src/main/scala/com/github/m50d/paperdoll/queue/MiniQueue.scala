@@ -1,7 +1,7 @@
 package com.github.m50d.paperdoll.queue
 
 import scalaz.Forall
-import com.github.m50d.paperdoll.{ Pair, Pair_, FunctionKK }
+import com.github.m50d.paperdoll.{ Pair, Pair_ }
 
 /**
  * Type aligned queue of exactly one or two elements
@@ -9,7 +9,6 @@ import com.github.m50d.paperdoll.{ Pair, Pair_, FunctionKK }
 sealed trait MiniQueue[C[_, _], A, B] {
   def fold[Z](one: C[A, B] ⇒ Z, pair: Pair[C, A, B] ⇒ Z): Z
   def asQueue: Queue[C, A, B]
-  def map[D[_, _]](f: FunctionKK[C, D]): MiniQueue[D, A, B]
 }
 
 object MiniQueue {
@@ -17,7 +16,6 @@ object MiniQueue {
     override def fold[Z](one: C[A, B] ⇒ Z, pair: Pair[C, A, B] ⇒ Z) =
       one(a)
     override def asQueue = One(a)
-    override def map[D[_, _]](f: FunctionKK[C, D]) = one(f(a))
     override def toString = f"M1($a%s)"
   }
   def pair[C[_, _], A, B](a: Pair[C, A, B]): MiniQueue[C, A, B] = new MiniQueue[C, A, B] {
@@ -28,7 +26,6 @@ object MiniQueue {
           Node(one(a), Empty[Pair_[C]#O, Z](), one(b))
       }
     })
-    override def map[D[_, _]](f: FunctionKK[C, D]) = pair(a map f)
     override def toString = f"MP($a%s)"
   }
 }

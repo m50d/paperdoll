@@ -1,6 +1,6 @@
 package com.github.m50d.paperdoll.layer
 
-import shapeless.{ Coproduct, :+:, Inl, Inr, CNil }
+import shapeless.{ Coproduct, :+:, Inl, Inr }
 
 /**
  * Typeclass representing that R1 is a member of the layer stack R, and bridging between the

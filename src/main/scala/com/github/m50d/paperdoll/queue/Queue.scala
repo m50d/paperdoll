@@ -1,7 +1,6 @@
 package com.github.m50d.paperdoll.queue
 
 import scalaz.Forall
-import scalaz.Leibniz.===
 import com.github.m50d.paperdoll.{ DestructuredHead, Pair, Pair_ }
 
 /**
@@ -58,10 +57,10 @@ private[queue] final case class Node[C[_, _], A, B0, X, Y](
 
   override def destructureHead = head.fold({
     headOne =>
-      def shiftForward[A, W, B](queue: Queue[Pair_[C]#O, A, W], last: MiniQueue[C, W, B]): Queue[C, A, B] =
+      def shiftForward[AA, W, B](queue: Queue[Pair_[C]#O, AA, W], last: MiniQueue[C, W, B]): Queue[C, AA, B] =
         queue.destructureHead.fold({
           witness => witness.subst[({ type L[V] = MiniQueue[C, V, B] })#L](last).asQueue
-        }, new Forall[({ type L[V] = (Pair[C, A, V], Queue[Pair_[C]#O, V, W]) => Queue[C, A, B] })#L] {
+        }, new Forall[({ type L[V] = (Pair[C, AA, V], Queue[Pair_[C]#O, V, W]) => Queue[C, AA, B] })#L] {
           override def apply[V] = {
             (head, tail) =>
               Node(MiniQueue.pair(head), tail, last)

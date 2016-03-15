@@ -1,15 +1,10 @@
 package com.github.m50d.paperdoll.reader
 
 import shapeless.{ Coproduct, CNil, :+: }
-import shapeless.ops.coproduct.Inject
-import scalaz.syntax.monad._
-import scalaz.{ Forall, Leibniz }
+import scalaz.Leibniz
 import scalaz.Leibniz.===
 import com.github.m50d.paperdoll.layer.Layers
-import com.github.m50d.paperdoll.effect.{ Eff, Eff_, Arr }
-import com.github.m50d.paperdoll.layer.Member
-import com.github.m50d.paperdoll.effect.Bind
-import com.github.m50d.paperdoll.effect.Handler
+import com.github.m50d.paperdoll.effect.{ Eff, Arr, Bind, Handler }
 
 /**
  * The type representing an effectful value of type X

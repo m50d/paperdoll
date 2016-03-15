@@ -1,15 +1,29 @@
 package com.github.m50d.paperdoll.effect
 
+import Predef.identity
 import shapeless.{ Coproduct, CNil, :+:, Inl }
-import shapeless.ops.coproduct.Inject
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
 import com.github.m50d.paperdoll.queue.Queue
-import com.github.m50d.paperdoll.layer.Layers
-import com.github.m50d.paperdoll.layer.Member
-import com.github.m50d.paperdoll.layer.Layer
-import com.github.m50d.paperdoll.layer.Subset
-import scalaz.Leibniz
+import com.github.m50d.paperdoll.layer.{Layer, Layers, Member, Subset}
+
+sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
+  final type O[A, B] = A ⇒ Eff[R, L, B]
+}
+
+/**
+ * Intermediate step as a helper for type inference of Eff#extend
+ */
+final class ExtendingEff[R <: Coproduct, L <: Layers[R], S <: Coproduct, A](eff: Eff[R, L, A]) {
+  def apply[L0 <: Layers[R]]()(implicit su: Subset[S, R] {
+      type LT = L0
+    }, le: Leibniz[Nothing, Layers[R], L0, L]): Eff[S, su.LS, A] = eff.inject(le.subst[({
+      type K[LL] = Subset[S, R] {
+        type LT = LL
+        type LS = su.LS
+      }
+    })#K](su))
+}
 
 /**
  * A lazy value of type A with a (possibly empty) stack of effects from the list given by R/L
@@ -28,16 +42,7 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
     type LT = L
   }): Eff[S, su.LS, A]
 
-  final def extend[S <: Coproduct] = new {
-    def apply[L0 <: Layers[R]]()(implicit su: Subset[S, R] {
-      type LT = L0
-    }, le: Leibniz[Nothing, Layers[R], L0, L]): Eff[S, su.LS, A] = inject(le.subst[({
-      type K[LL] = Subset[S, R] {
-        type LT = LL
-        type LS = su.LS
-      }
-    })#K](su))
-  }
+  final def extend[S <: Coproduct] = new ExtendingEff[R, L, S, A](this)
 }
 /**
  * An actual A - this is the "nil" case of Eff
@@ -71,7 +76,7 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
    */
   val cont: Arrs[R, L, X, A]
 
-  override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) =
+  override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[Y] = (L#O[Y], Arrs[R, L, Y, A]) ⇒ B })#K]) =
     impure.apply[X](eff, cont)
 
   override def inject[S <: Coproduct](implicit su: Subset[S, R] { type LT = L }): Eff[S, su.LS, A] = {
@@ -88,20 +93,6 @@ private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends E
 
 sealed trait Eff_[R <: Coproduct, L <: Layers[R]] {
   final type O[A] = Eff[R, L, A]
-}
-
-/**
- * Specific effects should provide implementations of this interface
- */
-trait Bind[L <: Layer] {
-  /**
-   * Translate the effectful value eff (with an effect from layer L)
-   * and effectful continuation cont (V => A with effects R)
-   * into an effectful (lazy) value of type A
-   * (usually by somehow "running" eff to obtain a V
-   * and then passing it to cont)
-   */
-  def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: L#F[V], cont: Arr[RR, RL, V, A]): Eff[RR, RL, A]
 }
 
 /**
@@ -148,7 +139,7 @@ object Eff {
       override type X = V
       override val eff = Inl(value)
       override val cont = Queue.empty[Arr_[L :+: CNil, Layers[L :+: CNil] {
-        type O[X] = L#F[X] :+: CNil
+        type O[Y] = L#F[Y] :+: CNil
       }]#O, V]
     }
 
@@ -214,7 +205,7 @@ object Eff {
    * Run a lazy effectful value after all the effects have already been handled -
    * it necessarily no longer contains any actual effects, just the value of type A
    */
-  def run[A](eff: Eff[CNil, Layers[CNil] { type O[X] = CNil }, A]): A = eff.fold(identity, new Forall[({ type K[X] = (CNil, Arrs[CNil, Layers[CNil] { type O[X] = CNil }, X, A]) ⇒ A })#K] {
+  def run[A](eff: Eff[CNil, Layers[CNil] { type O[X] = CNil }, A]): A = eff.fold(identity, new Forall[({ type K[X] = (CNil, Arrs[CNil, Layers[CNil] { type O[Y] = CNil }, X, A]) ⇒ A })#K] {
     override def apply[X] = {
       (eff, cont) ⇒
         eff.impossible

@@ -7,9 +7,8 @@ import com.github.m50d.paperdoll.reader.Reader_
 class MemberTest {
 
   @Test def basicFunctionality(): Unit = {
-    Member[Reader_[Int] :+: CNil, Reader_[Int]]
-    Member[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[String]]
-    Member[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int]]
-    implicitly[Member[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int]]]
+    val _1 = Member[Reader_[Int] :+: CNil, Reader_[Int]]
+    val _2 = Member[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[String]]
+    val _3 = Member[Reader_[String] :+: Reader_[Int] :+: CNil, Reader_[Int]]
   }
 }

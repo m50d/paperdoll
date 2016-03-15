@@ -9,6 +9,19 @@ New effect "layers" can be added onto the stack, or "unpeeled"
 out of the stack, without the implementation of one layer needing to
 be aware of any other layers.
 
+## How to use
+
+TODO
+
+## Features
+
+TODO
+
+## Non-features and rationales
+
+ * MiMA binary compatibility checking. Seems to only support SBT, not Maven.
+ * Using Cats instead of ScalaZ. This project makes extensive use of Leibniz. 
+
 ## Implementation notes
 
 In several places where there is a multi-parameter type `F[X, Y]`
@@ -27,27 +40,19 @@ to be the safe equivalent of a pattern match. When reviewing Scala
 [it is difficult to distinguish between safe and unsafe pattern matches](http://typelevel.org/blog/2014/11/10/why_is_adt_pattern_matching_allowed.html),
 so my preferred style is to avoid pattern matches entirely.
 This also makes it possible to hide trait implementation subtypes.
+(I have used pattern matching on Inr/Inl when working with Coproducts
+since Shapeless does not offer a suitable fold method)
 
 ## Future tasks
 
- * Add wartremover?
  * Implement more effect types
  * Create a test that demonstrates combining two unrelated effect monads and running in either order
   * Arguably the clearest would be to make this a multi-module project and put each monad in a different one
   * If doing this, make sure that works with bintray
- * Make sure it's possible to interpret effects in any order
- * Remove vestigal FunctionKK/mapKK functionality
  * Get into Maven Central
   * GPG signing in build (trivial)
  * General code review
  * Release 1.0
- * Binary compatibility checking in the build (using MiMA or similar)
- * Port to Cats if it:
-  * Adds Leibniz or equivalent
-  * Becomes 1.0
- * Ensure naming is as easy to understand as possible
-  * The original idea (and reason for the project name) was for an extended metaphor
-  of adding and removing layers of clothing on a FrenchKISS-style paper doll
   
 ## Notices
 
