@@ -44,7 +44,7 @@ This also makes it possible to hide trait implementation subtypes.
 (I have used pattern matching on Inr/Inl when working with Coproducts
 since Shapeless does not offer a suitable fold method)
 
-## Future tasks
+## TODO
 
  * Implement more effect types
  * Create a test that demonstrates combining two unrelated effect monads and running in either order
@@ -55,6 +55,8 @@ since Shapeless does not offer a suitable fold method)
  * General code review
   * Ensure that types that may need to change are private (e.g. queues)
   * Ensure public interface is documented
+ * Add Travis CI if possible
+ * Finish this document
  * Release 1.0
   
 ## Notices
