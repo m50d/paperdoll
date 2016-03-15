@@ -57,7 +57,6 @@ since Shapeless does not offer a suitable fold method)
  * General code review
   * Ensure that types that may need to change are private (e.g. queues)
   * Ensure public interface is documented
- * Add Travis CI if possible
  * Finish this document
  * Release 1.0
   
