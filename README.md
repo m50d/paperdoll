@@ -21,9 +21,9 @@ TODO
 
 ## Non-features and rationales
 
- * Performance tests. I don't have time to do these; maybe for a future version.
- * MiMA binary compatibility checking. Seems to only support SBT, not Maven.
- * Using Cats instead of ScalaZ. Paperdoll makes extensive use of Leibniz. 
+ * Performance tests. I don't have time to do these, but would welcome contributions.
+ * MiMA binary compatibility checking. MiMA seems to only support SBT, not Maven.
+ * Using Cats instead of ScalaZ. Paperdoll makes extensive use of `Leibniz`. 
 
 ## Implementation notes
 
