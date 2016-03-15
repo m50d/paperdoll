@@ -17,7 +17,11 @@ TODO
 
 ## Features
 
-TODO
+ * Allows any type to be adapted as a monad
+  * i.e. allows any ADT to be combined with functions (using for/yield sugar) and used as a command pattern
+ * Decouples expression of an abstract computation from its implementation
+  * Can use multiple interpreters to run the same monadic computation e.g. test vs live
+ * TODO, also links
 
 ## Non-features and rationales
 
@@ -65,7 +69,7 @@ since Shapeless does not offer a suitable `fold` method)
 Copyright 2015-2016 Michael Donaghy. md401@srcf.ucam.org
 
 Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
+you may not use this project except in compliance with the License.
 You may obtain a copy of the License at
 http://www.apache.org/licenses/LICENSE-2.0
 Unless required by applicable law or agreed to in writing,
