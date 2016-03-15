@@ -19,8 +19,9 @@ TODO
 
 ## Non-features and rationales
 
+ * Performance tests. I don't have time to do these; maybe for a future version.
  * MiMA binary compatibility checking. Seems to only support SBT, not Maven.
- * Using Cats instead of ScalaZ. This project makes extensive use of Leibniz. 
+ * Using Cats instead of ScalaZ. Paperdoll makes extensive use of Leibniz. 
 
 ## Implementation notes
 
@@ -52,6 +53,8 @@ since Shapeless does not offer a suitable fold method)
  * Get into Maven Central
   * GPG signing in build (trivial)
  * General code review
+  * Ensure that types that may need to change are private (e.g. queues)
+  * Ensure public interface is documented
  * Release 1.0
   
 ## Notices
