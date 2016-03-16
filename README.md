@@ -62,8 +62,6 @@ since Shapeless does not offer a suitable `fold` method)
  * Implement more effect types
  * Create a test that demonstrates combining two unrelated effect monads and running in either order
  * Get into Maven Central
-  * GPG signing in build (trivial)
- * General code review
  * Finish this document
  * Release 1.0
   
