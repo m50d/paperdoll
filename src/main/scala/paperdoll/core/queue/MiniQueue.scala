@@ -5,12 +5,12 @@ import scalaz.Forall
 /**
  * Type aligned queue of exactly one or two elements
  */
-sealed trait MiniQueue[C[_, _], A, B] {
+private[queue] sealed trait MiniQueue[C[_, _], A, B] {
   def fold[Z](one: C[A, B] ⇒ Z, pair: Pair[C, A, B] ⇒ Z): Z
   def asQueue: Queue[C, A, B]
 }
 
-object MiniQueue {
+private[queue] object MiniQueue {
   def one[C[_, _], A, B](a: C[A, B]): MiniQueue[C, A, B] = new MiniQueue[C, A, B] {
     override def fold[Z](one: C[A, B] ⇒ Z, pair: Pair[C, A, B] ⇒ Z) =
       one(a)

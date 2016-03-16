@@ -42,6 +42,10 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
     type LT = L
   }): Eff[S, su.LS, A]
 
+  /**
+   * Extend this effectful value to one in a larger stack of effects S.
+   * Can also be used to reorder the effect stack
+   */
   final def extend[S <: Coproduct] = new ExtendingEff[R, L, S, A](this)
 }
 /**

@@ -4,9 +4,11 @@ import shapeless.{ CNil, Coproduct, :+: }
 import scala.annotation.implicitNotFound
 
 /**
- * An effect, represented as a functor-like type F[X]
+ * Encapsulates an effect, represented as a functor-like type F[X]
  * (Note that F does not necessarily need to be a Functor - the machinery
- * will provide suitable map and flatMap operations)
+ * will provide suitable map and flatMap operations).
+ * Custom effects should provide their own layer types
+ * but these types should never be instantiated, hence sealed
  */
 sealed trait Layer {
   type F[X]

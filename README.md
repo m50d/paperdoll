@@ -25,9 +25,15 @@ TODO
 
 ## Non-features and rationales
 
- * Performance tests. I don't have time to do these, but would welcome contributions.
- * MiMA binary compatibility checking. MiMA seems to only support SBT, not Maven.
- * Using Cats instead of ScalaZ. Paperdoll makes extensive use of `Leibniz`. 
+ * `Eff#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
+ Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
+ is likely quadratic rather than linear as it should be.
+ Note that a `for { x <- f.extend[...] ; y <- g.extend[...] ; z <- h.extend[...] } yield ...`
+ construct should still behave linearly, so I believe this is not a problem in practice; patches are very welcome.
+ * There are no performance tests. I don't have time to do these, but would welcome contributions.
+ * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not Maven.
+ * Paperdoll depends on ScalaZ since it makes extensive use of `Leibniz`. I would prefer to depend on Cats
+ but this functionality is a firm requirement. 
 
 ## Implementation notes
 
@@ -52,15 +58,12 @@ since Shapeless does not offer a suitable `fold` method)
 
 ## TODO
 
- * Implement more effect types
  * Make this a multi-module project and put each monad in a different one
+ * Implement more effect types
  * Create a test that demonstrates combining two unrelated effect monads and running in either order
  * Get into Maven Central
   * GPG signing in build (trivial)
  * General code review
-  * Move types into simple packages a la scala community idiom - I've got to pick my battles and this one isn't worth it
-  * Ensure that types that may need to change are private (e.g. queues)
-  * Ensure public interface is documented
  * Finish this document
  * Release 1.0
   

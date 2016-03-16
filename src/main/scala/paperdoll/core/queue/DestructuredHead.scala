@@ -10,11 +10,11 @@ import scalaz.Leibniz.===
  * for some unknown type A (which is deliberately not exposed outside)
  * Arguably excessively generic (since we only actually use this with S = Queue)
  */
-sealed trait DestructuredHead[S[_[_, _], _, _], C[_, _], X, Y] {
+private[core] sealed trait DestructuredHead[S[_[_, _], _, _], C[_, _], X, Y] {
   def fold[A](nil: (Y === X) => A, cons: Forall[({type L[Z] = (C[X, Z], S[C, Z, Y]) => A})#L]): A
 }
 
-object DestructuredHead {
+private[core] object DestructuredHead {
   def nil[S[_[_, _], _, _], C[_, _], X]: DestructuredHead[S, C, X, X] = new DestructuredHead[S, C, X, X] {
     override def fold[A](nil: (X === X) => A, cons: Forall[({type L[Z] = (C[X, Z], S[C, Z, X]) => A})#L]) =
       nil(Leibniz.refl[X])

@@ -34,5 +34,5 @@ object Subset {
         case Inr(r) ⇒ tl.inject(r)
       }
     }
-  def apply[S <: Coproduct, T <: Coproduct](implicit s: Subset[S, T]) = s
+  def apply[S <: Coproduct, T <: Coproduct](implicit s: Subset[S, T]): Subset[S, T] {type LS = s.LS; type LT = s.LT} = s
 }
