@@ -21,7 +21,7 @@ TODO
   * i.e. allows any ADT to be combined with functions (using for/yield sugar) and used as a command pattern
  * Decouples expression of an abstract computation from its implementation
   * Can use multiple interpreters to run the same monadic computation e.g. test vs live
- * TODO, also links
+ * TODO - also improve markdown in this section
 
 ## Non-features and rationales
 
@@ -53,12 +53,12 @@ since Shapeless does not offer a suitable `fold` method)
 ## TODO
 
  * Implement more effect types
+ * Make this a multi-module project and put each monad in a different one
  * Create a test that demonstrates combining two unrelated effect monads and running in either order
-  * Arguably the clearest would be to make this a multi-module project and put each monad in a different one
-  * If doing this, make sure that works with bintray
  * Get into Maven Central
   * GPG signing in build (trivial)
  * General code review
+  * Move types into simple packages a la scala community idiom - I've got to pick my battles and this one isn't worth it
   * Ensure that types that may need to change are private (e.g. queues)
   * Ensure public interface is documented
  * Finish this document
