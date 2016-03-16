@@ -5,7 +5,6 @@ import scalaz.Leibniz
 import scalaz.Leibniz.===
 import com.github.m50d.paperdoll.layer.Layers
 import com.github.m50d.paperdoll.effect.{ Eff, Arr, Bind, Handler }
-import scala.annotation.implicitNotFound
 
 /**
  * The type representing an effectful value of type X
