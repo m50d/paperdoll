@@ -1,11 +1,11 @@
-package com.github.m50d.paperdoll.effect
+package paperdoll.core.effect
 
 import Predef.identity
 import shapeless.{ Coproduct, CNil, :+:, Inl }
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
-import com.github.m50d.paperdoll.queue.Queue
-import com.github.m50d.paperdoll.layer.{Layer, Layers, Member, Subset}
+import paperdoll.core.queue.Queue
+import paperdoll.core.layer.{Layer, Layers, Member, Subset}
 
 sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
   final type O[A, B] = A ⇒ Eff[R, L, B]
@@ -103,6 +103,7 @@ sealed trait Handler[L <: Layer] {
   def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L2 },
     le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, A]
 }
+
 
 object Eff {
   implicit def monadEff[R <: Coproduct, L <: Layers[R]] = new Monad[(Eff_[R, L])#O] {

@@ -1,4 +1,4 @@
-package com.github.m50d.paperdoll.layer
+package paperdoll.core.layer
 
 import org.junit.Test
 import shapeless.{ CNil, :+: }

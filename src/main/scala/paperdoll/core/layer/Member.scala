@@ -1,4 +1,4 @@
-package com.github.m50d.paperdoll.layer
+package paperdoll.core.layer
 
 import shapeless.{ Coproduct, :+:, Inl, Inr }
 

@@ -3,8 +3,8 @@ package paperdoll.reader
 import shapeless.{:+:, CNil, Coproduct}
 import scalaz.Leibniz
 import scalaz.Leibniz.===
-import com.github.m50d.paperdoll.layer.Layers
-import com.github.m50d.paperdoll.effect.{ Eff, Arr, Bind, Handler }
+import paperdoll.core.layer.Layers
+import paperdoll.core.effect.{ Eff, Arr, Bind, Handler }
 
 /**
  * The type representing an effectful value of type X

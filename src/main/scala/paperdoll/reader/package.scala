@@ -1,6 +1,6 @@
 package paperdoll
 
-import com.github.m50d.paperdoll.layer.Layer
+import paperdoll.core.layer.Layer
 
 package object reader {
   type Reader_[I] = Layer {

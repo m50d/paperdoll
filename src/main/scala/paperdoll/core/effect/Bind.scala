@@ -1,11 +1,12 @@
-package com.github.m50d.paperdoll.effect
+package paperdoll.core.effect
 
-import com.github.m50d.paperdoll.layer.Layer
-import com.github.m50d.paperdoll.layer.Layers
+import paperdoll.core.layer.{Layer, Layers}
 import shapeless.Coproduct
 
 /**
+ * Interface for something that knows how to handle a particular effect.
  * Specific effects should provide implementations of this interface
+ * and use Eff.handle to convert them into Handlers
  */
 trait Bind[L <: Layer] {
   /**

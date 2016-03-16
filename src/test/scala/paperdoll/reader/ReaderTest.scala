@@ -4,7 +4,7 @@ import shapeless.{CNil, :+:}
 import org.junit.Test
 import scalaz.syntax.monad._
 import Reader._
-import com.github.m50d.paperdoll.effect.Eff
+import paperdoll.core.effect.Eff
 import org.fest.assertions.Assertions.assertThat
 
 class ReaderTest {

@@ -1,8 +1,8 @@
-package com.github.m50d.paperdoll
+package paperdoll.core
 
 import shapeless.Coproduct
-import com.github.m50d.paperdoll.queue.Queue
-import com.github.m50d.paperdoll.layer.Layers
+import paperdoll.core.queue.Queue
+import paperdoll.core.layer.Layers
 
 package object effect {
   /**
