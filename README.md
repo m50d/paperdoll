@@ -27,11 +27,11 @@ TODO
 
  * `Eff#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
- is likely quadratic rather than linear as it should be.
+ is likely quadratic rather than linear as it should be. Indeed it may be worse than that, since `.extend` fixes a blob in the tree-like queue structure so composing with further operations won't rebalance the tree and we lose the efficient "reflection without remorse" structure, so the behaviour may actually be cubic. On the other hand the implementation is the same as that in `handleRelay`, so this aspect of the behaviour is no worse than what the original Haskell implementation would do for a chain of `f flatMap g |> handleA flatMap h |> handleB ...`
  Note that a `for { x <- f.extend[...] ; y <- g.extend[...] ; z <- h.extend[...] } yield ...`
  construct should still behave linearly, so I believe this is not a problem in practice; patches are very welcome.
  * There are no performance tests. I don't have time to do these, but would welcome contributions.
- * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not Maven.
+ * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven. I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT, but any implementation of binary compatibility checking in the maven build would be very welcome.
  * Paperdoll depends on ScalaZ since it makes extensive use of `Leibniz`. I would prefer to depend on Cats
  but this functionality is a firm requirement. 
 
