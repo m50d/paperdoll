@@ -1,7 +1,7 @@
 package paperdoll.core.layer
 
 import org.junit.Test
-import shapeless.{ CNil, :+: }
+import shapeless.{CNil, :+:}
 import paperdoll.reader.Reader_
 
 class MemberTest {

@@ -46,7 +46,7 @@ where commands are composed of instance of that datatype and custom functions
  construct should still behave linearly, so I believe this is not a problem in practice; patches are very welcome.
  * There are no performance tests. I don't have time to do these, but would welcome contributions.
  * Since `paperdoll-core` is very generic, a lot of the tests need at least one effect implementation.
- This means a lot of the test coverage is in `paperdoll-reader` or similar projects. 
+ So I've moved those tests down into `paperdoll-tests` 
  * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven.
  I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
  but any implementation of binary compatibility checking in the maven build would be very welcome.
@@ -76,7 +76,6 @@ since Shapeless does not offer a suitable `fold` method)
 
 ## TODO
 
- * Make this a multi-module project and put each monad in a different one
  * Implement more effect types
  * Create a test that demonstrates combining two unrelated effect monads and running in either order
  * Get into Maven Central
