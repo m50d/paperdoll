@@ -74,5 +74,6 @@
     </build>
     <modules>
         <module>core</module>
+        <module>reader</module>
     </modules>
 </project>

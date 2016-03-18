@@ -17,21 +17,39 @@ TODO
 
 ## Features
 
- * Allows any type to be adapted as a monad
-  * i.e. allows any ADT to be combined with functions (using for/yield sugar) and used as a command pattern
- * Decouples expression of an abstract computation from its implementation
+ * Implementations of some popular concrete, useful monads (e.g. `Reader`, `Writer`)
+  * i.e. some classes that do useful things when used in `for`/`yield` blocks
+ * ScalaZ-compatible typeclass instances allow monad-generic functions
+  * i.e. you can use these classes with ScalaZ functions like `traverse`, or with custom functions that work for any monad 
+ * Offers a [Free Monad](http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html) equivalent
+  * i.e. for any datatype you like, you can extend that datatype to a "command object",
+where commands are composed of instance of that datatype and custom functions
+  * Note there is no need for the `Coyoneda` trick in this implementation
+ * Free monads let you [separate the declaration of a computation from its implementation](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html)
   * Can use multiple interpreters to run the same monadic computation e.g. test vs live
- * TODO - also improve markdown in this section
+ * Freer monads let you interleave multiple monadic effects without the complexities of monad transformers
+  * Both definition of effects and of interpreters can be completely separate (even in separate codebases).
 
 ## Non-features and rationales
 
  * `Eff#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
- is likely quadratic rather than linear as it should be. Indeed it may be worse than that, since `.extend` fixes a blob in the tree-like queue structure so composing with further operations won't rebalance the tree and we lose the efficient "reflection without remorse" structure, so the behaviour may actually be cubic. On the other hand the implementation is the same as that in `handleRelay`, so this aspect of the behaviour is no worse than what the original Haskell implementation would do for a chain of `f flatMap g |> handleA flatMap h |> handleB ...`
+ is likely quadratic rather than linear as it should be.
+ Indeed it may be worse than that, since `.extend` fixes a blob in the tree-like queue structure,
+ so composing with further operations won't rebalance the tree
+ and we lose the efficient "reflection without remorse" structure.
+ So the behaviour may actually be cubic.
+ On the other hand the implementation is the same as that in `handleRelay`,
+ so this aspect of the behaviour is no worse than what the original Haskell implementation
+ would do for a chain of `f flatMap g |> handleA flatMap h |> handleB ...`
  Note that a `for { x <- f.extend[...] ; y <- g.extend[...] ; z <- h.extend[...] } yield ...`
  construct should still behave linearly, so I believe this is not a problem in practice; patches are very welcome.
  * There are no performance tests. I don't have time to do these, but would welcome contributions.
- * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven. I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT, but any implementation of binary compatibility checking in the maven build would be very welcome.
+ * Since `paperdoll-core` is very generic, a lot of the tests need at least one effect implementation.
+ This means a lot of the test coverage is in `paperdoll-reader` or similar projects. 
+ * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven.
+ I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
+ but any implementation of binary compatibility checking in the maven build would be very welcome.
  * Paperdoll depends on ScalaZ since it makes extensive use of `Leibniz`. I would prefer to depend on Cats
  but this functionality is a firm requirement. 
 
