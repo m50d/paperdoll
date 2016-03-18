@@ -9,21 +9,21 @@ import paperdoll.core.effect.{ Eff, Arr, Bind, Handler }
 /**
  * Type representing an effectful value of type X
  * that reads from input of type I.
- * Implementation is encapsulated .
+ * Implementation is encapsulated.
  */
 sealed trait Reader[I, X] {
   def fold[A](get: (I === X) ⇒ A): A
 }
-private[reader] final class Get[I, X](val witness: Leibniz.===[I, X]) extends Reader[I, X] {
-  override def fold[A](get: (I === X) ⇒ A) = get(witness)
-}
-
 object Reader {
+  private[this] def get[I] = new Reader[I, I] {
+    override def fold[A](get: (I === I) ⇒ A) = get(Leibniz.refl)
+  }
+  
   /**
    * Effect that reads an input I and returns it.
    */
   def ask[I]: Eff[Reader_[I] :+: CNil, Layers[Reader_[I] :+: CNil] { type O[X] = Reader[I, X] :+: CNil }, I] =
-    Eff.send[Reader_[I], I](new Get[I, I](Leibniz.refl))
+    Eff.send[Reader_[I], I](get)
 
   /**
    * Run the reader effect in the stack R by passing the input i

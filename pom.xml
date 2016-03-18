@@ -13,6 +13,7 @@
         <module>core</module>
         <module>reader</module>
         <module>tests</module>
+        <module>writer</module>
     </modules>
     <build>
         <plugins>
