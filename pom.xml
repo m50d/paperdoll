@@ -12,6 +12,7 @@
     <modules>
         <module>core</module>
         <module>reader</module>
+        <module>state</module>
         <module>tests</module>
         <module>writer</module>
     </modules>

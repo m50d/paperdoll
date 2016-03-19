@@ -52,9 +52,7 @@ where commands are composed of instance of that datatype and custom functions
  I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
  but any implementation of binary compatibility checking in the maven build would be very welcome.
  * Paperdoll depends on ScalaZ since it makes extensive use of `Leibniz`. I would prefer to depend on Cats
- but this functionality is a firm requirement. 
- * Since `paperdoll-core` is very generic, a lot of the tests need at least one effect implementation.
- So I've moved those tests down into `paperdoll-tests` 
+ but this functionality is a firm requirement.
 
 ## Implementation notes
 
@@ -73,9 +71,16 @@ Algebraic data types generally offer a `fold` method which is designed
 to be the safe equivalent of a pattern match. When reviewing Scala
 [it is difficult to distinguish between safe and unsafe pattern matches](http://typelevel.org/blog/2014/11/10/why_is_adt_pattern_matching_allowed.html),
 so my preferred style is to avoid pattern matches entirely.
-This also makes it possible to hide trait implementation subtypes.
-(I have used pattern matching on `Inr`/`Inl` when working with `Coproduct`s
-since Shapeless does not offer a suitable `fold` method)
+This also makes it possible to hide trait implementation subtypes
+(by using anonymous classes) where appropriate.
+I have used pattern matching on `Inr`/`Inl` when working with `Coproduct`s
+since Shapeless does not offer a suitable `fold` method,
+
+Since `paperdoll-core` is very generic, a lot of the tests need at least one effect implementation.
+So I've moved those tests down into `paperdoll-tests`
+
+The project is split into a large number of small modules,
+primarily to prove that the interpreters truly are independent.
 
 ## TODO
 

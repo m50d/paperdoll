@@ -5,7 +5,7 @@ import shapeless.{ Coproduct, CNil, :+:, Inl }
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
 import paperdoll.core.queue.Queue
-import paperdoll.core.layer.{Layer, Layers, Member, Subset}
+import paperdoll.core.layer.{ Layer, Layers, Member, Subset }
 
 sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
   final type O[A, B] = A ⇒ Eff[R, L, B]
@@ -16,13 +16,13 @@ sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
  */
 final class ExtendingEff[R <: Coproduct, L <: Layers[R], S <: Coproduct, A](eff: Eff[R, L, A]) {
   def apply[L0 <: Layers[R]]()(implicit su: Subset[S, R] {
-      type LT = L0
-    }, le: Leibniz[Nothing, Layers[R], L0, L]): Eff[S, su.LS, A] = eff.inject(le.subst[({
-      type K[LL] = Subset[S, R] {
-        type LT = LL
-        type LS = su.LS
-      }
-    })#K](su))
+    type LT = L0
+  }, le: Leibniz[Nothing, Layers[R], L0, L]): Eff[S, su.LS, A] = eff.inject(le.subst[({
+    type K[LL] = Subset[S, R] {
+      type LT = LL
+      type LS = su.LS
+    }
+  })#K](su))
 }
 
 /**
@@ -51,48 +51,24 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
 /**
  * An actual A - this is the "nil" case of Eff
  */
-private[effect] sealed trait Pure[R <: Coproduct, L <: Layers[R], A] extends Eff[R, L, A] {
-  val a: A
+final case class Pure[R <: Coproduct, L <: Layers[R], A](a: A) extends Eff[R, L, A] {
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]) = pure(a)
   override def inject[S <: Coproduct](implicit su: Subset[S, R] {
     type LT = L
-  }): Eff[S, su.LS, A] = {
-    val a0 = a
-    new Pure[S, su.LS, A] {
-      override val a = a0
-    }
-  }
+  }): Eff[S, su.LS, A] = Pure(a)
 }
 /**
- * The "cons" case: an effectful value and a continuation that will eventually lead to an A
+ * The "cons" case: an effectful value and a continuation that will eventually lead to an A.
+ * Note that the intermediate type X is hidden from the outside - one is expected
+ * to only access it via the fold method.
  */
-private[effect] sealed trait Impure[R <: Coproduct, L <: Layers[R], A] extends Eff[R, L, A] {
-  /**
-   * Type of the current value
-   */
-  type X
-  /**
-   * The current value: an X inside an effect
-   */
-  val eff: L#O[X]
-  /**
-   * The continuation from X to what will ultimately be an A
-   */
-  val cont: Arrs[R, L, X, A]
-
+final case class Impure[R <: Coproduct, L <: Layers[R], X, A](eff: L#O[X],
+  cont: Arrs[R, L, X, A]) extends Eff[R, L, A] {
   override def fold[B](pure: A ⇒ B, impure: Forall[({ type K[Y] = (L#O[Y], Arrs[R, L, Y, A]) ⇒ B })#K]) =
     impure.apply[X](eff, cont)
 
-  override def inject[S <: Coproduct](implicit su: Subset[S, R] { type LT = L }): Eff[S, su.LS, A] = {
-    val eff1 = su.inject(eff)
-    val cont1 = Eff.compose(cont) andThen { _.inject[S] }
-    type X0 = X
-    new Impure[S, su.LS, A] {
-      override type X = X0
-      override val eff = eff1
-      override val cont = Queue.one[Arr_[S, su.LS]#O, X0, A](cont1)
-    }
-  }
+  override def inject[S <: Coproduct](implicit su: Subset[S, R] { type LT = L }): Eff[S, su.LS, A] =
+    Impure[S, su.LS, X, A](su.inject(eff), Queue.one[Arr_[S, su.LS]#O, X, A](Eff.compose(cont) andThen { _.inject[S] }))
 }
 
 sealed trait Eff_[R <: Coproduct, L <: Layers[R]] {
@@ -123,17 +99,11 @@ object Eff {
     final type O = Eff[L :+: CNil, Layers.One[L]#N, A]
   }
   implicit def monadEff[R <: Coproduct, L <: Layers[R]] = new Monad[(Eff_[R, L])#O] {
-    override def point[A](a0: ⇒ A) = new Pure[R, L, A] { val a = a0 }
+    override def point[A](a: ⇒ A) = Pure[R, L, A](a)
     override def bind[A, B](fa: Eff[R, L, A])(f: A ⇒ Eff[R, L, B]) =
       fa.fold[Eff[R, L, B]](f, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ Eff[R, L, B] })#K] {
-        override def apply[X0] = {
-          (eff0, cont0) ⇒
-            new Impure[R, L, B] {
-              override type X = X0
-              override val eff = eff0
-              override val cont = cont0 :+ f
-            }
-        }
+        override def apply[X0] =
+          (eff0, cont0) ⇒ Impure[R, L, X0, B](eff0, cont0 :+ f)
       })
   }
   implicit def unapplyEff[TC[_[_]], R <: Coproduct, L <: Layers[R], A0](
@@ -147,18 +117,8 @@ object Eff {
    * Lift an effectful value L#F[V] to an Eff[L :+: CNil, ..., V].
    * Usually followed by a .extend to further lift this into a complete effect stack
    */
-  def send[L <: Layer, V](value: L#F[V]): Eff[L :+: CNil, Layers[L :+: CNil] {
-    type O[X] = L#F[X] :+: CNil
-  }, V] =
-    new Impure[L :+: CNil, Layers[L :+: CNil] {
-      type O[X] = L#F[X] :+: CNil
-    }, V] {
-      override type X = V
-      override val eff = Inl(value)
-      override val cont = Queue.empty[Arr_[L :+: CNil, Layers[L :+: CNil] {
-        type O[Y] = L#F[Y] :+: CNil
-      }]#O, V]
-    }
+  def send[L <: Layer, V](value: L#F[V]): Eff.One[L, V]#O =
+    Impure[L :+: CNil, Layers.One[L]#N, V, V](Inl(value), Queue.empty[Arr_[L :+: CNil, Layers.One[L]#N]#O, V])
 
   /**
    * Collapse an Arrs (a queue of Arr) to a single Arr.
@@ -174,12 +134,8 @@ object Eff {
                 ctail,
                 new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, W]) ⇒ Eff[R, L, B] })#K] {
                   override def apply[X0] = {
-                    (eff0, cont0) ⇒
-                      new Impure[R, L, B] {
-                        override type X = X0
-                        override val eff = eff0
-                        override val cont = cont0 :+ ctail
-                      }
+                    (eff, cont) ⇒
+                      Impure[R, L, X0, B](eff, cont :+ ctail)
                   }
                 })
           }
@@ -188,9 +144,6 @@ object Eff {
 
   /**
    * "Lift" bind to produce a Handler for L.
-   * One reason this method exists is so that the type Eff can remain sealed -
-   * if we implemented Handler directly for our various layers then those implementations
-   * would have to be able to create new Eff instances.
    */
   def handle[L <: Layer](bind: Bind[L]): Handler.Aux[L, bind.O] =
     new Handler[L] {
@@ -199,18 +152,14 @@ object Eff {
        * Actual implementation - apply method has extra Leibniz to assist type inference
        */
       private[this] def run[R <: Coproduct, L1 <: Layers[R], A](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L1 }): Eff[me.RestR, me.RestL, O[A]] =
-        eff.fold({ a0 ⇒ new Pure[me.RestR, me.RestL, O[A]] { val a = bind.pure(a0) } }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Eff[me.RestR, me.RestL, O[A]] })#K] {
+        eff.fold({ a ⇒ Pure[me.RestR, me.RestL, O[A]](bind.pure(a)) }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Eff[me.RestR, me.RestL, O[A]] })#K] {
           override def apply[X0] = { (eff, cont0) ⇒
             //New continuation is: recursively run this handler on the result of the old continuation 
             val cont1 = compose(cont0) andThen { run(_) }
             me.remove(eff).fold(
               {
                 otherEffect ⇒
-                  new Impure[me.RestR, me.RestL, O[A]] {
-                    override type X = X0
-                    override val eff = otherEffect
-                    override val cont = Queue.one[Arr_[me.RestR, me.RestL]#O, X0, O[A]](cont1)
-                  }
+                  Impure[me.RestR, me.RestL, X0, O[A]](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X0, O[A]](cont1))
               }, {
                 tEffect ⇒ bind[X0, me.RestR, me.RestL, A](tEffect, cont1)
               })

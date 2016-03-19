@@ -6,7 +6,7 @@
         <artifactId>paperdoll-aggregator</artifactId>
         <version>0.1-SNAPSHOT</version>
     </parent>
-    <artifactId>paperdoll-tests</artifactId>
+    <artifactId>paperdoll-state</artifactId>
     <packaging>jar</packaging>
     <dependencies>
         <dependency>
