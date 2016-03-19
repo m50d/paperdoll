@@ -26,6 +26,8 @@ class MultipleEffectsTest {
       _ <- Writer.tell("end").extend[ReaderWriter]()
     } yield r
     
-    val _1 = assertThat(Reader.runReader(10)(Writer.runWriterVector[String].apply(rdwr)).run).isEqualTo((100, Vector("begin", "end")))
+    val expected = (100, Vector("begin", "end"))
+    val _1 = assertThat(Reader.runReader(10)(Writer.runWriterVector[String].apply(rdwr)).run).isEqualTo(expected)
+    val _2 = assertThat(Writer.runWriterVector[String].apply(Reader.runReader(10)(rdwr)).run).isEqualTo(expected)
   }
 }
