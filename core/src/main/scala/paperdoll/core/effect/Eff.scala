@@ -102,8 +102,7 @@ object Eff {
     override def point[A](a: ⇒ A) = Pure[R, L, A](a)
     override def bind[A, B](fa: Eff[R, L, A])(f: A ⇒ Eff[R, L, B]) =
       fa.fold[Eff[R, L, B]](f, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ Eff[R, L, B] })#K] {
-        override def apply[X0] =
-          (eff0, cont0) ⇒ Impure[R, L, X0, B](eff0, cont0 :+ f)
+        override def apply[X] = (eff, cont) ⇒ Impure[R, L, X, B](eff, cont :+ f)
       })
   }
   implicit def unapplyEff[TC[_[_]], R <: Coproduct, L <: Layers[R], A0](
@@ -133,10 +132,7 @@ object Eff {
               head(value).fold(
                 ctail,
                 new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, W]) ⇒ Eff[R, L, B] })#K] {
-                  override def apply[X0] = {
-                    (eff, cont) ⇒
-                      Impure[R, L, X0, B](eff, cont :+ ctail)
-                  }
+                  override def apply[X] = (eff, cont) ⇒ Impure[R, L, X, B](eff, cont :+ ctail)
                 })
           }
         })
@@ -153,16 +149,12 @@ object Eff {
        */
       private[this] def run[R <: Coproduct, L1 <: Layers[R], A](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L1 }): Eff[me.RestR, me.RestL, O[A]] =
         eff.fold({ a ⇒ Pure[me.RestR, me.RestL, O[A]](bind.pure(a)) }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Eff[me.RestR, me.RestL, O[A]] })#K] {
-          override def apply[X0] = { (eff, cont0) ⇒
+          override def apply[X] = { (eff, cont) ⇒
             //New continuation is: recursively run this handler on the result of the old continuation 
-            val cont1 = compose(cont0) andThen { run(_) }
+            val newCont = compose(cont) andThen { run(_) }
             me.remove(eff).fold(
-              {
-                otherEffect ⇒
-                  Impure[me.RestR, me.RestL, X0, O[A]](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X0, O[A]](cont1))
-              }, {
-                tEffect ⇒ bind[X0, me.RestR, me.RestL, A](tEffect, cont1)
-              })
+              otherEffect ⇒ Impure[me.RestR, me.RestL, X, O[A]](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X, O[A]](newCont)),
+              thisEffect ⇒ bind[X, me.RestR, me.RestL, A](thisEffect, newCont))
           }
         })
       override def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L2 },

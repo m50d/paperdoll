@@ -44,35 +44,25 @@ private[queue] final case class One[C[_, _], A, B](value: C[A, B]) extends Queue
     Node[C, A, Z, B, B](MiniQueue.one(value), Empty[Pair_[C]#O, B](), MiniQueue.one(e))
   override def destructureHead = DestructuredHead.cons(value, Empty())
 }
-private[queue] final case class Node[C[_, _], A, B0, X, Y](
-  head: MiniQueue[C, A, X], middle: Queue[Pair_[C]#O, X, Y], last: MiniQueue[C, Y, B0]) extends Queue[C, A, B0] {
-  override def :+[Z](newLast: C[B0, Z]) =
-    last.fold({
-      lastOne => Node(head, middle, MiniQueue.pair(Pair(lastOne, newLast)))
-    },
-      {
-        lastPair => Node(head, middle :+ lastPair, MiniQueue.one(newLast))
-      })
+private[queue] final case class Node[C[_, _], A, B, X, Y](
+  head: MiniQueue[C, A, X], middle: Queue[Pair_[C]#O, X, Y], last: MiniQueue[C, Y, B]) extends Queue[C, A, B] {
+  override def :+[Z](newLast: C[B, Z]) =
+    last.fold(lastOne ⇒ Node(head, middle, MiniQueue.pair(Pair(lastOne, newLast))),
+      lastPair ⇒ Node(head, middle :+ lastPair, MiniQueue.one(newLast)))
 
   override def destructureHead = head.fold({
-    headOne =>
+    headOne ⇒
       def shiftForward[AA, W, B](queue: Queue[Pair_[C]#O, AA, W], last: MiniQueue[C, W, B]): Queue[C, AA, B] =
         queue.destructureHead.fold({
-          witness => witness.subst[({ type L[V] = MiniQueue[C, V, B] })#L](last).asQueue
-        }, new Forall[({ type L[V] = (Pair[C, AA, V], Queue[Pair_[C]#O, V, W]) => Queue[C, AA, B] })#L] {
-          override def apply[V] = {
-            (head, tail) =>
-              Node(MiniQueue.pair(head), tail, last)
-          }
+          witness ⇒ witness.subst[({ type L[V] = MiniQueue[C, V, B] })#L](last).asQueue
+        }, new Forall[({ type L[V] = (Pair[C, AA, V], Queue[Pair_[C]#O, V, W]) ⇒ Queue[C, AA, B] })#L] {
+          override def apply[V] = (head, tail) ⇒ Node(MiniQueue.pair(head), tail, last)
         })
       DestructuredHead.cons(headOne, shiftForward(middle, last))
   },
     {
-      _.fold(new Forall[({ type L[W] = (C[A, W], C[W, X]) => DestructuredHead[Queue, C, A, B0] })#L] {
-        override def apply[W] = {
-          (first, second) =>
-            DestructuredHead.cons(first, Node(MiniQueue.one[C, W, X](second), middle, last))
-        }
+      _.fold(new Forall[({ type L[W] = (C[A, W], C[W, X]) ⇒ DestructuredHead[Queue, C, A, B] })#L] {
+        override def apply[W] = (first, second) ⇒ DestructuredHead.cons(first, Node(MiniQueue.one[C, W, X](second), middle, last))
       })
     })
 }
