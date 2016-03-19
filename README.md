@@ -34,8 +34,14 @@ where commands are composed of instance of that datatype and custom functions
 
 ## Non-features and rationales
 
+ * Currently, supported monads are limited to (reimplementations of) those in the paper.
+ While this is sufficient to prove the concept, it would be better to add `Layer` adapters
+ for popular real-world Scala cases (e.g. those used by doobie).
+ The `Eff` abstraction should be easy to use with any existing monad implementation
+ without needing to change the concrete monad values (as long as they *are* values -
+ so perhaps only `Free`-like monads, but there is still an installed base of those
+ that it is well worth being able to interoperate with).
  * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
- I think
  * `Eff#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
  is likely quadratic rather than linear as it should be.
@@ -51,6 +57,7 @@ where commands are composed of instance of that datatype and custom functions
  * Use of type members vs. type parameters is arguably inconsistent in places, as is general style.
  In some cases this is deliberate pragmatism so as to ensure that the types can be used in practice;
  in others I couldn't get type inference to work correctly with a more natural representation.
+ * Compilation time is really awful, particularly in the case of errors.
  * There are no performance tests. I don't have time to do these, but would welcome contributions.
  * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven.
  I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
@@ -94,19 +101,16 @@ subset of Scala, and that is the primary goal for this project.
 A more pragmatic project would likely provide the same API,
 but make use of unsafe casts internally for performance. 
 
-## TODO
+## TODO for 1.0
 
- * Remove Eff.run in favour of Eff#run
- * Complete MultipleEffectsTest, possibly move examples around
  * Implement all effect types from the paper
-  * State
+  * Finish StateTest
   * Committed choice
  * Implement all examples from the paper
   * Might be worth splitting out -examples projects
   * Finish the "How to use" section of this document
  * Get into Maven Central
   * Requires adding gpg signing to the build
- * Release 1.0
 
 ## Notices
 
