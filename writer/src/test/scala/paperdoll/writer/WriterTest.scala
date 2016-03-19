@@ -15,9 +15,7 @@ class WriterTest {
       _ <- tell(2)
     } yield "WriterTest"
     
-    val pure1 = runWriterVector[Int](effect)
-    val _1 = assertThat(Eff.run(pure1)).isEqualTo(("WriterTest", Vector(1, 3, 2)))
-    val pure2 = runWriterMonoid[Int].apply(effect)
-    val _2 = assertThat(Eff.run(pure2)).isEqualTo(("WriterTest", 6))
+    val _1 = assertThat(runWriterVector[Int](effect).run).isEqualTo(("WriterTest", Vector(1, 3, 2)))
+    val _2 = assertThat(runWriterMonoid[Int].apply(effect).run).isEqualTo(("WriterTest", 6))
   }
 }

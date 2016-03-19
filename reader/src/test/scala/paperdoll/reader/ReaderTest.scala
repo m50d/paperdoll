@@ -15,9 +15,7 @@ class ReaderTest {
         snd ← ask[Int]
       } yield fst + snd
 
-    val pure = runReader(4)(reader)
-    val result = Eff.run(pure)
-    val _ = assertThat(result).isEqualTo(8)
+    val _ = assertThat(runReader(4)(reader).run).isEqualTo(8)
   }
 
   @Test def differingOrders(): Unit = {
@@ -26,10 +24,7 @@ class ReaderTest {
       label ← ask[String].extend[Reader_[String] :+: Reader_[Int] :+: CNil]()
     } yield f"There are $count%d $label%s"
     
-    runReader(4)(eff)
-    val pure1 = runReader(4)(runReader("lights")(eff))
-    val _1 = assertThat(Eff.run(pure1)).isEqualTo("There are 4 lights")
-    val pure2 = runReader("lights")(runReader(4)(eff))
-    val _2 = assertThat(Eff.run(pure2)).isEqualTo("There are 4 lights")
+    val _1 = assertThat(runReader(4)(runReader("lights")(eff)).run).isEqualTo("There are 4 lights")
+    val _2 = assertThat(runReader("lights")(runReader(4)(eff)).run).isEqualTo("There are 4 lights")
   }
 }

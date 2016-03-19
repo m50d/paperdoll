@@ -48,10 +48,15 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
    * Can also be used to reorder the effect stack
    */
   final def extend[S <: Coproduct] = new ExtendingEff[R, L, S, A](this)
-  
-  final def run(implicit l: Leibniz[Nothing, Layers[R], L, Layers[R]{type O[X] = CNil}]): A = fold(identity, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ A })#K]{
-    override def apply[X] = (eff, cont) => l.subst[({type J[K <: Layers[R]] = K#O[X]})#J](eff).impossible
-  })
+
+  /**
+   * Run this effectful value to produce an A. Only available once all effects have been handled
+   * (i.e. R will be CNil) and therefore this Eff must actually be a Pure.
+   */
+  final def run(implicit l: Leibniz[Nothing, Layers[R], L, Layers[R] { type O[X] = CNil }]): A =
+    fold(identity, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ A })#K] {
+      override def apply[X] = (eff, cont) ⇒ l.subst[({ type J[K <: Layers[R]] = K#O[X] })#J](eff).impossible
+    })
 }
 /**
  * An actual A - this is the "nil" case of Eff
@@ -164,14 +169,4 @@ object Eff {
       override def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L2 },
         le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, O[A]] = run(le.subst[({ type L[X <: Layers[R]] = Eff[R, X, A] })#L](eff))(me)
     }
-  /**
-   * Run a lazy effectful value after all the effects have already been handled -
-   * it necessarily no longer contains any actual effects, just the value of type A
-   */
-  def run[A](eff: Eff[CNil, Layers[CNil] { type O[X] = CNil }, A]): A = eff.fold(identity, new Forall[({ type K[X] = (CNil, Arrs[CNil, Layers[CNil] { type O[Y] = CNil }, X, A]) ⇒ A })#K] {
-    override def apply[X] = {
-      (eff, cont) ⇒
-        eff.impossible
-    }
-  })
 }
