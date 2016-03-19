@@ -104,10 +104,15 @@ sealed trait Eff_[R <: Coproduct, L <: Layers[R]] {
  * stack of effects R containing L, return the same
  */
 sealed trait Handler[L <: Layer] {
+  type O[X]
   def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L2 },
-    le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, A]
+    le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, O[A]]
 }
-
+object Handler {
+  type Aux[L <: Layer, O0[_]] = Handler[L] {
+    type O[X] = O0[X]
+  }
+}
 
 object Eff {
   /**
@@ -187,23 +192,24 @@ object Eff {
    * if we implemented Handler directly for our various layers then those implementations
    * would have to be able to create new Eff instances.
    */
-  def handle[L <: Layer](bind: Bind[L]): Handler[L] =
+  def handle[L <: Layer](bind: Bind[L]): Handler.Aux[L, bind.O] =
     new Handler[L] {
+      override type O[X] = bind.O[X]
       /**
        * Actual implementation - apply method has extra Leibniz to assist type inference
        */
-      private[this] def run[R <: Coproduct, L1 <: Layers[R], A](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L1 }): Eff[me.RestR, me.RestL, A] =
-        eff.fold({ a0 ⇒ new Pure[me.RestR, me.RestL, A] { val a = a0 } }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Eff[me.RestR, me.RestL, A] })#K] {
+      private[this] def run[R <: Coproduct, L1 <: Layers[R], A](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L1 }): Eff[me.RestR, me.RestL, O[A]] =
+        eff.fold({ a0 ⇒ new Pure[me.RestR, me.RestL, O[A]] { val a = bind.pure(a0) } }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Eff[me.RestR, me.RestL, O[A]] })#K] {
           override def apply[X0] = { (eff, cont0) ⇒
             //New continuation is: recursively run this handler on the result of the old continuation 
             val cont1 = compose(cont0) andThen { run(_) }
             me.remove(eff).fold(
               {
                 otherEffect ⇒
-                  new Impure[me.RestR, me.RestL, A] {
+                  new Impure[me.RestR, me.RestL, O[A]] {
                     override type X = X0
                     override val eff = otherEffect
-                    override val cont = Queue.one[Arr_[me.RestR, me.RestL]#O, X0, A](cont1)
+                    override val cont = Queue.one[Arr_[me.RestR, me.RestL]#O, X0, O[A]](cont1)
                   }
               }, {
                 tEffect ⇒ bind[X0, me.RestR, me.RestL, A](tEffect, cont1)
@@ -211,7 +217,7 @@ object Eff {
           }
         })
       override def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L2 },
-        le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, A] = run(le.subst[({ type L[X <: Layers[R]] = Eff[R, X, A] })#L](eff))(me)
+        le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, O[A]] = run(le.subst[({ type L[X <: Layers[R]] = Eff[R, X, A] })#L](eff))(me)
     }
   /**
    * Run a lazy effectful value after all the effects have already been handled -
