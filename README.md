@@ -44,14 +44,17 @@ where commands are composed of instance of that datatype and custom functions
  would do for a chain of `f flatMap g |> handleA flatMap h |> handleB ...`
  Note that a `for { x <- f.extend[...] ; y <- g.extend[...] ; z <- h.extend[...] } yield ...`
  construct should still behave linearly, so I believe this is not a problem in practice; patches are very welcome.
+ * Use of type members vs. type parameters is arguably inconsistent in places, as is general style.
+ In some cases this is deliberate pragmatism so as to ensure that the types can be used in practice;
+ in others I couldn't get type inference to work correctly with a more natural representation.
  * There are no performance tests. I don't have time to do these, but would welcome contributions.
- * Since `paperdoll-core` is very generic, a lot of the tests need at least one effect implementation.
- So I've moved those tests down into `paperdoll-tests` 
  * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven.
  I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
  but any implementation of binary compatibility checking in the maven build would be very welcome.
  * Paperdoll depends on ScalaZ since it makes extensive use of `Leibniz`. I would prefer to depend on Cats
  but this functionality is a firm requirement. 
+ * Since `paperdoll-core` is very generic, a lot of the tests need at least one effect implementation.
+ So I've moved those tests down into `paperdoll-tests` 
 
 ## Implementation notes
 

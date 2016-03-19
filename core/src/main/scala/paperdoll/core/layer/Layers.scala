@@ -21,9 +21,11 @@ object Layer {
 }
 
 /**
- * A stack of several possible effects. Each component of R is subtype of Layer
- * We use this representation to allow inference of monadEff to work
- * but we also need the Layers1 representation which has different type inference tradeoffs
+ * A stack of several possible effects. Each component of R is subtype of Layer.
+ * Often other types contain a type L <: Layers[R]; this should be understood to mean
+ * the unique such type L for which an implicit instance exists.
+ * The purpose of this type is to map between coproducts of layers R
+ * and the type of a concrete value in that stack of layers, O. 
  */
 @implicitNotFound("${R} is not a stack of layers")
 sealed trait Layers[R <: Coproduct] {
@@ -40,6 +42,17 @@ object Layers {
    */
   type Aux[R <: Coproduct, F[_] <: Coproduct] = Layers[R] {
     type O[X] = F[X]
+  }
+  type Empty = Layers[CNil] {
+    type O[X] = CNil
+  }
+  /**
+   * One[L]#N is the type of a stack consisting of the single layer L
+   */
+  sealed trait One[L <: Layer] {
+    final type N = Layers[L :+: CNil] {
+      type O[X] = L#F[X] :+: CNil
+    }
   }
   implicit def cnil = new Layers[CNil] {
     type O[X] = CNil

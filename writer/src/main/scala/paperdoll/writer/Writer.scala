@@ -18,6 +18,6 @@ object Writer {
     override def fold[A](put: O => A) = put(o)
   }
   
-  def tell[O0](o: O0): Eff[Writer_[O0] :+: CNil, Layers[Writer_[O0] :+: CNil] {type O[X] = Writer[O0, X] :+: CNil}, Unit] =
+  def tell[O0](o: O0): Eff.One[Writer_[O0], Unit]#O =
     Eff.send[Writer_[O0], Unit](put(o))
 }

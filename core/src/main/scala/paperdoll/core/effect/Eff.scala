@@ -110,6 +110,13 @@ sealed trait Handler[L <: Layer] {
 
 
 object Eff {
+  /**
+   * One[L, A]#O is the type of an Eff with layer stack just L,
+   * and value type A, i.e. Eff[L :+: CNil, ..., A]
+   */
+  sealed trait One[L <: Layer, A] {
+    final type O = Eff[L :+: CNil, Layers.One[L]#N, A]
+  }
   implicit def monadEff[R <: Coproduct, L <: Layers[R]] = new Monad[(Eff_[R, L])#O] {
     override def point[A](a0: ⇒ A) = new Pure[R, L, A] { val a = a0 }
     override def bind[A, B](fa: Eff[R, L, A])(f: A ⇒ Eff[R, L, B]) =

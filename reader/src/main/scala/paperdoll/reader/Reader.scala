@@ -22,7 +22,7 @@ object Reader {
   /**
    * Effect that reads an input I and returns it.
    */
-  def ask[I]: Eff[Reader_[I] :+: CNil, Layers[Reader_[I] :+: CNil] { type O[X] = Reader[I, X] :+: CNil }, I] =
+  def ask[I]: Eff.One[Reader_[I], I]#O =
     Eff.send[Reader_[I], I](get)
 
   /**
