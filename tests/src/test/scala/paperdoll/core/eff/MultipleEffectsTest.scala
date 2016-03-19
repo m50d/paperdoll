@@ -8,7 +8,6 @@ import shapeless.{:+:, CNil}
 import paperdoll.writer.Writer_
 import paperdoll.reader.Reader_
 import org.fest.assertions.Assertions.assertThat
-import paperdoll.core.effect.Eff
 
 class MultipleEffectsTest {
   /**
@@ -27,6 +26,6 @@ class MultipleEffectsTest {
       _ <- Writer.tell("end").extend[ReaderWriter]()
     } yield r
     
-    val pure1 = Reader.runReader(10)(Writer.runWriterVector[String].apply(rdwr)).run
+    val _1 = assertThat(Reader.runReader(10)(Writer.runWriterVector[String].apply(rdwr)).run).isEqualTo((100, Vector("begin", "end")))
   }
 }
