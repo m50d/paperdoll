@@ -5,7 +5,6 @@ import org.fest.assertions.Assertions.assertThat
 import scalaz.syntax.monad._
 import scalaz.std.anyVal._
 import Writer._
-import paperdoll.core.effect.Eff
 
 class WriterTest {
   @Test def basicFunctionality(): Unit = {
