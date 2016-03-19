@@ -15,7 +15,7 @@ import scalaz.Forall
  * really understand it, and so may have issues with eager evaluation in Scala
  * Also untested usage patterns might result in stack overflows for the same reason.
  */
-private[core] sealed trait Queue[C[_, _], A, B] {
+sealed trait Queue[C[_, _], A, B] {
   def :+[Z](element: C[B, Z]): Queue[C, A, Z]
   /**
    * Examine the front of the queue, destructuring it as either the queue being empty,
@@ -28,7 +28,7 @@ private[core] sealed trait Queue[C[_, _], A, B] {
    */
   def destructureHead: DestructuredHead[Queue, C, A, B]
 }
-private[core] object Queue {
+object Queue {
   def empty[C[_, _], A]: Queue[C, A, A] = Empty()
   def one[C[_, _], A, B](value: C[A, B]): Queue[C, A, B] = One(value)
 }
