@@ -28,10 +28,14 @@ where commands are composed of instance of that datatype and custom functions
  * Free monads let you [separate the declaration of a computation from its implementation](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html)
   * Can use multiple interpreters to run the same monadic computation e.g. test vs live
  * Freer monads let you interleave multiple monadic effects without the complexities of monad transformers
-  * Both definition of effects and of interpreters can be completely separate (even in separate codebases).
+  * Both definition of effects and of interpreters can be completely separate (even in separate codebases)
+ * Improving on the paper, Paperdoll uses a `Coproduct`-based representation for the effect stack,
+ allowing effects to be reordered and interpreted in in different orders by different interpreter stacks. 
 
 ## Non-features and rationales
 
+ * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
+ I think
  * `Eff#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
  is likely quadratic rather than linear as it should be.
@@ -69,27 +73,41 @@ an instance of this pattern.
 
 Algebraic data types generally offer a `fold` method which is designed
 to be the safe equivalent of a pattern match. When reviewing Scala
-[it is difficult to distinguish between safe and unsafe pattern matches](http://typelevel.org/blog/2014/11/10/why_is_adt_pattern_matching_allowed.html),
+[it is difficult to distinguish between safe and unsafe pattern matches](
+http://typelevel.org/blog/2014/11/10/why_is_adt_pattern_matching_allowed.html),
 so my preferred style is to avoid pattern matches entirely.
 This also makes it possible to hide trait implementation subtypes
 (by using anonymous classes) where appropriate.
 I have used pattern matching on `Inr`/`Inl` when working with `Coproduct`s
-since Shapeless does not offer a suitable `fold` method,
+since Shapeless does not offer a suitable `fold` method.
 
 Since `paperdoll-core` is very generic, a lot of the tests need at least one effect implementation.
-So I've moved those tests down into `paperdoll-tests`
+So I've moved those tests down into `paperdoll-tests`. TODO: Reevaluate project structure
 
 The project is split into a large number of small modules,
 primarily to prove that the interpreters truly are independent.
 
+I am a great admirer of [the circe philosophy](https://github.com/travisbrown/circe/blob/v0.3.0/DESIGN.md),
+but this project is in many respects an opposite: I think there is value
+in demonstrating that freer monads can be implemented in a very strictly safe
+subset of Scala, and that is the primary goal for this project.
+A more pragmatic project would likely provide the same API,
+but make use of unsafe casts internally for performance. 
+
 ## TODO
 
- * Implement more effect types
- * Create a test that demonstrates combining two unrelated effect monads and running in either order
+ * Remove Eff.run in favour of Eff#run
+ * Complete MultipleEffectsTest, possibly move examples around
+ * Implement all effect types from the paper
+  * State
+  * Committed choice
+ * Implement all examples from the paper
+  * Might be worth splitting out -examples projects
+  * Finish the "How to use" section of this document
  * Get into Maven Central
- * Finish this document
+  * Requires adding gpg signing to the build
  * Release 1.0
-  
+
 ## Notices
 
 Copyright 2015-2016 Michael Donaghy. md401@srcf.ucam.org

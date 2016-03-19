@@ -35,6 +35,7 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
    * This is a "shallow" cata. In practice the main use cases for this are recursive,
    * folding all the way down, but I found it very difficult to express the required type
    * for that case.
+   * While calling directly is supported, the most common use case for this is covered by Eff#handle.
    */
   def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]): B
 
@@ -47,6 +48,10 @@ sealed trait Eff[R <: Coproduct, L <: Layers[R], A] {
    * Can also be used to reorder the effect stack
    */
   final def extend[S <: Coproduct] = new ExtendingEff[R, L, S, A](this)
+  
+  final def run(implicit l: Leibniz[Nothing, Layers[R], L, Layers[R]{type O[X] = CNil}]): A = fold(identity, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ A })#K]{
+    override def apply[X] = (eff, cont) => l.subst[({type J[K <: Layers[R]] = K#O[X]})#J](eff).impossible
+  })
 }
 /**
  * An actual A - this is the "nil" case of Eff
@@ -61,6 +66,7 @@ final case class Pure[R <: Coproduct, L <: Layers[R], A](a: A) extends Eff[R, L,
  * The "cons" case: an effectful value and a continuation that will eventually lead to an A.
  * Note that the intermediate type X is hidden from the outside - one is expected
  * to only access it via the fold method.
+ * While instantiating directly is supported, most use cases should use the simpler Eff#send API
  */
 final case class Impure[R <: Coproduct, L <: Layers[R], X, A](eff: L#O[X],
   cont: Arrs[R, L, X, A]) extends Eff[R, L, A] {
@@ -118,7 +124,6 @@ object Eff {
    */
   def send[L <: Layer, V](value: L#F[V]): Eff.One[L, V]#O =
     Impure[L :+: CNil, Layers.One[L]#N, V, V](Inl(value), Queue.empty[Arr_[L :+: CNil, Layers.One[L]#N]#O, V])
-
   /**
    * Collapse an Arrs (a queue of Arr) to a single Arr.
    */
@@ -137,7 +142,6 @@ object Eff {
           }
         })
   }
-
   /**
    * "Lift" bind to produce a Handler for L.
    */
