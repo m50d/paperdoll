@@ -1,6 +1,6 @@
 package paperdoll.writer
 
-import shapeless.{ :+:, CNil, Coproduct }
+import shapeless.Coproduct
 import scalaz.{Leibniz, Monoid}
 import scalaz.Leibniz.===
 import scalaz.syntax.functor._

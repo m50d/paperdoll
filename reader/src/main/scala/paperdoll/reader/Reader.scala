@@ -1,6 +1,6 @@
 package paperdoll.reader
 
-import shapeless.{:+:, CNil, Coproduct}
+import shapeless.Coproduct
 import scalaz.Leibniz
 import scalaz.Id.Id
 import scalaz.Leibniz.===
