@@ -1,7 +1,6 @@
 package paperdoll.nondeterminism
 
 import scalaz.Leibniz.===
-import paperdoll.core.layer.Member
 import paperdoll.core.layer.Layers
 import shapeless.Coproduct
 import scalaz.MonadPlus
@@ -16,7 +15,7 @@ import shapeless.{ :+:, CNil }
 import paperdoll.core.layer.Subset
 
 sealed trait NDet[A] {
-  def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B)
+  def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B): B
 }
 
 object NDet {
