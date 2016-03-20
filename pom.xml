@@ -11,6 +11,7 @@
     </properties>
     <modules>
         <module>core</module>
+        <module>nondeterminism</module>
         <module>reader</module>
         <module>state</module>
         <module>tests</module>
