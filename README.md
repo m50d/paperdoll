@@ -41,6 +41,8 @@ where commands are composed of instance of that datatype and custom functions
  without needing to change the concrete monad values (as long as they *are* values -
  so perhaps only `Free`-like monads, but there is still an installed base of those
  that it is well worth being able to interoperate with).
+ Contributions are very welcome; instances for an external library "foo"
+ should be placed in a new `paperdoll-foo` maven module.
  * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
  * `Eff#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
@@ -103,8 +105,8 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
- * Implement committed choice
- * Implement all examples from the paper
+ * Consider moving NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
+ * Implement remaining things from the paper
   * Might be worth splitting out -examples projects
   * Finish the "How to use" section of this document
  * Get into Maven Central
