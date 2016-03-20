@@ -103,14 +103,13 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
- * Implement all effect types from the paper
-  * Finish StateTest
-  * Committed choice
+ * Implement committed choice
  * Implement all examples from the paper
   * Might be worth splitting out -examples projects
   * Finish the "How to use" section of this document
  * Get into Maven Central
   * Requires adding gpg signing to the build
+ * Decide on whether to do a gitter channel / conduct section / etc.
 
 ## Notices
 

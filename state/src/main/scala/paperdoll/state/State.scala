@@ -16,20 +16,20 @@ import paperdoll.core.queue.Queue
 import paperdoll.core.effect.Arr
 
 final class StateRunner[S] {
-  def loop[R <: Coproduct, L0 <: Layers[R], A, RR <: Coproduct, RL <: Layers[RR]](
+  def loop[R <: Coproduct, L0 <: Layers[R], A, RR <: Coproduct, RL0 <: Layers[RR], RL1 <: Layers[_]](
     eff: Eff[R, L0, A], s: S)(implicit m0: Member[R, Writer_[S]] {
       type L = L0
       type RestR = RR
-      type RestL = RL
-    }, m1: Member[R, Reader_[S]] {
-      type L = RL
-    }): Eff[m1.RestR, m1.RestL, (A, S)] = eff.fold[Eff[m1.RestR, m1.RestL, (A, S)]](
+      type RestL = RL0
+    }, m1: Member[RR, Reader_[S]] {
+      type L = RL1
+    }, l: Leibniz[Nothing, Layers[_], RL0, RL1]): Eff[m1.RestR, m1.RestL, (A, S)] = eff.fold[Eff[m1.RestR, m1.RestL, (A, S)]](
     a ⇒ Pure((a, s)),
     new Forall[({ type K[X] = (L0#O[X], Arrs[R, L0, X, A]) ⇒ Eff[m1.RestR, m1.RestL, (A, S)] })#K] {
       override def apply[X] = (eff, cont) ⇒ {
         def newCont(s: S) = Eff.compose(cont) andThen { e ⇒ loop(e, s) }
         m0.remove(eff).fold(
-          effr ⇒ m1.remove(effr).fold(
+          effr ⇒ m1.remove(l.subst[({type K[RLL <: Layers[_]] = RLL#O[X]})#K](effr)).fold(
             effrr ⇒ Impure[m1.RestR, m1.RestL, X, (A, S)](effrr, Queue.one[Arr_[m1.RestR, m1.RestL]#O, X, (A, S)](
               newCont(s))),
             _.fold(witness ⇒ Leibniz.symm[Nothing, Any, S, X](witness).subst[({ type K[Y] = Arr[m1.RestR, m1.RestL, Y, (A, S)] })#K](newCont(s))(s))),
@@ -37,27 +37,27 @@ final class StateRunner[S] {
       }
     })
 
-  def apply[R <: Coproduct, L0 <: Layers[R], A, L1 <: Layers[R], RR <: Coproduct, RL0 <: Layers[RR], RL1 <: Layers[RR]](
+  def apply[R <: Coproduct, L0 <: Layers[R], A, L1 <: Layers[R], RR <: Coproduct, RL0 <: Layers[RR], RL1 <: Layers[_]](
     eff: Eff[R, L0, A], s: S)(implicit m0: Member[R, Writer_[S]] {
       type L = L1
       type RestR = RR
       type RestL = RL0
-    }, m1: Member[R, Reader_[S]] {
+    }, m1: Member[RR, Reader_[S]] {
       type L = RL1
-    }, l0: Leibniz[Nothing, Layers[R], L1, L0], l1: Leibniz[Nothing, Layers[RR], RL1, RL0]): Eff[m1.RestR, m1.RestL, (A, S)] =
-    loop[R, L0, A, RR, RL0](eff, s)(l0.subst[({
+    }, l0: Leibniz[Nothing, Layers[R], L1, L0], l1: Leibniz[Nothing, Layers[_], RL0, RL1]): Eff[m1.RestR, m1.RestL, (A, S)] =
+    loop[R, L0, A, RR, RL0, RL1](eff, s)(l0.subst[({
       type K[LL <: Layers[R]] = Member[R, Writer_[S]] {
         type L = LL
         type RestR = RR
         type RestL = RL0
       }
-    })#K](m0), l1.subst[({
-      type K[RLL <: Layers[RR]] = Member[R, Reader_[S]] {
+    })#K](m0), m1, l1 /*l1.subst[({
+      type K[RLL <: Layers[RR]] = Member[RR, Reader_[S]] {
         type L = RLL
         type RestR = m1.RestR
         type RestL = m1.RestL
       }
-    })#K](m1))
+    })#K](m1)*/)
 }
 
 object State {
