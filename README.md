@@ -20,12 +20,14 @@ TODO
  * Implementations of some popular concrete, useful monads (e.g. `Reader`, `Writer`)
   * i.e. some classes that do useful things when used in `for`/`yield` blocks
  * ScalaZ-compatible typeclass instances allow monad-generic functions
-  * i.e. you can use these classes with ScalaZ functions like `traverse`, or with custom functions that work for any monad 
+  * i.e. you can use these classes with ScalaZ functions like `traverse`,
+  or with custom functions that work for any monad 
  * Offers a [Free Monad](http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html) equivalent
   * i.e. for any datatype you like, you can extend that datatype to a "command object",
 where commands are composed of instance of that datatype and custom functions
   * Note there is no need for the `Coyoneda` trick in this implementation
- * Free monads let you [separate the declaration of a computation from its implementation](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html)
+ * Free monads let you [separate the declaration of a computation from its implementation
+ ](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html)
   * Can use multiple interpreters to run the same monadic computation e.g. test vs live
  * Freer monads let you interleave multiple monadic effects without the complexities of monad transformers
   * Both definition of effects and of interpreters can be completely separate (even in separate codebases)
@@ -119,7 +121,7 @@ with me (Michael Donaghy) by email to md401@srcf.ucam.org.
 If you want to talk about a conduct matter privately I will
 respect that - I will likely be unwilling to act on an allegation
 if you want to keep the allegation and/or your identity private
-(I think it's important that participants be protected
+(I think it's important that project participants be protected
 from anonymous accusations), but you can always talk to me
 and I won't take any public actions without your consent.
 
@@ -155,22 +157,32 @@ seen arise elsewhere. My decision is final in all cases:
 I will generally look to resolve conduct issues amicably through
 discussion wherever possible. In cases where this fails,
 the only sanction I am able or willing to impose is temporary
-or permanent banning from project spaces. Serious harassment
-issues remain a matter for law enforcement, not this project.
+or permanent banning from project spaces. Cases of serious harassment
+remain a matter for law enforcement, not project governance.
 
-I ask those on the banlist not to participate in spaces
+I ask those on the banlist not to participate in community spaces
 associated with this project, including but not limited
 to the issue tracker and wiki.
-I may or may not take technical measures to enforce bans,
-but the canonical banlist is that given here; the absence of a
-technically enforced ban should not be taken to mean that an
-individual is no longer banned, and vice versa.
+The banlist does not affect your license to the software.
+I may or may not take technical measures to enforce bans;
+the presence or absence of a technical ban measure should not be taken
+to imply the existence of a ban not on the list in this document,
+or the nonexistence of a ban on this list in the document.
+If a technical ban measure is preventing you from participating
+but your name is not listed in this document, please file an
+issue if possible, or email me at md401@srcf.ucam.org if you
+cannot file an issue. 
 
 ### Banlist
 
- * Tony Morris
+ * Tony Morris (indefinite)
 
 ### Content Notes
+
+Paperdoll source code may contain sexualised elements, and discussion
+around it may be or become sexualised. Individuals who find sexualised
+code or conversation inherently threatening are advised not to
+contribute to this project or participate in its spaces. 
 
 ### Rationale
 
@@ -182,14 +194,36 @@ but are rarely clear and objective enough to ensure consistent,
 predictable handling of incidents or allegations.
 
 The TypeLevel Code of Conduct in particular has been ambiguously enforced
-by unaccountable people. Specifically, the inconsistent
+with very little accountability. Specifically, the inconsistent
 statements from Lars Hupel and Miles Sabin at various times
 regarding alleged violation (or not) of the Code of Conduct
 by Tony Morris are irreconcilable with the basic principles
 of transparency and accountability in project governance.
-(Indeed, I find it impossible to reconcile the inconsistent statements
-Mr Hupel have made on the matter with the presumption that he is
-acting in good faith and honesty).
+I believe this was an inappropriate use of a Code of Conduct,
+that likely arose out of an unwillingness to directly confront
+a specific individual who was causing problems. But I also believe
+that adopting a code within a small project inherently leads
+those involved to inappropriately overgeneralise.
+Therefore I explicitly intend handle conduct issues in Paperdoll
+at a personal/individual level, unless and until I become experienced
+enough to set good general policies.
+
+Mr Morris has upset people (including newcomers and myself)
+in Scala-related spaces on numerous occasions. I find it implausible
+that his statements were not intended to upset their recipients,
+and in any case he has been repeatedly warned about them by many people.
+My decision to ban him is taken in full awareness of his contributions to the Scala
+community (in particular as founder of ScalaZ, which Paperdoll depends on);
+while such contributions are laudable they do not make the things he says
+any less unacceptable.
+
+Paperdoll is an act of artistic self-expression (though it is also intended
+as a production-standard library). Sex is part of human life
+and I do not think it appropriate or healthy to pretend otherwise;
+therefore sexualised code has its place in the project.
+(I mention this as a content note because it differs from the TypeLevel Code of Conduct,
+which states "participants and community organizers should not use
+sexualized images, activities, or other material"). 
 
 ## Notices
 
