@@ -108,10 +108,17 @@ but make use of unsafe casts internally for performance.
  * Consider moving NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
  * Implement remaining things from the paper
   * Might be worth splitting out -examples projects
-  * Finish the "How to use" section of this document
+  * Finish this document
  * Get into Maven Central
   * Requires adding gpg signing to the build
- * Decide on whether to do a gitter channel / conduct section / etc.
+ 
+## Conduct
+
+TODO
+
+##Banlist
+
+TODO
 
 ## Notices
 
