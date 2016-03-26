@@ -36,7 +36,8 @@ where commands are composed of instance of that datatype and custom functions
 
 ## Non-features and rationales
 
- * Currently, supported monads are limited to (reimplementations of) those in the paper.
+ * Currently, supported monads are limited to (reimplementations of) those in the paper,
+ and adapters for some monads from Cats.
  While this is sufficient to prove the concept, it would be better to add `Layer` adapters
  for popular real-world Scala cases (e.g. those used by doobie).
  The `Eff` abstraction should be easy to use with any existing monad implementation
@@ -67,7 +68,10 @@ where commands are composed of instance of that datatype and custom functions
  I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
  but any implementation of binary compatibility checking in the maven build would be very welcome.
  * Paperdoll depends on ScalaZ since it makes extensive use of `Leibniz`. I would prefer to depend on Cats
- but this functionality is a firm requirement.
+ but this functionality is a firm requirement. I also use a feature of `MonadPlus` that I don't believe
+ is presently implemented in cats.
+ * I have not implemented the `MonadCatchIO` example from the paper as there is no single established
+ IO monad implementation in Scala.
 
 ## Implementation notes
 
@@ -110,7 +114,8 @@ but make use of unsafe casts internally for performance.
  * Consider moving NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
  * Implement remaining things from the paper
   * Might be worth splitting out -examples projects
-  * Finish TODOs in this document
+ * Implement cats adapters
+ * Finish TODOs in this document
  * Submit a release to Maven Central
  
 ## Conduct
