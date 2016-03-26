@@ -108,17 +108,49 @@ but make use of unsafe casts internally for performance.
  * Consider moving NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
  * Implement remaining things from the paper
   * Might be worth splitting out -examples projects
-  * Finish this document
- * Get into Maven Central
-  * Requires adding gpg signing to the build
+  * Finish TODOs in this document
+ * Submit a release to Maven Central
  
 ## Conduct
 
-TODO
+This project does not have a code of conduct. Please raise
+any conduct issues either via the issue tracker or directly
+with me (Michael Donaghy) by email to md401@srcf.ucam.org.
 
-##Banlist
 
-TODO
+
+I ask those on the banlist not to participate in spaces
+associated with this project, including but not limited
+to the issue tracker and wiki.
+I may or may not take technical measures to enforce bans,
+but the canonical banlist is that given here; the absence of a
+technically enforced ban should not be taken to mean that an
+individual is no longer banned, and vice versa.
+
+### Banlist
+
+### Content Notes
+
+
+
+### Rationale
+
+Conduct has sadly become an issue in the Scala community of late.
+Some projects have responded by adopting codes of conduct.
+In my view such codes have been counterproductive on the whole:
+they necessitate all the downsides of a formal process,
+but are rarely clear and objective enough to ensure consistent,
+predictable handling of incidents or allegations.
+
+The TypeLevel Code of Conduct in particular has been ambiguously enforced
+by unaccountable people. Specifically, the inconsistent
+statements from Lars Hupel and Miles Sabin at various times
+regarding alleged violation (or not) of the Code of Conduct
+by Tony Morris are irreconcilable with the basic principles
+of transparency and accountability in project governance.
+(Indeed, I find it impossible to reconcile the inconsistent statements
+Mr Hupel have made on the matter with the presumption that he is
+acting in good faith and honesty).
 
 ## Notices
 
