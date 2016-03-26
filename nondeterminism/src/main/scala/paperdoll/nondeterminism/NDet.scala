@@ -13,6 +13,8 @@ import paperdoll.core.effect.Arrs
 import scalaz.Leibniz
 import shapeless.{ :+:, CNil }
 import paperdoll.core.layer.Subset
+import scalaz.syntax.foldable._
+import scalaz.std.list._
 
 sealed trait NDet[A] {
   def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B): B
@@ -43,4 +45,14 @@ object NDet {
         })
       override def empty[A] = Eff.send[NDet_, A](zero).extend[R].apply[LT0]()
     }
+  
+//  private[this] def loop[R <: Coproduct, L <: Layers[R], A, LT0 <: Layers[NDet_ :+: CNil]](
+//      jq: List[Eff[R, L, A]], j: Eff[R, L, A])(implicit su: Subset[R, NDet_ :+: CNil] {
+//    type LS = L
+//    type LT = LT0
+//  }, le: Leibniz[Nothing, Layers[NDet_ :+: CNil], LT0, Layers.One[NDet_]#N]): Eff[R, L, Option[(A, Eff[R, L, A])]] =
+//    j.fold(a => Some((a, jq.msumlU)), ???)
+  
+  def msplit[R <: Coproduct, L <: Layers[R], A, LT0 <: Layers[R]](eff: Eff[R, L, A]): Eff[R, L, Option[(A, Eff[R, L, A])]] =
+    ???
 }
