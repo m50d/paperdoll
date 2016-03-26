@@ -116,8 +116,47 @@ but make use of unsafe casts internally for performance.
 This project does not have a code of conduct. Please raise
 any conduct issues either via the issue tracker or directly
 with me (Michael Donaghy) by email to md401@srcf.ucam.org.
+If you want to talk about a conduct matter privately I will
+respect that - I will likely be unwilling to act on an allegation
+if you want to keep the allegation and/or your identity private
+(I think it's important that participants be protected
+from anonymous accusations), but you can always talk to me
+and I won't take any public actions without your consent.
 
+The following is explicitly not a code and not binding,
+but is a guide to my current thinking on issues that I have
+seen arise elsewhere. My decision is final in all cases:
 
+ * Be polite. Correctness is no excuse for rudeness.
+  * At times it may be even better to not answer at all if you
+  know the answer to a (technical or other) question but are not
+  able or willing to express that answer politely.
+  * This applies particularly when interacting with newcomers
+  to the project, the language, or programming in general.
+ * I expect discussion to occur on a wide variety of subjects,
+ not necessarily "on-topic". However everyone has the right to disengage
+ from a particular topic and others should respect that.
+  * Note that this applies even to technical matters.
+  It's correct to be wary of the [XY problem](http://xyproblem.info/),
+  but if someone has a particular requirement and is not interested
+  in discussing why they have that requirement, respect that.
+ * If any participant requests some reasonable accommodation for themselves
+ (including but not limited to: referring to them in a particular
+ fashion or none, not discussing particular topics in project spaces
+ (provided those topics are not directly relevant to the project))
+ please respect that. If you find an accommodation that someone
+ else has requested to be onerous then please raise this as a
+ conduct issue.
+  * Generally I will either require participants to make that
+  accommodation or add the non-accommodation to the Content Notes
+  section of this document.
+  * Please request accommodations only in good faith and only for yourself.
+
+I will generally look to resolve conduct issues amicably through
+discussion wherever possible. In cases where this fails,
+the only sanction I am able or willing to impose is temporary
+or permanent banning from project spaces. Serious harassment
+issues remain a matter for law enforcement, not this project.
 
 I ask those on the banlist not to participate in spaces
 associated with this project, including but not limited
@@ -129,9 +168,9 @@ individual is no longer banned, and vice versa.
 
 ### Banlist
 
+ * Tony Morris
+
 ### Content Notes
-
-
 
 ### Rationale
 
