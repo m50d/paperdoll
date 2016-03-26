@@ -109,6 +109,9 @@ object Eff {
   sealed trait One[L <: Layer, A] {
     final type O = Eff[L :+: CNil, Layers.One[L]#N, A]
   }
+  sealed trait One_[L <: Layer] {
+    final type O[A] = One[L, A]#O
+  }
   implicit def monadEff[R <: Coproduct, L <: Layers[R]] = new Monad[(Eff_[R, L])#O] {
     override def point[A](a: ⇒ A) = Pure[R, L, A](a)
     override def bind[A, B](fa: Eff[R, L, A])(f: A ⇒ Eff[R, L, B]) =
