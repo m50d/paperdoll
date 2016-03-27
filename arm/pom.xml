@@ -15,6 +15,16 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.github.m50d</groupId>
+			<artifactId>paperdoll-reader</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.m50d</groupId>
+			<artifactId>paperdoll-writer</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.jsuereth</groupId>
 			<artifactId>scala-arm_2.11</artifactId>
 			<version>1.4</version>
