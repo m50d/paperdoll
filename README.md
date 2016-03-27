@@ -36,8 +36,7 @@ where commands are composed of instance of that datatype and custom functions
 
 ## Non-features and rationales
 
- * Currently, supported monads are limited to (reimplementations of) those in the paper,
- and adapters for some monads from Cats.
+ * Currently, supported monads are limited to (reimplementations of) those in the paper
  While this is sufficient to prove the concept, it would be better to add `Layer` adapters
  for popular real-world Scala cases (e.g. those used by doobie).
  The `Eff` abstraction should be easy to use with any existing monad implementation
@@ -46,6 +45,8 @@ where commands are composed of instance of that datatype and custom functions
  that it is well worth being able to interoperate with).
  Contributions are very welcome; instances for an external library "foo"
  should be placed in a new `paperdoll-foo` maven module.
+  * Support for ScalaZ IndexedReaderWriterStateT etc. would be relatively easy to add;
+  with the future of ScalaZ and related projects unclear I'm holding off for now.
  * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
  * `Eff#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
@@ -114,7 +115,7 @@ but make use of unsafe casts internally for performance.
  * Consider moving NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
  * Implement remaining things from the paper
   * Might be worth splitting out -examples projects
- * Implement cats adapters
+ * Consider implementing doobie adapters
  * Finish TODOs in this document
  * Submit a release to Maven Central
  
