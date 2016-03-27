@@ -20,7 +20,6 @@ import paperdoll.core.queue.Queue
 import paperdoll.core.effect.Bind
 import paperdoll.core.effect.Arr
 import paperdoll.core.effect.Handler
-import scalaz.syntax.monad._
 import Predef.identity
 
 sealed trait Region[S, R, A] {
