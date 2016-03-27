@@ -1,6 +1,7 @@
 package paperdoll.nondeterminism
 
 import org.junit.Test
+import scala.Predef.intWrapper
 import NDet._
 import scalaz.syntax.foldable._
 import scalaz.std.list._
