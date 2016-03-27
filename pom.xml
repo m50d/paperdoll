@@ -33,6 +33,7 @@
 		</profile>
 	</profiles>
 	<modules>
+		<module>arm</module>
 		<module>core</module>
 		<module>nondeterminism</module>
 		<module>reader</module>
