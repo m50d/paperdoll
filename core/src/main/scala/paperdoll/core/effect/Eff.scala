@@ -86,21 +86,6 @@ sealed trait Eff_[R <: Coproduct, L <: Layers[R]] {
   final type O[A] = Eff[R, L, A]
 }
 
-/**
- * Handler for the effect L: given an effectful value in a
- * stack of effects R containing L, return the same
- */
-sealed trait Handler[L <: Layer] {
-  type O[X]
-  def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L2 },
-    le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, O[A]]
-}
-object Handler {
-  type Aux[L <: Layer, O0[_]] = Handler[L] {
-    type O[X] = O0[X]
-  }
-}
-
 object Eff {
   /**
    * One[L, A]#O is the type of an Eff with layer stack just L,
@@ -156,10 +141,7 @@ object Eff {
   def handle[L <: Layer](bind: Bind[L]): Handler.Aux[L, bind.O] =
     new Handler[L] {
       override type O[X] = bind.O[X]
-      /**
-       * Actual implementation - apply method has extra Leibniz to assist type inference
-       */
-      private[this] def run[R <: Coproduct, L1 <: Layers[R], A](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L1 }): Eff[me.RestR, me.RestL, O[A]] =
+      override def run[R <: Coproduct, L1 <: Layers[R], A](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L1 }): Eff[me.RestR, me.RestL, O[A]] =
         eff.fold({ a ⇒ Pure[me.RestR, me.RestL, O[A]](bind.pure(a)) }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Eff[me.RestR, me.RestL, O[A]] })#K] {
           override def apply[X] = { (eff, cont) ⇒
             //New continuation is: recursively run this handler on the result of the old continuation 
@@ -169,7 +151,5 @@ object Eff {
               thisEffect ⇒ bind[X, me.RestR, me.RestL, A](thisEffect, newCont))
           }
         })
-      override def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L2 },
-        le: Leibniz[Nothing, Layers[R], L1, L2]): Eff[me.RestR, me.RestL, O[A]] = run(le.subst[({ type L[X <: Layers[R]] = Eff[R, X, A] })#L](eff))(me)
     }
 }
