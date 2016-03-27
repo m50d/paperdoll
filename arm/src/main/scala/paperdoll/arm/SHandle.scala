@@ -9,5 +9,6 @@ private[arm] case class Handle[S, R](r: R)(implicit res: Resource[R]) extends SH
 
 object SHandle {
   def newSHandle[R: Resource](r: R): Eff.One[SHandle_[S], R]#O forSome {type S} =
-    Eff.send[SHandle_[String], R](Handle(r))
+    Eff.send[SHandle_[Any], R](Handle(r))
+//  def operate
 }
