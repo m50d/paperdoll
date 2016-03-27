@@ -11,6 +11,7 @@ import paperdoll.core.layer.Layers
 import shapeless.Coproduct
 import scalaz.Leibniz.===
 import shapeless.UnaryTCConstraint
+import paperdoll.core.effect.Pure
 
 sealed trait Region[S, R, A] {
   def fold[B](resource: (A === R, ManagedResource[R]) => B): B
@@ -22,9 +23,23 @@ object Region {
       override def fold[B](resource: (R === R, ManagedResource[R]) => B) =
         resource(Leibniz.refl, managed(r))
     })
-
+    
+//  private[this] def open[S, RE, R <: Coproduct, L1 <: Layers[R], A](resource: eff: Eff[R, L1, A])(implicit me: Member[R, L] { type L = L1 }):
+//    Eff[me.RestR, me.RestL, O[A]]
+//  
+//  eff.fold({ a ⇒ Pure[me.RestR, me.RestL, A](a) }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Eff[me.RestR, me.RestL, O[A]] })#K] {
+//      override def apply[X] = { (eff, cont) ⇒
+//        //New continuation is: recursively run this handler on the result of the old continuation 
+//        val newCont = compose(cont) andThen { run(_) }
+//        me.remove(eff).fold(
+//          otherEffect ⇒ Impure[me.RestR, me.RestL, X, A](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X, O[A]](newCont)),
+//          thisEffect ⇒ bind[X, me.RestR, me.RestL, A](thisEffect, newCont))
+//      }
+//    })
+//
 //  def newRgn[S, RE, R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Eff[R, L1, A])(
 //    implicit me: Member[R, Region_[S, RE]] { type L = L2 },
-//    le: Leibniz[Nothing, Layers[R], L1, L2],
-//    safe: UnaryTCConstraint[R, SafeForRegion]): Eff[me.RestR, me.RestL, A] = ???
+//    le: Leibniz[Nothing, Layers[R], L1, L2] /* TODO ,
+//    safe: UnaryTCConstraint[R, SafeForRegion]*/ ): Eff[me.RestR, me.RestL, A] =
+//    ???
 }
