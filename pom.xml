@@ -33,6 +33,7 @@
 		</profile>
 	</profiles>
 	<modules>
+		<module>cats-reader</module>
 		<module>core</module>
 		<module>nondeterminism</module>
 		<module>reader</module>
