@@ -4,6 +4,7 @@ import resource.Resource
 import paperdoll.core.effect.Eff
 import resource.ManagedResource
 import resource.managed
+import scala.reflect.Manifest
 
 sealed trait Region[S, R, A]
 
