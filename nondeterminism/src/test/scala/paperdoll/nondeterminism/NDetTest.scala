@@ -6,7 +6,6 @@ import NDet._
 import scalaz.syntax.foldable._
 import scalaz.std.list._
 import scalaz.syntax.monadPlus._
-import shapeless.{ :+:, CNil }
 import paperdoll.core.effect.Eff
 
 class NDetTest {
