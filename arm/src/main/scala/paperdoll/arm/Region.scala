@@ -10,7 +10,7 @@ import paperdoll.core.layer.Member
 import paperdoll.core.layer.Layers
 import shapeless.Coproduct
 import scalaz.Leibniz.===
-import shapeless.UnaryTCConstraint
+//import shapeless.UnaryTCConstraint
 import paperdoll.core.effect.Pure
 import scalaz.Forall
 import paperdoll.core.effect.Arr_
