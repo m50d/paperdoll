@@ -32,7 +32,7 @@ object NDet {
   implicit def monadPlus[R <: Coproduct, L <: Layers[R], LT0 <: Layers[NDet_ :+: CNil]](implicit su: Subset[R, NDet_ :+: CNil] {
     type LS = L
     type LT = LT0
-  }, le: Leibniz[Nothing, Layers[NDet_ :+: CNil], LT0, Layers.One[NDet_]#N]): MonadPlus[Eff_[R, L]#O] =
+  }, le: Leibniz[Nothing, Layers[NDet_ :+: CNil], LT0, Layers.One[NDet_]]): MonadPlus[Eff_[R, L]#O] =
     new MonadPlus[Eff_[R, L]#O] {
       override def point[A](a: ⇒ A) = Pure[R, L, A](a)
       override def bind[A, B](fa: Eff[R, L, A])(f: A ⇒ Eff[R, L, B]) =

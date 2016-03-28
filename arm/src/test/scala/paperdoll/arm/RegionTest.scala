@@ -20,8 +20,8 @@ class RegionTest {
    * untilM or similar but I can't quite see how.
    */
   private[this] def readToWriter(br: BufferedReader): Eff.One[Writer_[String], Unit] =
-    Option(br.readLine()).fold({}.point)({
-    line => Writer.tell(line) *> readToWriter(br)
+    Option(br.readLine()).fold({}.point[Eff.One_[Writer_[String]]#O])({
+    line => tell(line) *> readToWriter(br)
 })
   
 	@Test def regionWithAccessInside(): Unit = {
@@ -30,7 +30,7 @@ class RegionTest {
 	  val eff = for {
 	    inputStream <- newSHandle(_0, getClass.getResourceAsStream("names.txt")).extend[EffectStack]()
 	    reader <- newSHandle(_1, new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))).extend[EffectStack]()
-	    _ <- readToWriter(br).extend[EffectStack]()
+	    _ <- readToWriter(reader).extend[EffectStack]()
 	  } yield {}
 	}
 }

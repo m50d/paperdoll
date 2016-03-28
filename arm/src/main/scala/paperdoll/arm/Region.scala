@@ -37,7 +37,7 @@ object Region {
    * and start numbering from there, so that client code that calls
    * two or more such library methods can ensure the types don't overlap.
    */
-  def newSHandle[S <: Nat, R](s: S, r: => R): Eff.One[Region_[S, R], R]#O =
+  def newSHandle[S <: Nat, R](s: S, r: => R): Eff.One[Region_[S, R], R] =
     Eff.send[Region_[S, R], R](new Region[S, R, R] {
       override def fold[B](resource: (R === R, R) => B) =
         resource(Leibniz.refl, r)
