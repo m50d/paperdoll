@@ -2,7 +2,6 @@ package paperdoll.arm
 
 import resource.Resource
 import paperdoll.core.effect.Eff
-import resource.ManagedResource
 import resource.managed
 import scala.reflect.Manifest
 import scalaz.Leibniz
@@ -19,7 +18,6 @@ import paperdoll.core.queue.Queue
 import paperdoll.core.effect.Bind
 import paperdoll.core.effect.Arr
 import paperdoll.core.effect.Handler
-import scala.util.control.Exception
 import Predef.identity
 
 sealed trait Region[S, R, A] {
