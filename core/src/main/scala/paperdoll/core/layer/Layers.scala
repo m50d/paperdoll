@@ -47,12 +47,10 @@ object Layers {
     type O[X] = CNil
   }
   /**
-   * One[L]#N is the type of a stack consisting of the single layer L
+   * One[L] is the type of a stack consisting of the single layer L
    */
-  sealed trait One[L <: Layer] {
-    final type N = Layers[L :+: CNil] {
-      type O[X] = L#F[X] :+: CNil
-    }
+  type One[L <: Layer] = Layers[L :+: CNil] {
+    type O[X] = L#F[X] :+: CNil
   }
   implicit def cnil = new Layers[CNil] {
     type O[X] = CNil
