@@ -7,6 +7,7 @@ import java.io.InputStreamReader
 import shapeless.{:+:, CNil}
 import java.io.InputStream
 import paperdoll.writer.Writer_
+import paperdoll.writer.Writer.tell
 import shapeless.Nat._0
 import shapeless.Nat._1
 
@@ -17,6 +18,8 @@ class RegionTest {
 	  val eff = for {
 	    inputStream <- newSHandle(_0, getClass.getResourceAsStream("names.txt")).extend[EffectStack]()
 	    reader <- newSHandle(_1, new InputStreamReader(inputStream, "UTF-8")).extend[EffectStack]()
+	    //TODO: read lines from file, loop using whileM_ or similar
+	    _ <- tell(reader.read.toString).extend[EffectStack]()
 	  } yield {}
 	}
 }
