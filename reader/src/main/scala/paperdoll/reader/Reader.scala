@@ -23,7 +23,7 @@ object Reader {
   /**
    * Effect that reads an input I and returns it.
    */
-  def ask[I]: Eff.One[Reader_[I], I]#O =
+  def ask[I]: Eff.One[Reader_[I], I] =
     Eff.send[Reader_[I], I](get)
 
   /**
