@@ -113,9 +113,9 @@ but make use of unsafe casts internally for performance.
 ## TODO for 1.0
 
  * Consider moving NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
- * Implement remaining things from the paper
-  * Might be worth splitting out -examples projects
  * Consider implementing doobie adapters
+ * Final code review for readability
+  * With particular focus on examples
  * Finish TODOs in this document
  * Submit a release to Maven Central
  

@@ -19,36 +19,38 @@ import paperdoll.core.effect.Bind
 import paperdoll.core.effect.Arr
 import paperdoll.core.effect.Handler
 import Predef.identity
+import shapeless.Nat
 
-sealed trait Region[S, R, A] {
+sealed trait Region[S <: Nat, R, A] {
   def fold[B](resource: (A === R, R) => B): B
 }
-import scala.util.control.ControlThrowable
 
 object Region {
-  def newSHandle[R](r: => R): Eff.One[Region_[S, R], R]#O forSome { type S } =
-    Eff.send[Region_[Any, R], R](new Region[Any, R, R] {
+  /**
+   * S is an index to allow us to have multiple regions for resources
+   * of the same type. Use a different S for each resource in the same
+   * effect stack (e.g. when opening two or more files).
+   * (Reusing the same S for different *types* of resource R should
+   * work but I still don't recommend it)
+   * If writing a library method that returns an effect stack that
+   * includes regions, best practice is to take an "offset" argument
+   * and start numbering from there, so that client code that calls
+   * two or more such library methods can ensure the types don't overlap.
+   */
+  def newSHandle[S <: Nat, R](s: S, r: => R): Eff.One[Region_[S, R], R]#O =
+    Eff.send[Region_[S, R], R](new Region[S, R, R] {
       override def fold[B](resource: (R === R, R) => B) =
         resource(Leibniz.refl, r)
     })
-    
-  /**
-   * Copied from AbstractManagedResource
-   */
-  private[this] def isRethrown(t: Throwable): Boolean = t match {
-    case _: ControlThrowable      => true
-    case _: InterruptedException  => true
-    case _                        => false    
-  }
 
-  private[this] def handleInRgn[S, RE] = Eff.handle(new Bind[Region_[S, RE]] {
+  private[this] def handleInRgn[S <: Nat, RE] = Eff.handle(new Bind[Region_[S, RE]] {
     override type O[X] = Either[Seq[Throwable], X]
     override def pure[A](a: A) = Right(a)
     override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: Region[S, RE, V], cont: Arr[RR, RL, V, O[A]]) =
       Pure(Left(Seq(new RuntimeException("Opened the same handle twice. The type system is supposed to forbid this"))))
   })
 
-  def newRgn[S, RE: Manifest](implicit re: Resource[RE]): Handler[Region_[S, RE]] = new Handler[Region_[S, RE]] {
+  def newRgn[S <: Nat, RE: Manifest](implicit re: Resource[RE]): Handler[Region_[S, RE]] = new Handler[Region_[S, RE]] {
     override type O[X] = Either[Seq[Throwable], X]
     override def run[R <: Coproduct, L1 <: Layers[R], A](eff: Eff[R, L1, A])(
       implicit me: Member[R, Region_[S, RE]] { type L = L1 }): Eff[me.RestR, me.RestL, O[A]] =
