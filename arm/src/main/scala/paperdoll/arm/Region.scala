@@ -43,46 +43,31 @@ object Region {
         resource(Leibniz.refl, r)
     })
 
-  private[this] def handleInRgn[S <: Nat, RE] = Eff.handle(new Bind[Region_[S, RE]] {
-    override type O[X] = Either[Seq[Throwable], X]
-    override def pure[A](a: A) = Right(a)
+  private[this] def handleInRgn[S <: Nat, RE](handle: RE)(implicit re: Resource[RE]) = Eff.handle(new Bind[Region_[S, RE]] {
+    override type O[X] = X
+    override def pure[A](a: A) = {
+      re.close(handle)
+      a
+    }
     override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: Region[S, RE, V], cont: Arr[RR, RL, V, O[A]]) =
-      Pure(Left(Seq(new RuntimeException("Opened the same handle twice. The type system is supposed to forbid this"))))
+      throw new RuntimeException("Opened the same handle twice. Did you reuse the same S type for multiple regions?")
   })
 
-  def newRgn[S <: Nat, RE: Manifest](implicit re: Resource[RE]): Handler[Region_[S, RE]] = new Handler[Region_[S, RE]] {
-    override type O[X] = Either[Seq[Throwable], X]
+  def newRgn[S <: Nat, RE](implicit re: Resource[RE]): Handler[Region_[S, RE]] = new Handler[Region_[S, RE]] {
+    override type O[X] = X
     override def run[R <: Coproduct, L1 <: Layers[R], A](eff: Eff[R, L1, A])(
       implicit me: Member[R, Region_[S, RE]] { type L = L1 }): Eff[me.RestR, me.RestL, O[A]] =
       eff.fold(
-        a => Pure[me.RestR, me.RestL, O[A]](Right(a)),
+        a => Pure[me.RestR, me.RestL, A](a),
         new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Eff[me.RestR, me.RestL, O[A]] })#K] {
           override def apply[X] = { (eff, cont) ⇒
             val composed = Eff.compose(cont)
             me.remove(eff).fold(
               otherEffect ⇒ Impure[me.RestR, me.RestL, X, O[A]](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X, O[A]](
                 composed andThen { run(_) })),
-              _.fold({ (le, res) =>
-                managed(res).acquireFor {
-                  re =>
-                    //FIXME I think this is still lazy. We may need to use a lower-level interface
-                    //than ManagedResource: open the resource explicitly, and then close it in the final
-                    //pure case
-//                    val handle = open
-//    val result = catchingNonFatal either (f(handle))
-//    val close  = catchingNonFatal either unsafeClose(handle, result.left.toOption)
-//    // Here we pattern match to make sure we get all the errors.
-//    (result, close) match {
-//      case (Left(t1), _       ) if isRethrown(t1) => throw t1
-//      case (Left(t1), Left(t2))                   => Left(t1 :: t2 :: Nil)
-//      case (Left(t1), _       )                   => Left(t1 :: Nil)
-//      case (_,        Left(t2))                   => Left(t2 :: Nil)
-//      case (Right(r), _       )                   => Right(r)
-//    }
-                    handleInRgn(le.subst[({ type K[Y] = Arr[R, L1, Y, A] })#K](composed)(re))
-                }.fold(
-                  fails => Pure(Left(fails)),
-                  identity)
+              _.fold({ (le, r) =>
+                re.open(r)
+                handleInRgn[S, RE](r).apply(le.subst[({ type K[Y] = Arr[R, L1, Y, A] })#K](composed)(r))
               }))
           }
         })

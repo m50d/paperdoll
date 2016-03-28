@@ -28,7 +28,7 @@ class RegionTest {
   @Test def regionWithAccessInside(): Unit = {
     type EffectStack = Region_[_0, InputStream] :+: Region_[_1, BufferedReader] :+: Writer_[String] :+: CNil
     val eff = for {
-      inputStream <- newSHandle(_0, getClass.getResourceAsStream("names.txt")).extend[EffectStack]()
+      inputStream <- newSHandle(_0, getClass.getResourceAsStream("/names.txt")).extend[EffectStack]()
       reader <- newSHandle(_1, new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))).extend[EffectStack]()
       _ <- readToWriter(reader).extend[EffectStack]()
     } yield {}
