@@ -2,8 +2,6 @@ package paperdoll.arm
 
 import resource.Resource
 import paperdoll.core.effect.Eff
-import resource.managed
-import scala.reflect.Manifest
 import scalaz.Leibniz
 import paperdoll.core.layer.Member
 import paperdoll.core.layer.Layers
@@ -18,7 +16,6 @@ import paperdoll.core.queue.Queue
 import paperdoll.core.effect.Bind
 import paperdoll.core.effect.Arr
 import paperdoll.core.effect.Handler
-import Predef.identity
 import shapeless.Nat
 
 sealed trait Region[S <: Nat, R, A] {
