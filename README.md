@@ -98,7 +98,7 @@ I have used pattern matching on `Inr`/`Inl` when working with `Coproduct`s
 since Shapeless does not offer a suitable `fold` method.
 
 Since `paperdoll-core` is very generic, a lot of the tests need at least one effect implementation.
-So I've moved those tests down into `paperdoll-tests`. TODO: Reevaluate project structure
+So I've moved those tests down into `paperdoll-tests`.
 
 The project is split into a large number of small modules,
 primarily to prove that the interpreters truly are independent.
@@ -112,11 +112,15 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
- * Consider moving NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
+ * Finish NDet implementation and tests
+ * Wait for scalaz 7.3 release and then:
+  * Tighten up dependency config (i.e. not snapshots repo)
+  * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
+ * Move NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
  * Consider implementing doobie adapters
  * Final code review for readability
   * With particular focus on examples
- * Finish TODOs in this document
+ * Finish TODOs in this document (in particular examples)
  * Submit a release to Maven Central
  
 ## Conduct
