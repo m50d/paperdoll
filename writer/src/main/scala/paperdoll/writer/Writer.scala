@@ -25,7 +25,7 @@ object Writer {
   /**
    * Effect that writes the value O
    */
-  def tell[O](o: O): Eff.One[Writer_[O], Unit]#O =
+  def tell[O](o: O): Eff.One[Writer_[O], Unit] =
     Eff.send[Writer_[O], Unit](put(o))
 
   /**
