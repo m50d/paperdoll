@@ -9,8 +9,8 @@ import scalaz.Disjunction
 import scalaz.syntax.monad._
 import paperdoll.core.layer.Subset
 import paperdoll.core.layer.Member
+import Predef.implicitly
 
-//TODO try using \/ rather than Disjunction
 object EitherTLayer {
   def send[F[_], A, B](et: EitherT[F, A, B]): Eff[Layer.Aux[F] :+: Disjunction_[A] :+: CNil, Layers[Layer.Aux[F] :+: Disjunction_[A] :+: CNil] {
     type O[X] = F[X] :+: Disjunction[A, X] :+: CNil
@@ -23,16 +23,13 @@ object EitherTLayer {
             type O[X] = F[X] :+: Disjunction[A, X] :+: CNil
           }, CNil, Layers[Layer.Aux[F] :+: Disjunction_[A] :+: CNil] {
             type O[X] = F[X] :+: Disjunction[A, X] :+: CNil
-          }](???, ??? : Subset[Layer.Aux[F] :+: Disjunction_[A] :+: CNil, CNil] {
+            //This Member.cons seems to not be inferred properly?
+          }](Member.cons[Layer.Aux[F], Disjunction_[A] :+: CNil, Disjunction_[A]], Subset.nilSubset : Subset[Layer.Aux[F] :+: Disjunction_[A] :+: CNil, CNil] {
             type LS = Layers[Layer.Aux[F] :+: Disjunction_[A] :+: CNil] {
               type O[X] = F[X] :+: Disjunction[A, X] :+: CNil
             }
             type LT = Layers.Empty
-          }, ???),
-          //        Subset.consSubset[Layer.Aux[F] :+: Disjunction_[A] :+: CNil, Disjunction_[A], Layers.One[Disjunction_[A]], CNil, Layers.One[Disjunction_[A]]](
-          //            /*Member.cons[Layer.Aux[F], Disjunction_[A] :+: CNil, Disjunction_[A]], Subset.nilSubset[Layer.Aux[F] :+: Disjunction_[A] :+: CNil]*/ ???,
-          //            implicitly, implicitly
-          //        )
+          }, implicitly),
           implicitly)
   }
 }
