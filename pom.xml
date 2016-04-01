@@ -42,7 +42,6 @@
 		<module>reader</module>
 		<module>scalaz</module>
 		<module>state</module>
-		<module>tests</module>
 		<module>treelog</module>
 		<module>writer</module>
 	</modules>
