@@ -25,7 +25,7 @@ object Subset {
   implicit def consSubset[S <: Coproduct, TH <: Layer, L1 <: Layers[_], TT <: Coproduct, L2 <: Layers[_]](
     implicit m: Member[S, TH] { type L = L1 }, tl: Subset[S, TT] { type LS = L2 }, le: Leibniz[Nothing, Any, L1, L2]) =
     new Subset[S, TH :+: TT] {
-      override type LS = Layers.Aux[S, tl.LS#O]
+      override type LS = Layers.Aux[S, L2#O]
       override type LT = Layers[TH :+: TT] {
         type O[X] = TH#F[X] :+: tl.LT#O[X]
       }
