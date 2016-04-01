@@ -24,12 +24,7 @@ object EitherTLayer {
           }, CNil, Layers[Layer.Aux[F] :+: Disjunction_[A] :+: CNil] {
             type O[X] = F[X] :+: Disjunction[A, X] :+: CNil
             //This Member.cons seems to not be inferred properly?
-          }](Member.cons[Layer.Aux[F], Disjunction_[A] :+: CNil, Disjunction_[A]], Subset.nilSubset : Subset[Layer.Aux[F] :+: Disjunction_[A] :+: CNil, CNil] {
-            type LS = Layers[Layer.Aux[F] :+: Disjunction_[A] :+: CNil] {
-              type O[X] = F[X] :+: Disjunction[A, X] :+: CNil
-            }
-            type LT = Layers.Empty
-          }, implicitly),
+          }](Member.cons[Layer.Aux[F], Disjunction_[A] :+: CNil, Disjunction_[A]], Subset.nilSubset, implicitly),
           implicitly)
   }
 }
