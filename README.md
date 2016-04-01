@@ -113,11 +113,12 @@ but make use of unsafe casts internally for performance.
 ## TODO for 1.0
 
  * Finish NDet implementation and tests
+ * Finish doobie and treelog
  * Wait for scalaz 7.3 release and then:
   * Tighten up dependency config (i.e. not snapshots repo)
   * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
  * Move NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
- * Consider implementing doobie adapters
+  * If changing project structure, remember to update all
  * Final code review for readability
   * With particular focus on examples
  * Finish TODOs in this document (in particular examples)
