@@ -8,6 +8,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<scala.version>2.11.8</scala.version>
+		<scalaz.version>7.3.0-SNAPSHOT</scalaz.version>
 	</properties>
 	<profiles>
 		<profile>
@@ -184,6 +185,26 @@
 				<groupId>org.scala-lang</groupId>
 				<artifactId>scala-library</artifactId>
 				<version>${scala.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.chuusai</groupId>
+				<artifactId>shapeless_2.11</artifactId>
+				<version>2.3.0</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scalaz</groupId>
+				<artifactId>scalaz-concurrent_2.11</artifactId>
+				<version>${scalaz.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scalaz</groupId>
+				<artifactId>scalaz-core_2.11</artifactId>
+				<version>${scalaz.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.scalaz</groupId>
+				<artifactId>scalaz-effect_2.11</artifactId>
+				<version>${scalaz.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.easytesting</groupId>
