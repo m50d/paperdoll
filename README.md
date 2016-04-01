@@ -113,6 +113,8 @@ but make use of unsafe casts internally for performance.
 ## TODO for 1.0
 
  * Finish NDet implementation and tests
+ * Make sure I have good reader/writer/free/etc. integration for cats/scalaz
+ * Consider porting to BindRec
  * Finish doobie and treelog
  * Wait for scalaz 7.3 release and then:
   * Tighten up dependency config (i.e. not snapshots repo)

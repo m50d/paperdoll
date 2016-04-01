@@ -40,6 +40,7 @@
 		<module>doobie</module>
 		<module>nondeterminism</module>
 		<module>reader</module>
+		<module>scalaz</module>
 		<module>state</module>
 		<module>tests</module>
 		<module>treelog</module>

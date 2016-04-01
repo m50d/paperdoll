@@ -36,6 +36,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.github.m50d</groupId>
+			<artifactId>paperdoll-scalaz</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.m50d</groupId>
 			<artifactId>paperdoll-state</artifactId>
 			<version>${project.version}</version>
 		</dependency>
