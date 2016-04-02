@@ -65,10 +65,13 @@ object NDet {
                 eff, Queue.one[Arr_[R, L0]#O, X, Option[(A, Eff[R, L0, A])]](newCont))
             },
               _.fold({
-                jq.toNel.fold(Pure[R, L0, Option[(A, Eff[R, L0, A])]](None))({
-                  jqn => ???
+                jq.toNel.fold[Eff[R, L0, Option[(A, Eff[R, L0, A])]]](Pure[R, L0, Option[(A, Eff[R, L0, A])]](None))({
+                  jqn => loop(jqn.tail.toList, jqn.head)
                 })
-              }, { le => ??? }))
+              }, { le =>
+                val booleanCont = Eff.compose(le.subst[({ type K[Y] = Arrs[R, L0, Y, A] })#K](cont))
+                loop(booleanCont(false) :: jq, booleanCont(true))
+              }))
         }
       })
 
