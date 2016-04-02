@@ -1,6 +1,6 @@
 package paperdoll.core.layer
 
-import shapeless.{ Coproduct, :+:, CNil, Inl, Inr }
+import shapeless.{ Coproduct, :+:, CNil }
 import scalaz.Leibniz
 
 /**

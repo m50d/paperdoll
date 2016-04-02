@@ -13,8 +13,12 @@ import paperdoll.core.effect.Arrs
 import scalaz.Leibniz
 import shapeless.{ :+:, CNil }
 import paperdoll.core.layer.Subset
-//import scalaz.syntax.foldable._
-//import scalaz.std.list._
+import scalaz.syntax.foldable._
+import scalaz.std.list._
+import scalaz.syntax.std.list._
+import paperdoll.core.layer.Member
+import paperdoll.core.effect.Arr_
+import paperdoll.core.queue.Queue
 
 sealed trait NDet[A] {
   def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B): B
@@ -45,14 +49,29 @@ object NDet {
         })
       override def empty[A] = Eff.send[NDet_, A](zero).extend[R].apply[LT0]()
     }
-  
-//  private[this] def loop[R <: Coproduct, L <: Layers[R], A, LT0 <: Layers[NDet_ :+: CNil]](
-//      jq: List[Eff[R, L, A]], j: Eff[R, L, A])(implicit su: Subset[R, NDet_ :+: CNil] {
-//    type LS = L
-//    type LT = LT0
-//  }, le: Leibniz[Nothing, Layers[NDet_ :+: CNil], LT0, Layers.One[NDet_]#N]): Eff[R, L, Option[(A, Eff[R, L, A])]] =
-//    j.fold(a => Some((a, jq.msumlU)), ???)
-  
-//  def msplit[R <: Coproduct, L <: Layers[R], A, LT0 <: Layers[R]](eff: Eff[R, L, A]): Eff[R, L, Option[(A, Eff[R, L, A])]] =
-//    ???
+
+  private[this] def loop[R <: Coproduct, L0 <: Layers[R], A](
+    jq: List[Eff[R, L0, A]], j: Eff[R, L0, A])(implicit su: Subset[R, NDet_ :+: CNil] {
+      type LS = L0
+      type LT = Layers.One[NDet_]
+    }, me: Member[R, NDet_] { type L = L0 }): Eff[R, L0, Option[(A, Eff[R, L0, A])]] =
+    j.fold(a => Pure[R, L0, Option[(A, Eff[R, L0, A])]](Some((a, jq.msuml[Eff_[R, L0]#O, A]))),
+      new Forall[({ type K[X] = (L0#O[X], Arrs[R, L0, X, A]) => Eff[R, L0, Option[(A, Eff[R, L0, A])]] })#K] {
+        override def apply[X] = {
+          (eff, cont) =>
+            me.remove(eff).fold({ otherEffect =>
+              val newCont = Eff.compose(cont) andThen { loop(jq, _) }
+              Impure[R, L0, X, Option[(A, Eff[R, L0, A])]](
+                eff, Queue.one[Arr_[R, L0]#O, X, Option[(A, Eff[R, L0, A])]](newCont))
+            },
+              _.fold({
+                jq.toNel.fold(Pure[R, L0, Option[(A, Eff[R, L0, A])]](None))({
+                  jqn => ???
+                })
+              }, { le => ??? }))
+        }
+      })
+
+  //  def msplit[R <: Coproduct, L <: Layers[R], A, LT0 <: Layers[R]](eff: Eff[R, L, A]): Eff[R, L, Option[(A, Eff[R, L, A])]] =
+  //    ???
 }
