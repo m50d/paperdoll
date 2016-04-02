@@ -19,11 +19,7 @@ object EitherTLayer {
       Eff.send[Disjunction_[A], B](eab)
         .extend[Layer.Aux[F] :+: Disjunction_[A] :+: CNil]
         .apply[Layers.One[Disjunction_[A]]]()(
-          Subset.consSubset[Layer.Aux[F] :+: Disjunction_[A] :+: CNil, Disjunction_[A], Layers[Layer.Aux[F] :+: Disjunction_[A] :+: CNil] {
-            type O[X] = F[X] :+: Disjunction[A, X] :+: CNil
-          }, CNil, Layers[Layer.Aux[F] :+: Disjunction_[A] :+: CNil] {
-            type O[X] = F[X] :+: Disjunction[A, X] :+: CNil
-          }](Member[Layer.Aux[F] :+: Disjunction_[A] :+: CNil, Disjunction_[A]], Subset.nilSubset, implicitly),
+          Subset[Layer.Aux[F] :+: Disjunction_[A] :+: CNil, Disjunction_[A] :+: CNil],
           implicitly)
   }
 }
