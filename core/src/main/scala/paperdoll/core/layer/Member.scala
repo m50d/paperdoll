@@ -27,10 +27,7 @@ object Member {
     override type RestR = R
     override type RestL = Layers.Aux[R, rest.O] // i.e. rest.type
     override def inject[X](value: R1#F[X]) = Inl(value)
-    override def remove[X](value: R1#F[X] :+: rest.O[X]) = value match {
-      case Inl(x) ⇒ Right(x)
-      case Inr(r) ⇒ Left(r)
-    }
+    override def remove[X](value: R1#F[X] :+: rest.O[X]) = value.eliminate(Right(_), Left(_))
   }
 
   implicit def cons[R2 <: Layer, R <: Coproduct, R1 <: Layer](
@@ -44,10 +41,8 @@ object Member {
         type O[X] = R2#F[X] :+: rest.RestL#O[X]
       }
       override def inject[X](value: R1#F[X]) = Inr(rest.inject(value))
-      override def remove[X](value: R2#F[X] :+: rest.L#O[X]) = value match {
-        case Inl(x) ⇒ Left(Inl(x))
-        case Inr(r) ⇒ rest.remove(r).left.map(Inr(_))
-      }
+      override def remove[X](value: R2#F[X] :+: rest.L#O[X]) =
+        value.eliminate(x ⇒ Left(Inl(x)), r ⇒ rest.remove(r).left.map(Inr(_)))
     }
 
   def apply[R <: Coproduct, R1 <: Layer](implicit m: Member[R, R1]): Member[R, R1] { type L = m.L; type RestR = m.RestR; type RestL = m.RestL } = m

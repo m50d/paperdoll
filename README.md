@@ -84,11 +84,10 @@ http://typelevel.org/blog/2014/11/10/why_is_adt_pattern_matching_allowed.html),
 so my preferred style is to avoid pattern matches entirely.
 This also makes it possible to hide trait implementation subtypes
 (by using anonymous classes) where appropriate.
-I have used pattern matching on `Inr`/`Inl` when working with `Coproduct`s
-since Shapeless does not offer a suitable `fold` method.
 
-Since `paperdoll-core` is very generic, a lot of the tests need at least one effect implementation.
-So I've moved those tests down into `paperdoll-tests`.
+As `paperdoll-core` is very abstract, a lot of tests for `paperdoll-core` code
+require one or more effect implementations.
+So I've moved those tests down into `paperdoll-all` rather than add test-only effects.
 
 The project is split into a large number of small modules,
 primarily to prove that the interpreters truly are independent.

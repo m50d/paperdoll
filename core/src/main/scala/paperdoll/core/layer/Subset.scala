@@ -29,10 +29,8 @@ object Subset {
       override type LT = Layers[TH :+: TT] {
         type O[X] = TH#F[X] :+: tl.LT#O[X]
       }
-      override def inject[X](value: TH#F[X] :+: tl.LT#O[X]) = value match {
-        case Inl(x) ⇒ le.subst[({type K[LL] = Member[S, TH]{type L = LL}})#K](m).inject(x)
-        case Inr(r) ⇒ tl.inject(r)
-      }
+      override def inject[X](value: TH#F[X] :+: tl.LT#O[X]) =
+        value.eliminate(x ⇒ le.subst[({type K[LL] = Member[S, TH]{type L = LL}})#K](m).inject(x), tl.inject(_))
     }
   def apply[S <: Coproduct, T <: Coproduct](implicit s: Subset[S, T]): Subset[S, T] {type LS = s.LS; type LT = s.LT} = s
 }
