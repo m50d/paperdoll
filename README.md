@@ -17,12 +17,7 @@ TODO
 
 ## Features
 
- * Implementations of some popular concrete, useful monads (e.g. `Reader`, `Writer`)
-  * i.e. some classes that do useful things when used in `for`/`yield` blocks
- * ScalaZ-compatible typeclass instances allow monad-generic functions
-  * i.e. you can use these classes with ScalaZ functions like `traverse`,
-  or with custom functions that work for any monad 
- * Offers a [Free Monad](http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html) equivalent
+ * A [Free Monad](http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html) equivalent
   * i.e. for any datatype you like, you can extend that datatype to a "command object",
 where commands are composed of instance of that datatype and custom functions
   * Note there is no need for the `Coyoneda` trick in this implementation
@@ -31,22 +26,17 @@ where commands are composed of instance of that datatype and custom functions
   * Can use multiple interpreters to run the same monadic computation e.g. test vs live
  * Freer monads let you interleave multiple monadic effects without the complexities of monad transformers
   * Both definition of effects and of interpreters can be completely separate (even in separate codebases)
+ * Implementation is compatible with ScalaZ Monads
+  * i.e. you can use existing ScalaZ-compatible functions like `traverse` on paperdoll effect stacks.
+ * Adapters to allow you to use popular monads from existing libraries as effect layers.
  * Improving on the paper, Paperdoll uses a `Coproduct`-based representation for the effect stack,
  allowing effects to be reordered and interpreted in in different orders by different interpreter stacks. 
 
 ## Non-features and rationales
 
- * Currently, supported monads are limited to (reimplementations of) those in the paper
- While this is sufficient to prove the concept, it would be better to add `Layer` adapters
- for popular real-world Scala cases (e.g. those used by doobie).
- The `Eff` abstraction should be easy to use with any existing monad implementation
- without needing to change the concrete monad values (as long as they *are* values -
- so perhaps only `Free`-like monads, but there is still an installed base of those
- that it is well worth being able to interoperate with).
- Contributions are very welcome; instances for an external library "foo"
+ * Contributions of layers for more popular monadsare very welcome;
+ instances and support code for an external library "foo"
  should be placed in a new `paperdoll-foo` maven module.
-  * Support for ScalaZ IndexedReaderWriterStateT etc. would be relatively easy to add;
-  with the future of ScalaZ and related projects unclear I'm holding off for now.
  * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
  * `Eff#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
@@ -114,6 +104,7 @@ but make use of unsafe casts internally for performance.
 
  * Finish NDet implementation and tests
  * Make sure I have good reader/writer/free/etc. integration for cats/scalaz
+  * Probably replace paperdoll-reader and paperdoll-writer
  * Consider porting to BindRec
  * Finish doobie and treelog
  * Wait for scalaz 7.3 release and then:
