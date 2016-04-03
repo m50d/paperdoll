@@ -103,15 +103,17 @@ but make use of unsafe casts internally for performance.
 
  * Stdlib cases
   * TraversableLike?
+  * Future?
  * Cats integration
   * OptionT
   * WriterT / Writer
   * XorT / Xor
  * Scalaz integration
-  * EitherT / Disjunction
+  * EitherT / Disjunction (finish)
   * IndexedReaderWriterStateT and all subsets thereof
     * Replace paperdoll-reader and paperdoll-writer
   * OptionT
+  * Task / Future
  * Doobie integration
  * Treelog integration
   * Possibly covered by EitherT and Writer
