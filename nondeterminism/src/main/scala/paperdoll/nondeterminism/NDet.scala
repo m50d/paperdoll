@@ -21,6 +21,8 @@ import paperdoll.core.effect.Arr_
 import paperdoll.core.queue.Queue
 import paperdoll.core.effect.Arr
 import scalaz.syntax.monad._
+import paperdoll.core.effect.Bind
+import paperdoll.core.effect.Handler
 
 sealed trait NDet[A] {
   def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B): B
@@ -106,4 +108,18 @@ object NDet {
     le1: Leibniz[Nothing, Layers[NDet_ :+: CNil], L1, Layers.One[NDet_]],
     le2: Leibniz[Nothing, Layers[R], L2, L0]): Eff[R, L0, B] =
     msplit(t).flatMap(_.fold(el)(u => th(u._1)))
+    
+  def runNDetVector: Handler.Aux[NDet_, Vector] = Eff.handle(new Bind[NDet_]{
+    override type O[X] = Vector[X]
+    override def pure[A](a: A) = Vector(a)
+    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: NDet[V], cont: Arr[RR, RL, V, Vector[A]]) =
+      eff.fold(Pure(Vector()), {
+        le =>
+          val booleanCont = le.subst[({ type K[Y] = Arr[RR, RL, Y, Vector[A]] })#K](cont)
+          for {
+            x <- booleanCont(true)
+            y <- booleanCont(false)
+          } yield x ++ y
+      })
+  })
 }

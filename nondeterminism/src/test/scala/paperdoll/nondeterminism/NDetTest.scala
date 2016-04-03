@@ -7,6 +7,7 @@ import scalaz.syntax.foldable._
 import scalaz.std.list._
 import scalaz.syntax.monadPlus._
 import paperdoll.core.effect.Eff
+import org.fest.assertions.Assertions.assertThat
 
 class NDetTest {
   @Test def testIfte(): Unit = {
@@ -18,5 +19,7 @@ class NDetTest {
         if(d < n && n % d == 0)
       } yield {}, {_: Unit => Zero[Int]}, n.point[Eff.One_[NDet_]#O])
     } yield n
+    val result = runNDetVector(eff).run
+    val _ = assertThat(result).isEqualTo(Vector(2, 3, 5, 7, 11, 13, 17, 19, 23, 29))
   }
 }
