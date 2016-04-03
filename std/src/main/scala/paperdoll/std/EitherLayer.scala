@@ -7,7 +7,6 @@ import paperdoll.core.effect.Arr
 import paperdoll.core.effect.Pure
 import paperdoll.core.layer.Layers
 import shapeless.Coproduct
-import scalaz.syntax.monad._
 
 object EitherLayer {
   def runEither[A]: Handler.Aux[Either_[A], Either_[A]#F] =

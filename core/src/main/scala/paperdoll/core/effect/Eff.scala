@@ -6,6 +6,7 @@ import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
 import paperdoll.core.queue.Queue
 import paperdoll.core.layer.{ Layer, Layers, Member, Subset }
+import scalaz.Functor
 
 sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
   final type O[A, B] = A => Eff[R, L, B]
@@ -115,6 +116,8 @@ object Eff {
    */
   def send[L <: Layer, V](value: L#F[V]): Eff.One[L, V] =
     Impure[L :+: CNil, Layers.One[L], V, V](Inl(value), Queue.empty[Arr_[L :+: CNil, Layers.One[L]]#O, V])
+  def sendU[FV](value: FV)(implicit u: Unapply[Functor, FV]): Eff.One[Layer.Aux[u.M], u.A] =
+    send[Layer.Aux[u.M], u.A](u.leibniz(value))
   /**
    * Collapse an Arrs (a queue of Arr) to a single Arr.
    */
