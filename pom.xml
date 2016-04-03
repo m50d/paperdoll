@@ -36,12 +36,14 @@
 	<modules>
 		<module>all</module>
 		<module>arm</module>
+		<module>cats</module>
 		<module>core</module>
 		<module>doobie</module>
 		<module>nondeterminism</module>
 		<module>reader</module>
 		<module>scalaz</module>
 		<module>state</module>
+		<module>std</module>
 		<module>treelog</module>
 		<module>writer</module>
 	</modules>

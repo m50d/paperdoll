@@ -101,19 +101,30 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
- * Finish NDet implementation and tests
- * Make sure I have good reader/writer/free/etc. integration for cats/scalaz
-  * Probably replace paperdoll-reader and paperdoll-writer
- * Consider porting to BindRec
- * Finish doobie and treelog
- * Wait for scalaz 7.3 release and then:
+ * Stdlib cases
+  * Either
+  * TraversableLike?
+ * Cats integration
+  * OptionT
+  * WriterT / Writer
+  * XorT / Xor
+ * Scalaz integration
+  * EitherT / Disjunction
+  * IndexedReaderWriterStateT and all subsets thereof
+    * Replace paperdoll-reader and paperdoll-writer
+  * OptionT
+ * Doobie integration
+ * Treelog integration
+  * Possibly covered by EitherT and Writer
+ * Wait for scalaz 7.3 release and shapeless 2.3.1 release and then:
+  * Use msumlU rather than msuml
   * Tighten up dependency config (i.e. not snapshots repo)
   * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
  * Move NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
   * If changing project structure, remember to update all
- * Final code review for readability
-  * With particular focus on examples
  * Finish TODOs in this document (in particular examples)
+ * Final code/readme review for readability
+  * With particular focus on examples
  * Submit a release to Maven Central
  
 ## Conduct

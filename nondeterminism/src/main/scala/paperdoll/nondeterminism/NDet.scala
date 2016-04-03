@@ -113,6 +113,10 @@ object NDet {
     le2: Leibniz[Nothing, Layers[R], L2, L0]): Eff[R, L0, B] =
     msplit(t).flatMap(_.fold(el)(u => th(u._1)))
     
+  /**
+   * Example interpreter. The paper implements this for any F[_]: Alternative
+   * rather than just Vector 
+   */
   def runNDetVector: Handler.Aux[NDet_, Vector] = Eff.handle(new Bind[NDet_]{
     override type O[X] = Vector[X]
     override def pure[A](a: A) = Vector(a)
