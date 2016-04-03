@@ -102,7 +102,6 @@ but make use of unsafe casts internally for performance.
 ## TODO for 1.0
 
  * Stdlib cases
-  * Either
   * TraversableLike?
  * Cats integration
   * OptionT
