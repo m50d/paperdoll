@@ -33,6 +33,8 @@ object NDet {
   private[this] def plus = new NDet[Boolean] {
     override def fold[B](zero: ⇒ B, plus: Boolean === Boolean ⇒ B) = plus(Leibniz.refl)
   }
+  def Zero[A] = Eff.send[NDet_, A](zero)
+  def Plus = Eff.send[NDet_, Boolean](plus)
 
   //TODO remove duplication between this and the other case
   implicit def monadPlus[R <: Coproduct, L <: Layers[R], LT0 <: Layers[NDet_ :+: CNil]](implicit su: Subset[R, NDet_ :+: CNil] {
