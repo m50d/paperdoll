@@ -19,6 +19,8 @@ import scalaz.syntax.std.list._
 import paperdoll.core.layer.Member
 import paperdoll.core.effect.Arr_
 import paperdoll.core.queue.Queue
+import paperdoll.core.effect.Arr
+import scalaz.syntax.monad._
 
 sealed trait NDet[A] {
   def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B): B
@@ -75,6 +77,17 @@ object NDet {
         }
       })
 
-  //  def msplit[R <: Coproduct, L <: Layers[R], A, LT0 <: Layers[R]](eff: Eff[R, L, A]): Eff[R, L, Option[(A, Eff[R, L, A])]] =
-  //    ???
+  def msplit[R <: Coproduct, L0 <: Layers[R], A](eff: Eff[R, L0, A])(
+    implicit su: Subset[R, NDet_ :+: CNil] {
+      type LS = L0
+      type LT = Layers.One[NDet_]
+    }, me: Member[R, NDet_] { type L = L0 }): Eff[R, L0, Option[(A, Eff[R, L0, A])]] =
+    loop(Nil, eff)
+
+  def ifte[R <: Coproduct, L0 <: Layers[R], A, B](t: Eff[R, L0, A], th: Arr[R, L0, A, B], el: Eff[R, L0, B])(
+    implicit su: Subset[R, NDet_ :+: CNil] {
+      type LS = L0
+      type LT = Layers.One[NDet_]
+    }, me: Member[R, NDet_] { type L = L0 }): Eff[R, L0, B] =
+    msplit(t).flatMap(_.fold(el)(u => th(u._1)))
 }
