@@ -19,7 +19,6 @@ class NDetTest {
         if(d < n && n % d == 0)
       } yield {}, {_: Unit => Zero[Int]}, n.point[Eff.One_[NDet_]#O])
     } yield n
-    val result = runNDetVector(eff).run
-    val _ = assertThat(result).isEqualTo(Vector(2, 3, 5, 7, 11, 13, 17, 19, 23, 29))
+    val _ = assertThat(runNDetVector(eff).run).isEqualTo(Vector(2, 3, 5, 7, 11, 13, 17, 19, 23, 29))
   }
 }
