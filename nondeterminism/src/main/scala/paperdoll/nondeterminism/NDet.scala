@@ -67,6 +67,10 @@ object NDet {
           (eff, cont) =>
             me.remove(eff).fold({ otherEffect =>
               val newCont = Eff.compose(cont) andThen { loop(jq, _) }
+              //We pass eff here, knowing that it is now really otherEff.
+              //Arguably it would be more correct to lift otherEff back into the [R, L0]
+              //layer stack using .extend (or some inverse method on Member)
+              //but that would add overhead for no practical benefit
               Impure[R, L0, X, Option[(A, Eff[R, L0, A])]](
                 eff, Queue.one[Arr_[R, L0]#O, X, Option[(A, Eff[R, L0, A])]](newCont))
             },
