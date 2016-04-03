@@ -79,17 +79,31 @@ object NDet {
         }
       })
 
-  def msplit[R <: Coproduct, L0 <: Layers[R], A](eff: Eff[R, L0, A])(
+  def msplit[R <: Coproduct, L0 <: Layers[R], A, L1 <: Layers[NDet_ :+: CNil], L2 <: Layers[R]](eff: Eff[R, L0, A])(
     implicit su: Subset[R, NDet_ :+: CNil] {
       type LS = L0
-      type LT = Layers.One[NDet_]
-    }, me: Member[R, NDet_] { type L = L0 }): Eff[R, L0, Option[(A, Eff[R, L0, A])]] =
-    loop(Nil, eff)
+      type LT = L1
+    }, me: Member[R, NDet_] { type L = L2 },
+    le1: Leibniz[Nothing, Layers[NDet_ :+: CNil], L1, Layers.One[NDet_]],
+    le2: Leibniz[Nothing, Layers[R], L2, L0]): Eff[R, L0, Option[(A, Eff[R, L0, A])]] =
+    loop(Nil, eff)(le1.subst[({
+      type K[LL <: Layers[NDet_ :+: CNil]] = Subset[R, NDet_ :+: CNil] {
+        type LS = L0
+        type LT = LL
+      }
+    })#K](su), le2.subst[({
+      type K[LL <: Layers[R]] = Member[R, NDet_] {
+        type L = LL
+      }
+    })#K](me))
 
-  def ifte[R <: Coproduct, L0 <: Layers[R], A, B](t: Eff[R, L0, A], th: Arr[R, L0, A, B], el: Eff[R, L0, B])(
+  def ifte[R <: Coproduct, L0 <: Layers[R], A, B, L1 <: Layers[NDet_ :+: CNil], L2 <: Layers[R]](
+      t: Eff[R, L0, A], th: Arr[R, L0, A, B], el: Eff[R, L0, B])(
     implicit su: Subset[R, NDet_ :+: CNil] {
       type LS = L0
-      type LT = Layers.One[NDet_]
-    }, me: Member[R, NDet_] { type L = L0 }): Eff[R, L0, B] =
+      type LT = L1
+    }, me: Member[R, NDet_] { type L = L2 },
+    le1: Leibniz[Nothing, Layers[NDet_ :+: CNil], L1, Layers.One[NDet_]],
+    le2: Leibniz[Nothing, Layers[R], L2, L0]): Eff[R, L0, B] =
     msplit(t).flatMap(_.fold(el)(u => th(u._1)))
 }
