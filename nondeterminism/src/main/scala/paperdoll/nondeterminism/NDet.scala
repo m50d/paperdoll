@@ -23,22 +23,15 @@ import paperdoll.core.effect.Arr
 import scalaz.syntax.monad._
 import paperdoll.core.effect.Bind
 import paperdoll.core.effect.Handler
+import scalaz.Foldable
+import scalaz.Unapply
 
 sealed trait NDet[A] {
   def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B): B
 }
 
 object NDet {
-  private[this] def zero[A] = new NDet[A] {
-    override def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B) = zero
-  }
-  private[this] def plus = new NDet[Boolean] {
-    override def fold[B](zero: ⇒ B, plus: Boolean === Boolean ⇒ B) = plus(Leibniz.refl)
-  }
-  def Zero[A] = Eff.send[NDet_, A](zero)
-  def Plus = Eff.send[NDet_, Boolean](plus)
-
-  //TODO remove duplication between this and the other case
+    //TODO remove duplication between this and the other case
   implicit def monadPlus[R <: Coproduct, L <: Layers[R], LT0 <: Layers[NDet_ :+: CNil]](implicit su: Subset[R, NDet_ :+: CNil] {
     type LS = L
     type LT = LT0
@@ -55,7 +48,20 @@ object NDet {
         })
       override def empty[A] = Eff.send[NDet_, A](zero).extend[R].apply[LT0]()
     }
-
+  
+  private[this] def zero[A] = new NDet[A] {
+    override def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B) = zero
+  }
+  private[this] def plus = new NDet[Boolean] {
+    override def fold[B](zero: ⇒ B, plus: Boolean === Boolean ⇒ B) = plus(Leibniz.refl)
+  }
+  def Zero[A] = Eff.send[NDet_, A](zero)
+  def Plus = Eff.send[NDet_, Boolean](plus)
+  def collapse[F[_]: Foldable, A](fa: F[A]): Eff.One[NDet_, A] =
+    fa.collapse[Eff.One_[NDet_]#O]
+  def collapseU[FA](fa: FA)(implicit u: Unapply[Foldable, FA]): Eff.One[NDet_, u.A] =
+    collapse(u.leibniz(fa))(u.TC)
+  
   private[this] def loop[R <: Coproduct, L0 <: Layers[R], A](
     jq: List[Eff[R, L0, A]], j: Eff[R, L0, A])(implicit su: Subset[R, NDet_ :+: CNil] {
       type LS = L0

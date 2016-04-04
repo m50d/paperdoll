@@ -3,7 +3,6 @@ package paperdoll.nondeterminism
 import org.junit.Test
 import scala.Predef.intWrapper
 import NDet._
-import scalaz.syntax.foldable._
 import scalaz.std.list._
 import scalaz.syntax.monadPlus._
 import paperdoll.core.effect.Eff
@@ -11,7 +10,7 @@ import org.fest.assertions.Assertions.assertThat
 
 class NDetTest {
   @Test def testIfte(): Unit = {
-    val gen = (2 to 30).toList.collapse[Eff.One_[NDet_]#O]
+    val gen = collapse((2 to 30).toList)
     val eff = for {
       n <- gen
       x <- ifte(for {

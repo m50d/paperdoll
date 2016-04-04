@@ -13,7 +13,21 @@ be aware of any other layers.
 
 ## How to use
 
+Values of type `Eff` form monads (using ScalaZ's monad implementation).
+You can use `Eff.send` or `Eff.sendU` (which infers the type if there
+is a ScalaZ `Functor` instance) to create these values: 
+
+````scala
+import scalaz.syntax.monad._
+
+val eff1 = for {
+  r <- 
+}
+````
+
 TODO
+
+To represent a collection (`List`, `Vector` etc.) as an effect TODO: NDet
 
 ## Features
 
