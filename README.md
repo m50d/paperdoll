@@ -11,6 +11,26 @@ be aware of any other layers.
 
 [![Build Status](https://travis-ci.org/m50d/paperdoll.svg?branch=master)](https://travis-ci.org/m50d/paperdoll)
 
+## Features
+
+ * A [Free Monad](http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html) implementation
+  * i.e. for any datatype you like, you can extend that datatype to a "command object",
+where commands are composed of instance of that datatype and custom functions
+  * Note that with Paperdoll there is no need for the `Coyoneda` trick, simplifying your code
+  * Free monads let you [separate the declaration of a computation from its implementation
+ ](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html).
+ You can then use multiple interpreters to run the same monadic computation e.g. test vs live
+ or realtime datastore vs batch datastore (when using "lambda architecture")
+ * Freer monads let you interleave multiple monadic effects without the complexities of monad transformers
+  * Both definition of effects and of interpreters can be completely separate (even in separate codebases)
+  * Effects are applied in a common-sense order according to their order in the code - different effects
+  can be interleaved
+ * Implementation is compatible with ScalaZ Monads
+  * i.e. you can use existing ScalaZ-compatible functions like `traverse` on paperdoll effect stacks
+ * Adapters to allow you to use popular monads from existing libraries as effect layers
+ * Improving on the paper, Paperdoll uses a `Coproduct`-based representation for the effect stack,
+ allowing effects to be reordered and interpreted in in different orders by different interpreter stacks
+
 ## How to use
 
 ### Basic effect representation
@@ -48,35 +68,66 @@ The difference comes when we want to mix and match two or more effects,
 which we do by using `.extend` to extend the effects into a common stack.
 I recommend using a type alias to name the effect stack for convenience:
 
-TODO
+````scala
+import shapeless.{:+:, CNil}
+import paperdoll.scalaz.Writer_
+import paperdoll.scalaz.WriterLayer._
+import paperdoll.std.Option_
+import scalaz.std.anyVal._
+import scala.collection.BitSet
 
-To represent a collection (`List`, `Vector` etc.) as an effect TODO: NDet
+type MyStack = Option_ :+: Writer_[Int] :+: CNil
 
-## Features
+val eff2 = for {
+  _ <- sendTell(2).extend[MyStack]()
+  t <- eff1.extend[MyStack]()
+  _ <- sendTell(1).extend[MyStack]()
+} yield t
 
- * A [Free Monad](http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html) equivalent
-  * i.e. for any datatype you like, you can extend that datatype to a "command object",
-where commands are composed of instance of that datatype and custom functions
-  * Note there is no need for the `Coyoneda` trick in this implementation
-  * Free monads let you [separate the declaration of a computation from its implementation
- ](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html).
- You can then use multiple interpreters to run the same monadic computation e.g. test vs live
- or realtime datastore vs batch datastore (when using "lambda architecture")
- * Freer monads let you interleave multiple monadic effects without the complexities of monad transformers
-  * Effects are ordered in a common-sense way according to their order in code
-  * Both definition of effects and of interpreters can be completely separate (even in separate codebases)
- * Implementation is compatible with ScalaZ Monads
-  * i.e. you can use existing ScalaZ-compatible functions like `traverse` on paperdoll effect stacks.
- * Adapters to allow you to use popular monads from existing libraries as effect layers.
- * Improving on the paper, Paperdoll uses a `Coproduct`-based representation for the effect stack,
- allowing effects to be reordered and interpreted in in different orders by different interpreter stacks. 
+val resultA: (Option[String], Int) = runWriterMonoid[Int].apply(runOption(eff2)).run
+val resultB: Option[(String, BitSet)] = runOption(runWriterCollection[Int, BitSet].apply(eff2)).run
+
+val eff3 = eff2.extend[Writer_[Int] :+: Option_ :+: CNil]()
+val resultC: (Option[String], Int) = runWriterMonoid[Int].apply(runOption(eff2)).run
+````
+
+(`sendTell` here is just a convenience function - you can still call `send`
+or `sendU` directly for `Writer` or any other effect)
+
+This is more powerful and flexible than monad transformers. We didn't have to choose
+which way our effects would nest until interpretation time: `eff2` and `eff3` are
+completely equivalent. Furthermore the effects can be interleaved, and happen in the
+order they're specified in code (thus `resultA._2 == 2`), rather than all the
+`Writer` effects happening before all the `Option` effects or vice versa (which
+would make the writer result either `0` or `3`).
+This is what we would expect from reading the definition of `eff2` (monadic effects
+are not generally commutative, we should not be surprised that composing them
+in a different order would yield a different result).
+
+Note also that we have full, `Free`-style separation of the declaration of an effect
+and the interpreter for that effect: for `Writer` there are two interpreters, the
+`runWriterMonoid` interpreter that merges all the written values into a single value,
+and the `runWriterCollection` interpreter that returns a collection of the values
+that were written.
+
+### Supported effects
+
+To represent a collection (`List`, `Vector` etc.) as an effect TODO: NDet for stdlib.
+
+TODO: list of all the other supported ones
+
+### Custom effects
+
+TODO: Basic and advanced use cases 
 
 ## Non-features and rationales
 
- * Contributions of layers for more popular monadsare very welcome;
+ * Contributions of layers for more popular monads are very welcome;
  instances and support code for an external library "foo"
  should be placed in a new `paperdoll-foo` maven module.
  * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
+ I found it made the code clearer to separate the two (and it should make effects
+ more compositional/reusable), but there may be an efficiency penalty.
  * `Effects#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
  is likely quadratic rather than linear as it should be.
@@ -94,6 +145,11 @@ where commands are composed of instance of that datatype and custom functions
  in others I couldn't get type inference to work correctly with a more natural representation.
  * I have largely ignored variance. Good type inference is a higher priority than correct variance,
  but contributions that add co- or contravariance without compromising type inference are welcome.
+ * I have not integrated with ScalaZ `MonadTell` and friends. This is partly because I'd rather not
+ couple `paperdoll-core` tightly to ScalaZ but mostly because I don't understand the use cases for it.
+ Contributions are welcome provided they come with a convincing test case/example.
+  * Similarly, the `Arr` type is closely related to `Kleisli`/`Arrow`, but I don't fully understand
+  the similarity and am not yet aware of concrete use cases for it.
  * Compilation time is really awful, particularly in the case of errors. Contributions very welcome.
  * There are no performance tests. I don't have time to do these, but would welcome contributions.
   * Constant-factor performance is likely also bad. Contributions welcome but likely a waste of time without tests.
@@ -101,10 +157,12 @@ where commands are composed of instance of that datatype and custom functions
  I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
  but any implementation of binary compatibility checking in the maven build would be very welcome.
  * Paperdoll depends on ScalaZ since it makes extensive use of `Leibniz`. I would prefer to depend on Cats
- but this functionality is a firm requirement. I also use a feature of `MonadPlus` that I don't believe
- is presently implemented in cats.
+ (at least for `paperdoll-core`), but this functionality is a firm requirement.
+ I also use a feature of `MonadPlus` that I don't believe  is presently implemented in Cats,
+ and make some use of `Unapply`.
  * I have not implemented the `MonadCatchIO` example from the paper as there is no single established
- IO monad implementation in Scala.
+ IO monad implementation in Scala and I don't really understand the approach ScalaZ is taking.
+ Contributions welcome.
 
 ## Implementation notes
 
@@ -131,8 +189,10 @@ As `paperdoll-core` is very abstract, a lot of tests for `paperdoll-core` code
 require one or more effect implementations.
 So I've moved those tests down into `paperdoll-all` rather than add test-only effects.
 
-The project is split into a large number of small modules,
+The project is split into a number of small modules,
 primarily to prove that the interpreters truly are independent.
+I am not entirely convinced the dividing lines are in the right places;
+suggestions for improvements are welcome.
 
 I am a great admirer of [the circe philosophy](https://github.com/travisbrown/circe/blob/v0.3.0/DESIGN.md),
 but this project is in many respects an opposite: I think there is value
@@ -144,7 +204,6 @@ but make use of unsafe casts internally for performance.
 ## TODO for 1.0
 
  * Stdlib cases
-  * TraversableLike?
   * Future?
  * Cats integration
   * OptionT
@@ -154,17 +213,17 @@ but make use of unsafe casts internally for performance.
   * EitherT / Disjunction (finish)
   * IndexedReaderWriterStateT and all subsets thereof
     * Replace paperdoll-reader and paperdoll-writer
+    * When changing project structure, remember to update all
   * OptionT
   * Task / Future
- * Doobie integration
  * Treelog integration
-  * Possibly covered by EitherT and Writer
+  * Possibly pointless, but take a look - even if it's just one convenience function it helps
+ * Doobie integration
  * Wait for scalaz 7.3 release and shapeless 2.3.1 release and then:
   * Use msumlU rather than msuml
   * Tighten up dependency config (i.e. not snapshots repo)
   * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
- * Move NDet (and potentially other cases) into -core for pragmatism regarding implicit resolution
-  * If changing project structure, remember to update all
+ * Straighten out `NDet`/`MonadPlus` stuff
  * Finish TODOs in this document (in particular examples)
  * Final code/readme review for readability
   * With particular focus on examples

@@ -32,7 +32,8 @@ class RegionTest {
       reader <- newSHandle(_1, new BufferedReader(new InputStreamReader(inputStream, "UTF-8"))).extend[EffectStack]()
       _ <- readToWriter(reader).extend[EffectStack]()
     } yield {}
-    val (res, written) = runWriterVector[String](newRgn[_1, BufferedReader].apply(newRgn[_0, InputStream].apply(eff))).run
+    val (res, written) = runWriterCollection[String, Vector[String]].apply(
+        newRgn[_1, BufferedReader].apply(newRgn[_0, InputStream].apply(eff))).run
     val discard = assertThat(written).isEqualTo(Vector("Alice", "Bob", "Carol", "Eve"))
   }
 }

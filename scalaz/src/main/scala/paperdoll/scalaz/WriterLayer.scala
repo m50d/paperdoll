@@ -1,11 +1,9 @@
 package paperdoll.scalaz
 
 import shapeless.Coproduct
-import scalaz.{ Leibniz, Monoid, Writer }
+import scalaz.{ Monoid, Writer }
 import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
 import paperdoll.core.layer.Layers
-import scala.Vector
-import scalaz.Leibniz.===
 import scalaz.syntax.monad._
 import scalaz.syntax.monoid._
 import scala.collection.generic.CanBuildFrom
