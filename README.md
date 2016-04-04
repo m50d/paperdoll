@@ -13,8 +13,8 @@ be aware of any other layers.
 
 ## How to use
 
-Values of type `Eff` form monads (using ScalaZ's monad implementation).
-You can use `Eff.send` or `Eff.sendU` (which infers the type if there
+Values of type `Effects` form monads (using ScalaZ's monad implementation).
+You can use `Effects.send` or `Effects.sendU` (which infers the type if there
 is a ScalaZ `Functor` instance) to create these values: 
 
 ````scala
@@ -52,7 +52,7 @@ where commands are composed of instance of that datatype and custom functions
  instances and support code for an external library "foo"
  should be placed in a new `paperdoll-foo` maven module.
  * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
- * `Eff#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
+ * `Effects#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
  is likely quadratic rather than linear as it should be.
  Indeed it may be worse than that, since `.extend` fixes a blob in the tree-like queue structure,

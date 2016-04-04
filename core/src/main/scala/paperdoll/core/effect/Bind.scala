@@ -6,7 +6,7 @@ import shapeless.Coproduct
 /**
  * Interface for something that knows how to handle a particular effect.
  * Specific effects should provide implementations of this interface
- * and use Eff.handle to convert them into Handlers
+ * and use Effects.handle to convert them into Handlers
  */
 trait Bind[L <: Layer] {
   /**
@@ -25,5 +25,5 @@ trait Bind[L <: Layer] {
    * (usually by somehow "running" eff to obtain a V
    * and then passing it to cont)
    */
-  def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: L#F[V], cont: Arr[RR, RL, V, O[A]]): Eff[RR, RL, O[A]]
+  def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: L#F[V], cont: Arr[RR, RL, V, O[A]]): Effects[RR, RL, O[A]]
 }

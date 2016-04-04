@@ -2,7 +2,7 @@ package paperdoll.state
 
 import shapeless.Coproduct
 import paperdoll.core.layer.Layers
-import paperdoll.core.effect.Eff
+import paperdoll.core.effect.Effects
 import paperdoll.core.layer.Member
 import paperdoll.writer.Writer_
 import paperdoll.reader.Reader_
@@ -17,17 +17,17 @@ import paperdoll.core.effect.Arr
 
 final class StateRunner[S] {
   def loop[R <: Coproduct, L0 <: Layers[R], A, RR <: Coproduct, RL0 <: Layers[RR], RL1 <: Layers[_]](
-    eff: Eff[R, L0, A], s: S)(implicit m0: Member[R, Writer_[S]] {
+    eff: Effects[R, L0, A], s: S)(implicit m0: Member[R, Writer_[S]] {
       type L = L0
       type RestR = RR
       type RestL = RL0
     }, m1: Member[RR, Reader_[S]] {
       type L = RL1
-    }, l: Leibniz[Nothing, Layers[_], RL0, RL1]): Eff[m1.RestR, m1.RestL, (A, S)] = eff.fold[Eff[m1.RestR, m1.RestL, (A, S)]](
+    }, l: Leibniz[Nothing, Layers[_], RL0, RL1]): Effects[m1.RestR, m1.RestL, (A, S)] = eff.fold[Effects[m1.RestR, m1.RestL, (A, S)]](
     a ⇒ Pure((a, s)),
-    new Forall[({ type K[X] = (L0#O[X], Arrs[R, L0, X, A]) ⇒ Eff[m1.RestR, m1.RestL, (A, S)] })#K] {
+    new Forall[({ type K[X] = (L0#O[X], Arrs[R, L0, X, A]) ⇒ Effects[m1.RestR, m1.RestL, (A, S)] })#K] {
       override def apply[X] = (eff, cont) ⇒ {
-        def newCont(s: S) = Eff.compose(cont) andThen { e ⇒ loop(e, s) }
+        def newCont(s: S) = Effects.compose(cont) andThen { e ⇒ loop(e, s) }
         m0.remove(eff).fold(
           effr ⇒ m1.remove(l.subst[({type K[RLL <: Layers[_]] = RLL#O[X]})#K](effr)).fold(
             effrr ⇒ Impure[m1.RestR, m1.RestL, X, (A, S)](effrr, Queue.one[Arr_[m1.RestR, m1.RestL]#O, X, (A, S)](
@@ -38,13 +38,13 @@ final class StateRunner[S] {
     })
 
   def apply[R <: Coproduct, L0 <: Layers[R], A, L1 <: Layers[R], RR <: Coproduct, RL0 <: Layers[RR], RL1 <: Layers[_]](
-    eff: Eff[R, L0, A], s: S)(implicit m0: Member[R, Writer_[S]] {
+    eff: Effects[R, L0, A], s: S)(implicit m0: Member[R, Writer_[S]] {
       type L = L1
       type RestR = RR
       type RestL = RL0
     }, m1: Member[RR, Reader_[S]] {
       type L = RL1
-    }, l0: Leibniz[Nothing, Layers[R], L1, L0], l1: Leibniz[Nothing, Layers[_], RL0, RL1]): Eff[m1.RestR, m1.RestL, (A, S)] =
+    }, l0: Leibniz[Nothing, Layers[R], L1, L0], l1: Leibniz[Nothing, Layers[_], RL0, RL1]): Effects[m1.RestR, m1.RestL, (A, S)] =
     loop[R, L0, A, RR, RL0, RL1](eff, s)(l0.subst[({
       type K[LL <: Layers[R]] = Member[R, Writer_[S]] {
         type L = LL

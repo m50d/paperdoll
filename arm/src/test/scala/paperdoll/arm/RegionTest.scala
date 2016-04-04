@@ -11,7 +11,7 @@ import paperdoll.writer.Writer._
 import shapeless.Nat._0
 import shapeless.Nat._1
 import java.io.BufferedReader
-import paperdoll.core.effect.Eff
+import paperdoll.core.effect.Effects
 import org.fest.assertions.Assertions.assertThat
 
 class RegionTest {
@@ -20,8 +20,8 @@ class RegionTest {
    * This could possibly be implemented using whileM or
    * untilM or similar but I can't quite see how.
    */
-  private[this] def readToWriter(br: BufferedReader): Eff.One[Writer_[String], Unit] =
-    Option(br.readLine()).fold({}.point[Eff.One_[Writer_[String]]#O])({
+  private[this] def readToWriter(br: BufferedReader): Effects.One[Writer_[String], Unit] =
+    Option(br.readLine()).fold({}.point[Effects.One_[Writer_[String]]#O])({
       line => tell(line) *> readToWriter(br)
     })
 

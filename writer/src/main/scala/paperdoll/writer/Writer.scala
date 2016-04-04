@@ -5,7 +5,7 @@ import scalaz.{Leibniz, Monoid}
 import scalaz.Leibniz.===
 import scalaz.syntax.functor._
 import scalaz.syntax.monoid._
-import paperdoll.core.effect.{ Eff, Arr, Bind, Handler }
+import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
 import paperdoll.core.layer.Layers
 
 /**
@@ -25,15 +25,15 @@ object Writer {
   /**
    * Effect that writes the value O
    */
-  def tell[O](o: O): Eff.One[Writer_[O], Unit] =
-    Eff.send[Writer_[O], Unit](put(o))
+  def tell[O](o: O): Effects.One[Writer_[O], Unit] =
+    Effects.send[Writer_[O], Unit](put(o))
 
   /**
    * Run the writer effect, producing a vector of all the written values
    */
   def runWriterVector[O0]: Handler[Writer_[O0]] {
     type O[X] = (X, Vector[O0])
-  } = Eff.handle(new Bind[Writer_[O0]] {
+  } = Effects.handle(new Bind[Writer_[O0]] {
     override type O[X] = (X, Vector[O0])
     override def pure[A](a: A) = (a, Vector())
     override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[O0, V], arr: Arr[RR, RL, V, O[A]]) =
@@ -50,7 +50,7 @@ object Writer {
    */
   def runWriterMonoid[O0: Monoid]: Handler[Writer_[O0]] {
     type O[X] = (X, O0)
-  } = Eff.handle(new Bind[Writer_[O0]] {
+  } = Effects.handle(new Bind[Writer_[O0]] {
     override type O[X] = (X, O0)
     override def pure[A](a: A) = (a, Monoid[O0].zero)
     override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[O0, V], arr: Arr[RR, RL, V, O[A]]) =
