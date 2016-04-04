@@ -6,8 +6,8 @@ import Region._
 import java.io.InputStreamReader
 import shapeless.{ :+:, CNil }
 import java.io.InputStream
-import paperdoll.writer.Writer_
-import paperdoll.writer.Writer._
+import paperdoll.scalaz.Writer_
+import paperdoll.scalaz.Writer._
 import shapeless.Nat._0
 import shapeless.Nat._1
 import java.io.BufferedReader

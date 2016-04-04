@@ -4,7 +4,7 @@ import shapeless.Coproduct
 import paperdoll.core.layer.Layers
 import paperdoll.core.effect.Effects
 import paperdoll.core.layer.Member
-import paperdoll.writer.Writer_
+import paperdoll.scalaz.Writer_
 import paperdoll.reader.Reader_
 import paperdoll.core.effect.Pure
 import scalaz.Forall

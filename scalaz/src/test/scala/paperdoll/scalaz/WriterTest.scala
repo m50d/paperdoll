@@ -1,10 +1,10 @@
-package paperdoll.writer
+package paperdoll.scalaz
 
 import org.junit.Test
-import org.fest.assertions.Assertions.assertThat
 import scalaz.syntax.monad._
 import scalaz.std.anyVal._
 import Writer._
+import org.fest.assertions.Assertions.assertThat
 
 class WriterTest {
   @Test def basicFunctionality(): Unit = {

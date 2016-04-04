@@ -4,9 +4,9 @@ import org.junit.Test
 import paperdoll.reader.Reader
 import shapeless.{:+:, CNil}
 import scalaz.syntax.monad._
-import paperdoll.writer.Writer_
+import paperdoll.scalaz.Writer_
 import paperdoll.reader.Reader_
-import paperdoll.writer.Writer
+import paperdoll.scalaz.Writer
 import org.fest.assertions.Assertions.assertThat
 
 class StateTest {

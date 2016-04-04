@@ -16,7 +16,7 @@
         </dependency>
         <dependency>
             <groupId>com.github.m50d</groupId>
-            <artifactId>paperdoll-writer</artifactId>
+            <artifactId>paperdoll-scalaz</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>

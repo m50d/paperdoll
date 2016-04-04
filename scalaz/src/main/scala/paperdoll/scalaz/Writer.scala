@@ -1,12 +1,13 @@
-package paperdoll.writer
+package paperdoll.scalaz
 
 import shapeless.Coproduct
-import scalaz.{Leibniz, Monoid}
-import scalaz.Leibniz.===
-import scalaz.syntax.functor._
-import scalaz.syntax.monoid._
+import scalaz.{ Leibniz, Monoid }
 import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
 import paperdoll.core.layer.Layers
+import scala.Vector
+import scalaz.Leibniz.===
+import scalaz.syntax.monad._
+import scalaz.syntax.monoid._
 
 /**
  * Type representing an effectful value of type X
@@ -38,11 +39,11 @@ object Writer {
     override def pure[A](a: A) = (a, Vector())
     override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[O0, V], arr: Arr[RR, RL, V, O[A]]) =
       writer.fold {
-        (o, le) ⇒
+        (o, le) =>
           le.subst[({ type L[X] = Arr[RR, RL, X, O[A]] })#L](arr)({}) map { case (a, l) ⇒ (a, o +: l) }
       }
   })
-  
+
   /**
    * Run the writer effect, merging all the written values.
    * Notice how we can have multiple interpreters for the same effect,

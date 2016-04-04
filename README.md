@@ -13,17 +13,40 @@ be aware of any other layers.
 
 ## How to use
 
-Values of type `Effects` form monads (using ScalaZ's monad implementation).
+### Basic effect representation
+
+Values of type `Effects[R, L, ?]` form monads (using ScalaZ's `Monad` implementation).
 You can use `Effects.send` or `Effects.sendU` (which infers the type if there
-is a ScalaZ `Functor` instance) to create these values: 
+is a ScalaZ `Functor` instance) to create `Effects` values, and then use monadic
+`for`/`yield` (or other monad-based constructs) to work with them:
 
 ````scala
+import scalaz.std.option._
 import scalaz.syntax.monad._
+import paperdoll.core.effect.Effects
 
 val eff1 = for {
-  r <- 
-}
+  r <- Effects.sendU(Option(1))
+  s <- Effects.sendU(Option.empty[String])
+} yield s + r
 ````
+
+To use these values you apply the appropriate handler(s), and then
+finally call `.run`:
+
+````scala
+import paperdoll.std.OptionLayer
+
+val result: Option[String] = OptionLayer.runOption(eff1).run
+````
+
+### Combining multiple effects
+
+So far, this is just an overcomplicated way of doing a `for`/`yield` that
+we could have done natively with `Option`.
+The difference comes when we want to mix and match two or more effects,
+which we do by using `.extend` to extend the effects into a common stack.
+I recommend using a type alias to name the effect stack for convenience:
 
 TODO
 

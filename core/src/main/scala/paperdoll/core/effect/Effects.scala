@@ -27,7 +27,7 @@ final class ExtendingEffects[R <: Coproduct, L <: Layers[R], S <: Coproduct, A](
 }
 
 /**
- * A lazy value of type A with a (possibly empty) stack of effects from the list given by R/L
+ * A lazy value of type A via a (possibly empty) queue of effects from the list given by R/L
  * (something like an effectful continuation)
  * Evaluating this by providing implementations of each effect will eventually yield a value of type A
  */

@@ -3,9 +3,9 @@ package paperdoll.core.eff
 import org.junit.Test
 import scalaz.syntax.monad._
 import paperdoll.reader.Reader
-import paperdoll.writer.Writer
+import paperdoll.scalaz.Writer
 import shapeless.{:+:, CNil}
-import paperdoll.writer.Writer_
+import paperdoll.scalaz.Writer_
 import paperdoll.reader.Reader_
 import org.fest.assertions.Assertions.assertThat
 

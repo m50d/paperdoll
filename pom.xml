@@ -44,7 +44,6 @@
 		<module>state</module>
 		<module>std</module>
 		<module>treelog</module>
-		<module>writer</module>
 	</modules>
 	<build>
 		<plugins>
