@@ -1,4 +1,4 @@
-package paperdoll
+package paperdoll.core
 
 import paperdoll.core.layer.Layer
 

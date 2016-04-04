@@ -1,23 +1,17 @@
-package paperdoll.nondeterminism
+package paperdoll.core.nondeterminism
 
-import scalaz.Leibniz.===
 import paperdoll.core.layer.Layers
-import shapeless.Coproduct
+import shapeless.{:+:, Coproduct}
 import scalaz.MonadPlus
-import paperdoll.core.effect.Eff_
 import paperdoll.core.effect.Impure
 import paperdoll.core.effect.Eff
 import paperdoll.core.effect.Pure
 import scalaz.Forall
-import paperdoll.core.effect.Arrs
 import scalaz.Leibniz
-import shapeless.{ :+:, CNil }
-import paperdoll.core.layer.Subset
+import shapeless.CNil
 import scalaz.syntax.foldable._
 import scalaz.std.list._
 import scalaz.syntax.std.list._
-import paperdoll.core.layer.Member
-import paperdoll.core.effect.Arr_
 import paperdoll.core.queue.Queue
 import paperdoll.core.effect.Arr
 import scalaz.syntax.monad._
@@ -25,6 +19,13 @@ import paperdoll.core.effect.Bind
 import paperdoll.core.effect.Handler
 import scalaz.Foldable
 import scalaz.Unapply
+import scala.Vector
+import scalaz.Leibniz.===
+import paperdoll.core.effect.Arrs
+import paperdoll.core.effect.Eff_
+import paperdoll.core.layer.Member
+import paperdoll.core.layer.Subset
+import paperdoll.core.effect.Arr_
 
 sealed trait NDet[A] {
   def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B): B

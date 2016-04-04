@@ -1,12 +1,12 @@
-package paperdoll.nondeterminism
+package paperdoll.core.nondeterminism
 
 import org.junit.Test
-import scala.Predef.intWrapper
 import NDet._
 import scalaz.std.list._
 import scalaz.syntax.monadPlus._
-import paperdoll.core.effect.Eff
 import org.fest.assertions.Assertions.assertThat
+import scala.Vector
+import paperdoll.core.effect.Eff
 
 class NDetTest {
   @Test def testIfte(): Unit = {

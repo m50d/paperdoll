@@ -16,17 +16,17 @@
 		</dependency>
 		<dependency>
 			<groupId>com.github.m50d</groupId>
+			<artifactId>paperdoll-cats</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.m50d</groupId>
 			<artifactId>paperdoll-core</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.github.m50d</groupId>
 			<artifactId>paperdoll-doobie</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>com.github.m50d</groupId>
-			<artifactId>paperdoll-nondeterminism</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -42,6 +42,11 @@
 		<dependency>
 			<groupId>com.github.m50d</groupId>
 			<artifactId>paperdoll-state</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.github.m50d</groupId>
+			<artifactId>paperdoll-std</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

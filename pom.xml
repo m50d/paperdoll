@@ -39,7 +39,6 @@
 		<module>cats</module>
 		<module>core</module>
 		<module>doobie</module>
-		<module>nondeterminism</module>
 		<module>reader</module>
 		<module>scalaz</module>
 		<module>state</module>
