@@ -2,6 +2,7 @@ package paperdoll
 
 import paperdoll.core.layer.Layer
 import _root_.scalaz.Disjunction
+import _root_.scalaz.Writer
 
 package object scalaz {
   type Disjunction_[A] = Layer {

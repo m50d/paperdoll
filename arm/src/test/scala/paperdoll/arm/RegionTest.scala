@@ -7,7 +7,7 @@ import java.io.InputStreamReader
 import shapeless.{ :+:, CNil }
 import java.io.InputStream
 import paperdoll.scalaz.Writer_
-import paperdoll.scalaz.Writer._
+import paperdoll.scalaz.WriterLayer._
 import shapeless.Nat._0
 import shapeless.Nat._1
 import java.io.BufferedReader
@@ -22,7 +22,7 @@ class RegionTest {
    */
   private[this] def readToWriter(br: BufferedReader): Effects.One[Writer_[String], Unit] =
     Option(br.readLine()).fold({}.point[Effects.One_[Writer_[String]]#O])({
-      line => tell(line) *> readToWriter(br)
+      line => sendTell(line) *> readToWriter(br)
     })
 
   @Test def regionWithAccessInside(): Unit = {

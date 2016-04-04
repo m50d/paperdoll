@@ -29,11 +29,14 @@ final class StateRunner[S] {
       override def apply[X] = (eff, cont) ⇒ {
         def newCont(s: S) = Effects.compose(cont) andThen { e ⇒ loop(e, s) }
         m0.remove(eff).fold(
-          effr ⇒ m1.remove(l.subst[({type K[RLL <: Layers[_]] = RLL#O[X]})#K](effr)).fold(
+          effr ⇒ m1.remove(l.subst[({ type K[RLL <: Layers[_]] = RLL#O[X] })#K](effr)).fold(
             effrr ⇒ Impure[m1.RestR, m1.RestL, X, (A, S)](effrr, Queue.one[Arr_[m1.RestR, m1.RestL]#O, X, (A, S)](
               newCont(s))),
             _.fold(witness ⇒ Leibniz.symm[Nothing, Any, S, X](witness).subst[({ type K[Y] = Arr[m1.RestR, m1.RestL, Y, (A, S)] })#K](newCont(s))(s))),
-          _.fold((newS, witness) ⇒ witness.subst[({ type K[Y] = Arr[m1.RestR, m1.RestL, Y, (A, S)] })#K](newCont(newS))({})))
+          { effw =>
+            val (newS, v) = effw.run
+            newCont(newS)(v)
+          })
       }
     })
 
@@ -51,13 +54,7 @@ final class StateRunner[S] {
         type RestR = RR
         type RestL = RL0
       }
-    })#K](m0), m1, l1 /*l1.subst[({
-      type K[RLL <: Layers[RR]] = Member[RR, Reader_[S]] {
-        type L = RLL
-        type RestR = m1.RestR
-        type RestL = m1.RestL
-      }
-    })#K](m1)*/)
+    })#K](m0), m1, l1)
 }
 
 object State {

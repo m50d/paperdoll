@@ -3,15 +3,15 @@ package paperdoll.scalaz
 import org.junit.Test
 import scalaz.syntax.monad._
 import scalaz.std.anyVal._
-import Writer._
+import WriterLayer._
 import org.fest.assertions.Assertions.assertThat
 
 class WriterTest {
   @Test def basicFunctionality(): Unit = {
     val effect = for {
-      _ <- tell(1)
-      _ <- tell(3)
-      _ <- tell(2)
+      _ <- sendTell(1)
+      _ <- sendTell(3)
+      _ <- sendTell(2)
     } yield "WriterTest"
     
     val _1 = assertThat(runWriterVector[Int](effect).run).isEqualTo(("WriterTest", Vector(1, 3, 2)))

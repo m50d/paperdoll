@@ -1,7 +1,7 @@
 package paperdoll.scalaz
 
 import shapeless.Coproduct
-import scalaz.{ Leibniz, Monoid }
+import scalaz.{ Leibniz, Monoid, Writer }
 import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
 import paperdoll.core.layer.Layers
 import scala.Vector
@@ -9,25 +9,9 @@ import scalaz.Leibniz.===
 import scalaz.syntax.monad._
 import scalaz.syntax.monoid._
 
-/**
- * Type representing an effectful value of type X
- * that writes to an output of type O.
- * Implementation is encapsulated.
- */
-sealed trait Writer[O, X] {
-  def fold[A](put: (O, X === Unit) ⇒ A): A
-}
-
-object Writer {
-  private[this] def put[O](o: O) = new Writer[O, Unit] {
-    override def fold[A](put: (O, Unit === Unit) ⇒ A) = put(o, Leibniz.refl)
-  }
-
-  /**
-   * Effect that writes the value O
-   */
-  def tell[O](o: O): Effects.One[Writer_[O], Unit] =
-    Effects.send[Writer_[O], Unit](put(o))
+object WriterLayer {
+  def sendTell[O](o: O): Effects.One[Writer_[O], Unit] =
+    Effects.sendU(Writer(o, {}))
 
   /**
    * Run the writer effect, producing a vector of all the written values
@@ -37,10 +21,10 @@ object Writer {
   } = Effects.handle(new Bind[Writer_[O0]] {
     override type O[X] = (X, Vector[O0])
     override def pure[A](a: A) = (a, Vector())
-    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[O0, V], arr: Arr[RR, RL, V, O[A]]) =
-      writer.fold {
-        (o, le) =>
-          le.subst[({ type L[X] = Arr[RR, RL, X, O[A]] })#L](arr)({}) map { case (a, l) ⇒ (a, o +: l) }
+    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[O0, V], arr: Arr[RR, RL, V, (A, Vector[O0])]) =
+      {
+        val (log, result) = writer.run
+        arr(result) map { case (a, l) ⇒ (a, log +: l) }
       }
   })
 
@@ -55,9 +39,9 @@ object Writer {
     override type O[X] = (X, O0)
     override def pure[A](a: A) = (a, Monoid[O0].zero)
     override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[O0, V], arr: Arr[RR, RL, V, O[A]]) =
-      writer.fold {
-        (o, le) ⇒
-          le.subst[({ type L[X] = Arr[RR, RL, X, O[A]] })#L](arr)({}) map { case (a, l) ⇒ (a, o |+| l) }
+      {
+        val (log, result) = writer.run
+        arr(result) map { case (a, l) ⇒ (a, log |+| l) }
       }
   })
 }
