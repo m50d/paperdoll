@@ -7,6 +7,7 @@ import scalaz.syntax.monadPlus._
 import org.fest.assertions.Assertions.assertThat
 import scala.Vector
 import paperdoll.core.effect.Eff
+import scala.Predef.intWrapper
 
 class NDetTest {
   @Test def testIfte(): Unit = {
