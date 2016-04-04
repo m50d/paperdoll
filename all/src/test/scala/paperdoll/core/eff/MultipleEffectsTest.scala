@@ -27,7 +27,7 @@ class MultipleEffectsTest {
     } yield r
     
     val expected = (100, Vector("begin", "end"))
-    val _1 = assertThat(Reader.runReader(10)(runWriterVector[String].apply(rdwr)).run).isEqualTo(expected)
-    val _2 = assertThat(runWriterVector[String].apply(Reader.runReader(10)(rdwr)).run).isEqualTo(expected)
+    val _1 = assertThat(Reader.runReader(10)(runWriterCollection[String, Vector[String]].apply(rdwr)).run).isEqualTo(expected)
+    val _2 = assertThat(runWriterCollection[String, Vector[String]].apply(Reader.runReader(10)(rdwr)).run).isEqualTo(expected)
   }
 }

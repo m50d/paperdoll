@@ -23,11 +23,11 @@ is a ScalaZ `Functor` instance) to create `Effects` values, and then use monadic
 ````scala
 import scalaz.std.option._
 import scalaz.syntax.monad._
-import paperdoll.core.effect.Effects
+import paperdoll.core.effect.Effects._
 
 val eff1 = for {
-  r <- Effects.sendU(Option(1))
-  s <- Effects.sendU(Option.empty[String])
+  r <- sendU(Option(1))
+  s <- sendU(Option.empty[String])
 } yield s + r
 ````
 
@@ -35,9 +35,9 @@ To use these values you apply the appropriate handler(s), and then
 finally call `.run`:
 
 ````scala
-import paperdoll.std.OptionLayer
+import paperdoll.std.OptionLayer._
 
-val result: Option[String] = OptionLayer.runOption(eff1).run
+val result: Option[String] = runOption(eff1).run
 ````
 
 ### Combining multiple effects
@@ -58,10 +58,12 @@ To represent a collection (`List`, `Vector` etc.) as an effect TODO: NDet
   * i.e. for any datatype you like, you can extend that datatype to a "command object",
 where commands are composed of instance of that datatype and custom functions
   * Note there is no need for the `Coyoneda` trick in this implementation
- * Free monads let you [separate the declaration of a computation from its implementation
- ](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html)
-  * Can use multiple interpreters to run the same monadic computation e.g. test vs live
+  * Free monads let you [separate the declaration of a computation from its implementation
+ ](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html).
+ You can then use multiple interpreters to run the same monadic computation e.g. test vs live
+ or realtime datastore vs batch datastore (when using "lambda architecture")
  * Freer monads let you interleave multiple monadic effects without the complexities of monad transformers
+  * Effects are ordered in a common-sense way according to their order in code
   * Both definition of effects and of interpreters can be completely separate (even in separate codebases)
  * Implementation is compatible with ScalaZ Monads
   * i.e. you can use existing ScalaZ-compatible functions like `traverse` on paperdoll effect stacks.
@@ -90,8 +92,11 @@ where commands are composed of instance of that datatype and custom functions
  * Use of type members vs. type parameters is arguably inconsistent in places, as is general style.
  In some cases this is deliberate pragmatism so as to ensure that the types can be used in practice;
  in others I couldn't get type inference to work correctly with a more natural representation.
- * Compilation time is really awful, particularly in the case of errors.
+ * I have largely ignored variance. Good type inference is a higher priority than correct variance,
+ but contributions that add co- or contravariance without compromising type inference are welcome.
+ * Compilation time is really awful, particularly in the case of errors. Contributions very welcome.
  * There are no performance tests. I don't have time to do these, but would welcome contributions.
+  * Constant-factor performance is likely also bad. Contributions welcome but likely a waste of time without tests.
  * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven.
  I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
  but any implementation of binary compatibility checking in the maven build would be very welcome.
