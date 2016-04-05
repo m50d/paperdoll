@@ -1,13 +1,9 @@
 package paperdoll.std
 
 import paperdoll.core.effect.Effects
-import paperdoll.core.effect.Bind
-import paperdoll.core.effect.Handler
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
-import paperdoll.core.effect.Arr
-import paperdoll.core.layer.Layers
-import shapeless.{ :+:, CNil, Coproduct }
+import shapeless.{ :+:, CNil }
 import scalaz.Forall
 import paperdoll.core.effect.Arrs
 

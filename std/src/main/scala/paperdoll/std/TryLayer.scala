@@ -15,7 +15,7 @@ object TryLayer {
   /** Try is handled much like Option: if Success,
    *  run the continuation, if Failure, return that.
    */
-  def runTry[A]: Handler.Aux[Try_, Try] =
+  def runTry: Handler.Aux[Try_, Try] =
     Effects.handle(new Bind[Try_] {
       override type O[X] = Try[X]
       override def pure[A](b: A) = Success(b)
