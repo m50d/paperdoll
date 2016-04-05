@@ -1,7 +1,7 @@
 package paperdoll.core.nondeterminism
 
 import org.junit.Test
-import NDet._
+import Nondeterminism._
 import scalaz.std.list._
 import scalaz.syntax.monadPlus._
 import org.fest.assertions.Assertions.assertThat

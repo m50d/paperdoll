@@ -27,11 +27,11 @@ import paperdoll.core.layer.Member
 import paperdoll.core.layer.Subset
 import paperdoll.core.effect.Arr_
 
-sealed trait NDet[A] {
+sealed trait Nondeterminism[A] {
   def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B): B
 }
 
-object NDet {
+object Nondeterminism {
     //TODO remove duplication between this and the other case
   implicit def monadPlus[R <: Coproduct, L <: Layers[R], LT0 <: Layers[NDet_ :+: CNil]](implicit su: Subset[R, NDet_ :+: CNil] {
     type LS = L
@@ -44,16 +44,16 @@ object NDet {
           override def apply[X] = (eff, cont) ⇒ Impure[R, L, X, B](eff, cont :+ f)
         })
       override def plus[A](a: Effects[R, L, A], b: ⇒ Effects[R, L, A]) =
-        bind(Effects.send[NDet_, Boolean](NDet.this.plus).extend[R].apply[LT0]())({
+        bind(Effects.send[NDet_, Boolean](Nondeterminism.this.plus).extend[R].apply[LT0]())({
           x ⇒ if (x) a else b
         })
       override def empty[A] = Effects.send[NDet_, A](zero).extend[R].apply[LT0]()
     }
   
-  private[this] def zero[A] = new NDet[A] {
+  private[this] def zero[A] = new Nondeterminism[A] {
     override def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B) = zero
   }
-  private[this] def plus = new NDet[Boolean] {
+  private[this] def plus = new Nondeterminism[Boolean] {
     override def fold[B](zero: ⇒ B, plus: Boolean === Boolean ⇒ B) = plus(Leibniz.refl)
   }
   def Zero[A] = Effects.send[NDet_, A](zero)
@@ -127,7 +127,7 @@ object NDet {
   def runNDetVector: Handler.Aux[NDet_, Vector] = Effects.handle(new Bind[NDet_]{
     override type O[X] = Vector[X]
     override def pure[A](a: A) = Vector(a)
-    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: NDet[V], cont: Arr[RR, RL, V, Vector[A]]) =
+    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: Nondeterminism[V], cont: Arr[RR, RL, V, Vector[A]]) =
       eff.fold(Pure(Vector()), {
         le =>
           val booleanCont = le.subst[({ type K[Y] = Arr[RR, RL, Y, Vector[A]] })#K](cont)

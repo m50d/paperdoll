@@ -75,7 +75,7 @@ final case class Pure[R <: Coproduct, L <: Layers[R], A](a: A) extends Effects[R
  * While instantiating directly is supported, most use cases should use the simpler Effects#send API
  */
 final case class Impure[R <: Coproduct, L <: Layers[R], X, A](eff: L#O[X],
-  cont: Arrs[R, L, X, A]) extends Effects[R, L, A] {
+    cont: Arrs[R, L, X, A]) extends Effects[R, L, A] {
   override def fold[B](pure: A => B, impure: Forall[({ type K[Y] = (L#O[Y], Arrs[R, L, Y, A]) => B })#K]) =
     impure.apply[X](eff, cont)
 
@@ -87,7 +87,20 @@ sealed trait Effects_[R <: Coproduct, L <: Layers[R]] {
   final type O[A] = Effects[R, L, A]
 }
 
-object Effects {
+/**
+ * Lower priority implicit instances for Effects
+ */
+trait Effects0 {
+  implicit def monadEffects[R <: Coproduct, L <: Layers[R]] = new Monad[(Effects_[R, L])#O] {
+    override def point[A](a: => A) = Pure[R, L, A](a)
+    override def bind[A, B](fa: Effects[R, L, A])(f: A => Effects[R, L, B]) =
+      fa.fold[Effects[R, L, B]](f, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => Effects[R, L, B] })#K] {
+        override def apply[X] = (eff, cont) => Impure[R, L, X, B](eff, cont :+ f)
+      })
+  }
+}
+
+object Effects extends Effects0 {
   /**
    * One[L, A] is the type of an Effects with layer stack just L,
    * and value type A, i.e. Effects[L :+: CNil, ..., A]
@@ -95,13 +108,6 @@ object Effects {
   type One[L <: Layer, A] = Effects[L :+: CNil, Layers.One[L], A]
   sealed trait One_[L <: Layer] {
     final type O[A] = One[L, A]
-  }
-  implicit def monadEffects[R <: Coproduct, L <: Layers[R]] = new Monad[(Effects_[R, L])#O] {
-    override def point[A](a: => A) = Pure[R, L, A](a)
-    override def bind[A, B](fa: Effects[R, L, A])(f: A => Effects[R, L, B]) =
-      fa.fold[Effects[R, L, B]](f, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) => Effects[R, L, B] })#K] {
-        override def apply[X] = (eff, cont) => Impure[R, L, X, B](eff, cont :+ f)
-      })
   }
   implicit def unapplyEffects[TC[_[_]], R <: Coproduct, L <: Layers[R], A0](
     implicit instance: TC[Effects_[R, L]#O]) = new Unapply[TC, Effects[R, L, A0]] {
