@@ -15,6 +15,14 @@ sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
   final type O[A, B] = A ⇒ Effects[R, L, B]
 }
 
+object Arr_ {
+  final type One[L <: Layer] = Arr_[L :+: CNil, Layers.One[L]]
+}
+
+object Arrs {
+  final type One[L <: Layer, A, B] = Queue[Arr_.One[L]#O, A, B]
+}
+
 /** Intermediate step as a helper for type inference of Effects#extend
  */
 final class ExtendingEffects[R <: Coproduct, L <: Layers[R], S <: Coproduct, A](eff: Effects[R, L, A]) {

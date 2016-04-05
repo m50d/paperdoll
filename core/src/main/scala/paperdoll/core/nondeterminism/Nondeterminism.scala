@@ -2,7 +2,6 @@ package paperdoll.core.nondeterminism
 
 import paperdoll.core.layer.Layers
 import shapeless.{:+:, Coproduct}
-import scalaz.MonadPlus
 import paperdoll.core.effect.Impure
 import paperdoll.core.effect.Effects
 import paperdoll.core.effect.Pure
