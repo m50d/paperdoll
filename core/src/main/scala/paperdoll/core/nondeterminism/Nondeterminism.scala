@@ -32,24 +32,6 @@ sealed trait Nondeterminism[A] {
 }
 
 object Nondeterminism {
-    //TODO remove duplication between this and the other case
-  implicit def monadPlus[R <: Coproduct, L <: Layers[R], LT0 <: Layers[NDet_ :+: CNil]](implicit su: Subset[R, NDet_ :+: CNil] {
-    type LS = L
-    type LT = LT0
-  }, le: Leibniz[Nothing, Layers[NDet_ :+: CNil], LT0, Layers.One[NDet_]]): MonadPlus[Effects_[R, L]#O] =
-    new MonadPlus[Effects_[R, L]#O] {
-      override def point[A](a: ⇒ A) = Pure[R, L, A](a)
-      override def bind[A, B](fa: Effects[R, L, A])(f: A ⇒ Effects[R, L, B]) =
-        fa.fold[Effects[R, L, B]](f, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ Effects[R, L, B] })#K] {
-          override def apply[X] = (eff, cont) ⇒ Impure[R, L, X, B](eff, cont :+ f)
-        })
-      override def plus[A](a: Effects[R, L, A], b: ⇒ Effects[R, L, A]) =
-        bind(Effects.send[NDet_, Boolean](Nondeterminism.this.plus).extend[R].apply[LT0]())({
-          x ⇒ if (x) a else b
-        })
-      override def empty[A] = Effects.send[NDet_, A](zero).extend[R].apply[LT0]()
-    }
-  
   private[this] def zero[A] = new Nondeterminism[A] {
     override def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B) = zero
   }
