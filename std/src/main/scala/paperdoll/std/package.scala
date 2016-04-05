@@ -1,6 +1,7 @@
 package paperdoll
 
 import paperdoll.core.layer.Layer
+import scala.util.Try
 
 package object std {
   type Option_ = Layer {
@@ -8,5 +9,8 @@ package object std {
   }
   type Either_[A] = Layer {
     type F[X] = Either[A, X]
+  }
+  type Try_ = Layer {
+    type F[X] = Try[X]
   }
 }

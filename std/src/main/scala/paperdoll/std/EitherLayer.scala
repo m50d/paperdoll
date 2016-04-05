@@ -9,6 +9,10 @@ import paperdoll.core.layer.Layers
 import shapeless.Coproduct
 
 object EitherLayer {
+  /**
+   * Either is handled much like Option: if Right,
+   * run the continuation, if Left, return that.
+   */
   def runEither[A]: Handler.Aux[Either_[A], Either_[A]#F] =
     Effects.handle(new Bind[Either_[A]] {
       override type O[X] = Either[A, X]

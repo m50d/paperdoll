@@ -174,7 +174,9 @@ I have added a corresponding:
     }
 
 so that `F_[X]#O` can be used to express the partially applied type
-instead of a type lambda. Any type ending in `_` is likely to be
+instead of a type lambda. In the case of `Layer`s I have used
+`F` rather than `O` for the type member to emphasise that `F` is a
+Functor-like type. Any type ending in `_` is likely to be
 an instance of this pattern.
 
 Algebraic data types generally offer a `fold` method which is designed
