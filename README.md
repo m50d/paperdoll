@@ -35,7 +35,7 @@ where commands are composed of instance of that datatype and custom functions
 
 ### Basic effect representation
 
-Values of type `Effects[R, L, ?]` form monads (using ScalaZ's `Monad` implementation).
+Values of type `Effects[R, L, ?]` form a monad (using ScalaZ's `Monad` implementation).
 You can use `Effects.send` or `Effects.sendU` (which infers the type if there
 is a ScalaZ `Functor` instance) to create `Effects` values, and then use monadic
 `for`/`yield` (or other monad-based constructs) to work with them:
@@ -223,10 +223,10 @@ but make use of unsafe casts internally for performance.
   * Use msumlU rather than msuml
   * Tighten up dependency config (i.e. not snapshots repo)
   * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
- * Straighten out `NDet`/`MonadPlus` stuff
  * Finish TODOs in this document (in particular examples)
  * Final code/readme review for readability
   * With particular focus on examples
+  * Ensure no abbreviations where a full name will work
  * Submit a release to Maven Central
  
 ## Conduct
