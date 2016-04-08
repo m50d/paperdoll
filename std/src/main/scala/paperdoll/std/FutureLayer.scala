@@ -12,7 +12,8 @@ object FutureLayer {
    *  since it's side-effecting and so can't be safely combined with laziness.
    *  For a more pure/composable notion of async,
    *  consider scalaz-concurrent Future instead
-   *  TODO this implementation is totally generic and should just be in Eff
+   *  TODO replace with a call to Effects.handleLast if we have a Monad[Future]
+   *  (possibly from scalaz-outlaws?)
    */
   def runFuture[A](effects: Effects.One[Future_, A])(implicit ec: ExecutionContext): Future[A] =
     effects.fold(Future.successful,

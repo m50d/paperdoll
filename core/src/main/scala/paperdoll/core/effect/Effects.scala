@@ -149,10 +149,9 @@ object Effects extends Effects0 {
    */
   def send[L <: Layer, V](value: L#F[V]): Effects.One[L, V] =
     Impure[L :+: CNil, Layers.One[L], V, V](Inl(value), Queue.empty[Arr_[L :+: CNil, Layers.One[L]]#O, V])
-  /**
-   * Send that infers the types L and V. However since the inference relies on implicit
-   * Functor instances, this will only work if L#F forms a (ScalaZ) Functor
-   * (and the relevant implicit instance is in scope)
+  /** Send that infers the types L and V. However since the inference relies on implicit
+   *  Functor instances, this will only work if L#F forms a (ScalaZ) Functor
+   *  (and the relevant implicit instance is in scope)
    */
   def sendU[FV](value: FV)(implicit u: Unapply[Functor, FV]): Effects.One[Layer.Aux[u.M], u.A] =
     send[Layer.Aux[u.M], u.A](u.leibniz(value))
@@ -189,4 +188,21 @@ object Effects extends Effects0 {
           }
         })
     }
+
+  /**
+   * Usually effects can be interleaved, but some effects cannot be expressed
+   * in an interleaveable way (similar to monads which do not have monad transformers).
+   * In that case we may only have one such effect in the stack, and must handle
+   * it last - but we can handle any monadic effect this way.
+   */
+  def handleLast[L <: Layer, A](effects: One[L, A])(implicit monad: Monad[L#F]): L#F[A] =
+    effects.fold(monad.point(_),
+      new Forall[({ type K[X] = (L#F[X] :+: CNil, Arrs.One[L, X, A]) ⇒ L#F[A] })#K] {
+        override def apply[X] = {
+          (eff, cont) ⇒
+            eff.eliminate(_.flatMap {
+              x ⇒ handleLast(compose(cont)(x))
+            }, _.impossible)
+        }
+      })
 }
