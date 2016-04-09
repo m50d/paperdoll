@@ -13,10 +13,9 @@ import scalaz.Leibniz
 import paperdoll.core.effect.Impure
 import paperdoll.core.effect.Arr_
 import paperdoll.core.queue.Queue
-import paperdoll.core.effect.Arr
 
-final class StateRunner[S] {
-  def loop[R <: Coproduct, L0 <: Layers[R], A, RR <: Coproduct, RL0 <: Layers[RR], RL1 <: Layers[_]](
+final class StateHandler[S] {
+  private[this] def loop[R <: Coproduct, L0 <: Layers[R], A, RR <: Coproduct, RL0 <: Layers[RR], RL1 <: Layers[_]](
     eff: Effects[R, L0, A], s: S)(implicit m0: Member[R, Writer_[S]] {
       type L = L0
       type RestR = RR
@@ -58,5 +57,8 @@ final class StateRunner[S] {
 }
 
 object State {
-  def runState[S] = new StateRunner[S]
+  /**
+   * A demonstration from the paper.
+   */
+  def handleState[S] = new StateHandler[S]
 }

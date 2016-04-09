@@ -18,7 +18,7 @@ class StateTest {
       _ <- sendTell(firstValue * 2).extend[ReaderWriter]()
       secondValue <- sendAsk[Int].extend[ReaderWriter]()
     } yield (firstValue, secondValue)
-    val _ = assertThat(State.runState[Int](eff, 4).run).isEqualTo(((4, 8), 8))
+    val _ = assertThat(State.handleState[Int](eff, 4).run).isEqualTo(((4, 8), 8))
   }
 
 }
