@@ -15,7 +15,7 @@ object WriterLayer {
   /**
    * Run the writer effect, producing a collection of all the written values
    */
-  def runWriterCollection[O0, CC <: TraversableOnce[O0]](implicit cbf: CanBuildFrom[CC, O0, CC]): Handler[Writer_[O0]] {
+  def handleWriterCollection[O0, CC <: TraversableOnce[O0]](implicit cbf: CanBuildFrom[CC, O0, CC]): Handler[Writer_[O0]] {
     type O[X] = (X, CC)
   } = Effects.handle(new Bind[Writer_[O0]] {
     override type O[X] = (X, CC)
@@ -31,7 +31,7 @@ object WriterLayer {
    * Notice how we can have multiple interpreters for the same effect,
    * as we've decoupled the declaration of an effect from its implementation.
    */
-  def runWriterMonoid[O0: Monoid]: Handler[Writer_[O0]] {
+  def handleWriterMonoid[O0: Monoid]: Handler[Writer_[O0]] {
     type O[X] = (X, O0)
   } = Effects.handle(new Bind[Writer_[O0]] {
     override type O[X] = (X, O0)

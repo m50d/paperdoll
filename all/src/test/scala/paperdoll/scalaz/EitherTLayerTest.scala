@@ -21,7 +21,7 @@ object EitherTLayerTest {
     val eff: Effects[Option_ :+: Disjunction_[Int] :+: CNil, Layers[Option_ :+: Disjunction_[Int] :+: CNil] {
       type O[X] = Option[X] :+: Disjunction[Int, X] :+: CNil
     }, String] = sendEitherT[Option, Int, String](EitherT.right[Option, Int, String](Some("test")))
-    val partial = runOption(eff)
+    val partial = handleOption(eff)
     val pure = unsafeRun(partial)
     assertThat(pure).isEqualTo(\/-(Some("test")))
   }

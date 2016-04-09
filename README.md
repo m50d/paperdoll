@@ -57,7 +57,7 @@ finally call `.run`:
 ````scala
 import paperdoll.std.OptionLayer._
 
-val result: Option[String] = runOption(eff1).run
+val result: Option[String] = handleOption(eff1).run
 ````
 
 ### Combining multiple effects
@@ -84,11 +84,11 @@ val eff2 = for {
   _ <- sendTell(1).extend[MyStack]()
 } yield t
 
-val resultA: (Option[String], Int) = runWriterMonoid[Int].apply(runOption(eff2)).run
-val resultB: Option[(String, BitSet)] = runOption(runWriterCollection[Int, BitSet].apply(eff2)).run
+val resultA: (Option[String], Int) = handleWriterMonoid[Int].apply(handleOption(eff2)).run
+val resultB: Option[(String, BitSet)] = handleOption(handleWriterCollection[Int, BitSet].apply(eff2)).run
 
 val eff3 = eff2.extend[Writer_[Int] :+: Option_ :+: CNil]()
-val resultC: (Option[String], Int) = runWriterMonoid[Int].apply(runOption(eff2)).run
+val resultC: (Option[String], Int) = handleWriterMonoid[Int].apply(handleOption(eff2)).run
 ````
 
 (`sendTell` here is just a convenience function - you can still call `send`
@@ -106,8 +106,8 @@ in a different order would yield a different result).
 
 Note also that we have full, `Free`-style separation of the declaration of an effect
 and the interpreter for that effect: for `Writer` there are two interpreters, the
-`runWriterMonoid` interpreter that merges all the written values into a single value,
-and the `runWriterCollection` interpreter that returns a collection of the values
+`handleWriterMonoid` interpreter that merges all the written values into a single value,
+and the `handleWriterCollection` interpreter that returns a collection of the values
 that were written.
 
 ### Supported effects

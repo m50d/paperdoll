@@ -13,7 +13,7 @@ object OptionLayer {
    * Options are handled by: if Some, run the continuation, otherwise
    * return Pure(None)
    */
-  def runOption: Handler.Aux[Option_, Option] =
+  def handleOption: Handler.Aux[Option_, Option] =
     Effects.handle(new Bind[Option_] {
       override type O[X] = Option[X]
       override def pure[A](a: A) = Some(a)

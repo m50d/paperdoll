@@ -15,8 +15,8 @@ class WriterTest {
       _ <- sendTell(2)
     } yield "WriterTest"
     
-    val _1 = assertThat(runWriterCollection[Int, Vector[Int]].apply(effect).run).isEqualTo(("WriterTest", Vector(1, 3, 2)))
-    val _2 = assertThat(runWriterMonoid[Int].apply(effect).run).isEqualTo(("WriterTest", 6))
-    val _3 = assertThat(runWriterCollection[Int, BitSet].apply(effect).run).isEqualTo(("WriterTest", BitSet(1, 2, 3)))
+    val _1 = assertThat(handleWriterCollection[Int, Vector[Int]].apply(effect).run).isEqualTo(("WriterTest", Vector(1, 3, 2)))
+    val _2 = assertThat(handleWriterMonoid[Int].apply(effect).run).isEqualTo(("WriterTest", 6))
+    val _3 = assertThat(handleWriterCollection[Int, BitSet].apply(effect).run).isEqualTo(("WriterTest", BitSet(1, 2, 3)))
   }
 }
