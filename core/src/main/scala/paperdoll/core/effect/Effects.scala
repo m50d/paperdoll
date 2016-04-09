@@ -155,6 +155,19 @@ object Effects extends Effects0 {
    */
   def sendU[FV](value: FV)(implicit u: Unapply[Functor, FV]): Effects.One[Layer.Aux[u.M], u.A] =
     send[Layer.Aux[u.M], u.A](u.leibniz(value))
+
+  /**
+   * Send a nested pair of effects F[G[A]], inferring the types based on implicit functor instances.
+   */
+  def sendTU[FGA, GA](value: FGA)(implicit u1: Unapply[Functor, FGA] {
+    type A = GA
+  }, u2: Unapply[Functor, GA]): Effects[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil, Layers[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil] {
+    type O[X] = u1.M[X] :+: u2.M[X] :+: CNil
+  }, u2.A] = {
+    // Inlining this causes compilation to fail, I don't understand why
+    def sendGA(ga: GA) = sendU(ga).extend[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil]()
+    sendU(value).extend[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil]().flatMap(sendGA(_))
+  }
   /** Collapse an Arrs (a queue of Arr) to a single Arr.
    */
   def compose[R <: Coproduct, L <: Layers[R], A, B](arrs: Arrs[R, L, A, B]): Arr[R, L, A, B] = {
@@ -189,11 +202,10 @@ object Effects extends Effects0 {
         })
     }
 
-  /**
-   * Usually effects can be interleaved, but some effects cannot be expressed
-   * in an interleaveable way (similar to monads which do not have monad transformers).
-   * In that case we may only have one such effect in the stack, and must handle
-   * it last - but we can handle any monadic effect this way.
+  /** Usually effects can be interleaved, but some effects cannot be expressed
+   *  in an interleaveable way (similar to monads which do not have monad transformers).
+   *  In that case we may only have one such effect in the stack, and must handle
+   *  it last - but we can handle any monadic effect this way.
    */
   def handleLast[L <: Layer, A](effects: One[L, A])(implicit monad: Monad[L#F]): L#F[A] =
     effects.fold(monad.point(_),
