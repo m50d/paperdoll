@@ -205,13 +205,13 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
+ * Scalaz integration
+  * IndexedReaderWriterStateT and all subsets thereof
+  * Task / Future
  * Cats integration
   * OptionT
   * WriterT / Writer
   * XorT / Xor
- * Scalaz integration
-  * IndexedReaderWriterStateT and all subsets thereof
-  * Task / Future
  * Treelog integration
   * Possibly pointless, but take a look - even if it's just one convenience function it helps
  * Doobie integration

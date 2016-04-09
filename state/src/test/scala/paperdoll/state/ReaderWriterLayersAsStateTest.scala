@@ -9,7 +9,7 @@ import paperdoll.scalaz.WriterLayer._
 import paperdoll.scalaz.ReaderLayer._
 import org.fest.assertions.Assertions.assertThat
 
-class StateTest {
+class ReaderWriterLayersAsStateTest {
   @Test def basicFunctionality(): Unit = {
     type ReaderWriter = Reader_[Int] :+: Writer_[Int] :+: CNil
     val eff = for {
@@ -17,7 +17,7 @@ class StateTest {
       _ <- sendTell(firstValue * 2).extend[ReaderWriter]()
       secondValue <- sendAsk[Int].extend[ReaderWriter]()
     } yield (firstValue, secondValue)
-    val _ = assertThat(State.handleState[Int](eff, 4).run).isEqualTo(((4, 8), 8))
+    val _ = assertThat(ReaderWriterLayersAsState.handleState[Int](eff, 4).run).isEqualTo(((4, 8), 8))
   }
 
 }

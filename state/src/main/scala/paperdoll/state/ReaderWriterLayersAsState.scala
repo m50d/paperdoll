@@ -14,7 +14,7 @@ import paperdoll.core.effect.Impure
 import paperdoll.core.effect.Arr_
 import paperdoll.core.queue.Queue
 
-final class StateHandler[S] {
+final class ReaderWriterAsStateHandler[S] {
   private[this] def loop[R <: Coproduct, L0 <: Layers[R], A, RR <: Coproduct, RL0 <: Layers[RR], RL1 <: Layers[_]](
     eff: Effects[R, L0, A], s: S)(implicit m0: Member[R, Writer_[S]] {
       type L = L0
@@ -56,9 +56,11 @@ final class StateHandler[S] {
     })#K](m0), m1, l1)
 }
 
-object State {
+object ReaderWriterLayersAsState {
   /**
-   * A demonstration from the paper.
+   * A demonstration from the paper: reinterpret reader and
+   * writer effects as a state. This is probably not terribly practical
+   * (you'd just use StateLayer instead), but shows the power and flexibility of this style
    */
-  def handleState[S] = new StateHandler[S]
+  def handleState[S] = new ReaderWriterAsStateHandler[S]
 }
