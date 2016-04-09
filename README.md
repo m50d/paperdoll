@@ -210,11 +210,7 @@ but make use of unsafe casts internally for performance.
   * WriterT / Writer
   * XorT / Xor
  * Scalaz integration
-  * EitherT / Disjunction (finish)
   * IndexedReaderWriterStateT and all subsets thereof
-    * Replace paperdoll-reader and paperdoll-writer
-    * When changing project structure, remember to update all
-  * OptionT
   * Task / Future
  * Treelog integration
   * Possibly pointless, but take a look - even if it's just one convenience function it helps
