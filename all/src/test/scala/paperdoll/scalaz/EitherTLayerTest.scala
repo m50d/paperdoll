@@ -7,7 +7,6 @@ import paperdoll.core.effect.Effects
 import paperdoll.core.effect.Effects.unsafeRun
 import paperdoll.std.OptionLayer._
 import scalaz.std.option._
-import scalaz.syntax.monad._
 import paperdoll.std.Option_
 import shapeless.CNil
 import paperdoll.core.layer.Layers
@@ -23,6 +22,6 @@ object EitherTLayerTest {
     }, String] = sendEitherT[Option, Int, String](EitherT.right[Option, Int, String](Some("test")))
     val partial = handleOption(eff)
     val pure = unsafeRun(partial)
-    assertThat(pure).isEqualTo(\/-(Some("test")))
+    val _ = assertThat(pure).isEqualTo(\/-(Some("test")))
   }
 }
