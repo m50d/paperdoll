@@ -15,5 +15,5 @@ object FutureLayer {
    *  consider scalaz-concurrent Future instead
    */
   def runFuture[A](effects: Effects.One[Future_, A])(implicit ec: ExecutionContext): Future[A] =
-    Effects.handleLast(effects)
+    Effects.unsafeRun(effects)
 }

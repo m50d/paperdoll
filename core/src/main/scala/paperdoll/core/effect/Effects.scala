@@ -207,13 +207,13 @@ object Effects extends Effects0 {
    *  In that case we may only have one such effect in the stack, and must handle
    *  it last - but we can handle any monadic effect this way.
    */
-  def handleLast[L <: Layer, A](effects: One[L, A])(implicit monad: Monad[L#F]): L#F[A] =
+  def unsafeRun[L <: Layer, A](effects: One[L, A])(implicit monad: Monad[L#F]): L#F[A] =
     effects.fold(monad.point(_),
       new Forall[({ type K[X] = (L#F[X] :+: CNil, Arrs.One[L, X, A]) ⇒ L#F[A] })#K] {
         override def apply[X] = {
           (eff, cont) ⇒
             eff.eliminate(_.flatMap {
-              x ⇒ handleLast(compose(cont)(x))
+              x ⇒ unsafeRun(compose(cont)(x))
             }, _.impossible)
         }
       })

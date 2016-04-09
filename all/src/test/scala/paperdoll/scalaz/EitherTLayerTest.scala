@@ -4,7 +4,7 @@ import org.fest.assertions.Assertions.assertThat
 import org.junit.Test
 import EitherTLayer._
 import paperdoll.core.effect.Effects
-import paperdoll.core.effect.Effects.handleLast
+import paperdoll.core.effect.Effects.unsafeRun
 import paperdoll.std.OptionLayer._
 import scalaz.std.option._
 import scalaz.syntax.monad._
@@ -22,7 +22,7 @@ object EitherTLayerTest {
       type O[X] = Option[X] :+: Disjunction[Int, X] :+: CNil
     }, String] = sendEitherT[Option, Int, String](EitherT.right[Option, Int, String](Some("test")))
     val partial = runOption(eff)
-    val pure = handleLast(partial)
+    val pure = unsafeRun(partial)
     assertThat(pure).isEqualTo(\/-(Some("test")))
   }
 }
