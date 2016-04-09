@@ -1,11 +1,11 @@
-package paperdoll.reader
+package paperdoll.scalaz
 
 import shapeless.Coproduct
 import scalaz.Leibniz
-import scalaz.Id.Id
-import scalaz.Leibniz.===
 import paperdoll.core.layer.Layers
 import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
+import scalaz.Id.Id
+import scalaz.Leibniz.===
 
 /**
  * Type representing an effectful value of type X

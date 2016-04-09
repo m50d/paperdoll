@@ -3,9 +3,6 @@ package paperdoll.std
 import paperdoll.core.effect.Effects
 import scala.concurrent.Future
 import scala.concurrent.ExecutionContext
-import shapeless.{ :+:, CNil }
-import scalaz.Forall
-import paperdoll.core.effect.Arrs
 import scalaz.std.scalaFuture._
 
 object FutureLayer {

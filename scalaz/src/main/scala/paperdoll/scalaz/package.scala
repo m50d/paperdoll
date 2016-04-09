@@ -11,4 +11,7 @@ package object scalaz {
   type Writer_[O] = Layer {
     type F[X] = Writer[O, X]
   }
+  type Reader_[I] = Layer {
+    type F[X] = Reader[I, X]
+  }
 }

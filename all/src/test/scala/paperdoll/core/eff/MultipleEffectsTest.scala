@@ -2,11 +2,11 @@ package paperdoll.core.eff
 
 import org.junit.Test
 import scalaz.syntax.monad._
-import paperdoll.reader.Reader._
+import paperdoll.scalaz.Reader._
 import paperdoll.scalaz.WriterLayer._
 import shapeless.{:+:, CNil}
 import paperdoll.scalaz.Writer_
-import paperdoll.reader.Reader_
+import paperdoll.scalaz.Reader_
 import org.fest.assertions.Assertions.assertThat
 
 class MultipleEffectsTest {

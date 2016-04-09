@@ -1,6 +1,6 @@
 package paperdoll.arm
 
-import paperdoll.reader.Reader_
+import paperdoll.scalaz.Reader_
 import paperdoll.scalaz.Writer_
 import shapeless.Nat
 

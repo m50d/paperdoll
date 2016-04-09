@@ -2,7 +2,7 @@ package paperdoll.core.layer
 
 import org.junit.Test
 import shapeless.{ CNil, :+: }
-import paperdoll.reader.Reader_
+import paperdoll.scalaz.Reader_
 import paperdoll.scalaz.Disjunction_
 
 class SubsetTest {

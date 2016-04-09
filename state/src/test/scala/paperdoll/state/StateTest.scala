@@ -1,11 +1,11 @@
 package paperdoll.state
 
 import org.junit.Test
-import paperdoll.reader.Reader
+import paperdoll.scalaz.Reader
 import shapeless.{:+:, CNil}
 import scalaz.syntax.monad._
 import paperdoll.scalaz.Writer_
-import paperdoll.reader.Reader_
+import paperdoll.scalaz.Reader_
 import paperdoll.scalaz.WriterLayer
 import org.fest.assertions.Assertions.assertThat
 

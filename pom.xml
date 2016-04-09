@@ -39,7 +39,6 @@
 		<module>cats</module>
 		<module>core</module>
 		<module>doobie</module>
-		<module>reader</module>
 		<module>scalaz</module>
 		<module>state</module>
 		<module>std</module>
