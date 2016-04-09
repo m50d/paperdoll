@@ -10,6 +10,6 @@ class EitherTest {
 	@Test def basicFunctionality(): Unit = {
 	  val either: Either[Int, String] = Left(4)
 	  val eff = sendU(either)
-	  val _ = assertThat(runEither[Int](eff).run).isEqualTo(Left(4))
+	  val _ = assertThat(handleEither[Int](eff).run).isEqualTo(Left(4))
 	}
 }
