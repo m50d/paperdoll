@@ -8,7 +8,6 @@ import paperdoll.scalaz.Reader_
 import paperdoll.scalaz.WriterLayer._
 import paperdoll.scalaz.ReaderLayer._
 import org.fest.assertions.Assertions.assertThat
-import scalaz.Reader
 
 class StateTest {
   @Test def basicFunctionality(): Unit = {
