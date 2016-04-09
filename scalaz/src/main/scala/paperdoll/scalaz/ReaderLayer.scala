@@ -1,12 +1,10 @@
 package paperdoll.scalaz
 
 import shapeless.Coproduct
-import scalaz.Leibniz
 import paperdoll.core.layer.Layers
 import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
 import paperdoll.core.effect.Effects.sendU
 import scalaz.Id.Id
-import scalaz.Leibniz.===
 import scalaz.Reader
 import scala.Predef.identity
 
