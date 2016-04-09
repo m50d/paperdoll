@@ -32,7 +32,7 @@ final class StateRunner[S] {
           effr ⇒ m1.remove(l.subst[({ type K[RLL <: Layers[_]] = RLL#O[X] })#K](effr)).fold(
             effrr ⇒ Impure[m1.RestR, m1.RestL, X, (A, S)](effrr, Queue.one[Arr_[m1.RestR, m1.RestL]#O, X, (A, S)](
               newCont(s))),
-            _.fold(witness ⇒ Leibniz.symm[Nothing, Any, S, X](witness).subst[({ type K[Y] = Arr[m1.RestR, m1.RestL, Y, (A, S)] })#K](newCont(s))(s))),
+            r => newCont(s)(r(s))),
           { effw =>
             val (newS, v) = effw.run
             newCont(newS)(v)

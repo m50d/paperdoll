@@ -2,7 +2,7 @@ package paperdoll.core.eff
 
 import org.junit.Test
 import scalaz.syntax.monad._
-import paperdoll.scalaz.Reader._
+import paperdoll.scalaz.ReaderLayer._
 import paperdoll.scalaz.WriterLayer._
 import shapeless.{:+:, CNil}
 import paperdoll.scalaz.Writer_
@@ -14,9 +14,9 @@ class MultipleEffectsTest {
    * Example functions from the paper
    */
   def addGet(x: Int) = for {
-    i <- ask[Int]
+    i <- sendAsk[Int]
   } yield i+x
-  def addN(n: Int) = ask[Int].replicateM(n).map(_.sum)
+  def addN(n: Int) = sendAsk[Int].replicateM(n).map(_.sum)
   
   @Test def multipleEffects(): Unit = {
     type ReaderWriter = Reader_[Int] :+: Writer_[String] :+: CNil
