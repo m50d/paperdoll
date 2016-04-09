@@ -15,13 +15,12 @@ import scalaz.Disjunction
 import scalaz.EitherT
 import scalaz.\/-
 
-object EitherTLayerTest {
+class EitherTLayerTest {
   @Test def basicFunctionality(): Unit = {
     val eff: Effects[Option_ :+: Disjunction_[Int] :+: CNil, Layers[Option_ :+: Disjunction_[Int] :+: CNil] {
       type O[X] = Option[X] :+: Disjunction[Int, X] :+: CNil
     }, String] = sendEitherT[Option, Int, String](EitherT.right[Option, Int, String](Some("test")))
     val partial = handleOption(eff)
-    val pure = unsafeRun(partial)
-    val _ = assertThat(pure).isEqualTo(\/-(Some("test")))
+    val _ = assertThat(unsafeRun(partial)).isEqualTo(\/-(Some("test")))
   }
 }
