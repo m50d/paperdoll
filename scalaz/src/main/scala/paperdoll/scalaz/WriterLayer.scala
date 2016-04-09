@@ -9,18 +9,18 @@ import scalaz.syntax.monoid._
 import scala.collection.generic.CanBuildFrom
 
 object WriterLayer {
-  def sendTell[O](o: O): Effects.One[Writer_[O], Unit] =
-    Effects.sendU(Writer(o, {}))
+  def sendTell[W](w: W): Effects.One[Writer_[W], Unit] =
+    Effects.sendU(Writer(w, {}))
 
   /**
    * Run the writer effect, producing a collection of all the written values
    */
-  def handleWriterCollection[O0, CC <: TraversableOnce[O0]](implicit cbf: CanBuildFrom[CC, O0, CC]): Handler[Writer_[O0]] {
+  def handleWriterCollection[W, CC <: TraversableOnce[W]](implicit cbf: CanBuildFrom[CC, W, CC]): Handler[Writer_[W]] {
     type O[X] = (X, CC)
-  } = Effects.handle(new Bind[Writer_[O0]] {
+  } = Effects.handle(new Bind[Writer_[W]] {
     override type O[X] = (X, CC)
     override def pure[A](a: A) = (a, cbf().result)
-    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[O0, V], arr: Arr[RR, RL, V, (A, CC)]) = {
+    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[W, V], arr: Arr[RR, RL, V, (A, CC)]) = {
       val (log, result) = writer.run
       arr(result) map { case (a, l) ⇒ (a, cbf() += log ++= l result) }
     }
@@ -31,12 +31,12 @@ object WriterLayer {
    * Notice how we can have multiple interpreters for the same effect,
    * as we've decoupled the declaration of an effect from its implementation.
    */
-  def handleWriterMonoid[O0: Monoid]: Handler[Writer_[O0]] {
-    type O[X] = (X, O0)
-  } = Effects.handle(new Bind[Writer_[O0]] {
-    override type O[X] = (X, O0)
-    override def pure[A](a: A) = (a, Monoid[O0].zero)
-    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[O0, V], arr: Arr[RR, RL, V, O[A]]) = {
+  def handleWriterMonoid[W: Monoid]: Handler[Writer_[W]] {
+    type O[X] = (X, W)
+  } = Effects.handle(new Bind[Writer_[W]] {
+    override type O[X] = (X, W)
+    override def pure[A](a: A) = (a, Monoid[W].zero)
+    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[W, V], arr: Arr[RR, RL, V, O[A]]) = {
       val (log, result) = writer.run
       arr(result) map { case (a, l) ⇒ (a, log |+| l) }
     }
