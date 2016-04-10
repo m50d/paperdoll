@@ -17,6 +17,7 @@ sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
 
 object Arr_ {
   final type One[L <: Layer] = Arr_[L :+: CNil, Layers.One[L]]
+  final type Two[L1 <: Layer, L2 <: Layer] = Arr_[L1 :+: L2 :+: CNil, Layers.Two[L1, L2]]
 }
 
 object Arrs {
