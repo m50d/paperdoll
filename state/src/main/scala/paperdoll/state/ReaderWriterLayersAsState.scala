@@ -22,14 +22,14 @@ final class ReaderWriterAsStateHandler[S] {
       type RestL = RL0
     }, m1: Member[RR, Reader_[S]] {
       type L = RL1
-    }, l: Leibniz[Nothing, Layers[_], RL0, RL1]): Effects[m1.RestR, m1.RestL, (A, S)] = eff.fold[Effects[m1.RestR, m1.RestL, (A, S)]](
-    a ⇒ Pure((a, s)),
-    new Forall[({ type K[X] = (L0#O[X], Arrs[R, L0, X, A]) ⇒ Effects[m1.RestR, m1.RestL, (A, S)] })#K] {
+    }, l: Leibniz[Nothing, Layers[_], RL0, RL1]): Effects[m1.RestR, m1.RestL, (S, A)] = eff.fold[Effects[m1.RestR, m1.RestL, (S, A)]](
+    a ⇒ Pure((s, a)),
+    new Forall[({ type K[X] = (L0#O[X], Arrs[R, L0, X, A]) ⇒ Effects[m1.RestR, m1.RestL, (S, A)] })#K] {
       override def apply[X] = (eff, cont) ⇒ {
         def newCont(s: S) = Effects.compose(cont) andThen { e ⇒ loop(e, s) }
         m0.remove(eff).fold(
           effr ⇒ m1.remove(l.subst[({ type K[RLL <: Layers[_]] = RLL#O[X] })#K](effr)).fold(
-            effrr ⇒ Impure[m1.RestR, m1.RestL, X, (A, S)](effrr, Queue.one[Arr_[m1.RestR, m1.RestL]#O, X, (A, S)](
+            effrr ⇒ Impure[m1.RestR, m1.RestL, X, (S, A)](effrr, Queue.one[Arr_[m1.RestR, m1.RestL]#O, X, (S, A)](
               newCont(s))),
             r => newCont(s)(r(s))),
           { effw =>
@@ -46,7 +46,7 @@ final class ReaderWriterAsStateHandler[S] {
       type RestL = RL0
     }, m1: Member[RR, Reader_[S]] {
       type L = RL1
-    }, l0: Leibniz[Nothing, Layers[R], L1, L0], l1: Leibniz[Nothing, Layers[_], RL0, RL1]): Effects[m1.RestR, m1.RestL, (A, S)] =
+    }, l0: Leibniz[Nothing, Layers[R], L1, L0], l1: Leibniz[Nothing, Layers[_], RL0, RL1]): Effects[m1.RestR, m1.RestL, (S, A)] =
     loop[R, L0, A, RR, RL0, RL1](eff, s)(l0.subst[({
       type K[LL <: Layers[R]] = Member[R, Writer_[S]] {
         type L = LL

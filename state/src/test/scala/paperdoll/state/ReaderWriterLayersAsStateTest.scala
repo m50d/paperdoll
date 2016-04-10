@@ -17,7 +17,7 @@ class ReaderWriterLayersAsStateTest {
       _ <- sendTell(firstValue * 2).extend[ReaderWriter]()
       secondValue <- sendAsk[Int].extend[ReaderWriter]()
     } yield (firstValue, secondValue)
-    val _ = assertThat(ReaderWriterLayersAsState.handleState[Int](eff, 4).run).isEqualTo(((4, 8), 8))
+    val _ = assertThat(ReaderWriterLayersAsState.handleState[Int](eff, 4).run).isEqualTo((8, (4, 8)))
   }
 
 }
