@@ -3,11 +3,9 @@ package paperdoll.scalaz
 import scalaz.State
 import paperdoll.core.effect.Effects
 import paperdoll.core.effect.Effects.{ sendU, compose }
-import paperdoll.core.effect.Bind
 import paperdoll.core.effect.Handler
 import shapeless.Coproduct
 import paperdoll.core.layer.Layers
-import paperdoll.core.effect.Arr
 import paperdoll.core.layer.Member
 import paperdoll.core.effect.Pure
 import scalaz.Forall

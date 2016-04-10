@@ -137,6 +137,7 @@ object Effects extends Effects0 {
   sealed trait One_[L <: Layer] {
     final type O[A] = One[L, A]
   }
+  type Two[L1 <: Layer, L2 <: Layer, A] = Effects[L1 :+: L2 :+: CNil, Layers.Two[L1, L2], A]
   implicit def unapplyEffects[TC[_[_]], R <: Coproduct, L <: Layers[R], A0](
     implicit instance: TC[Effects_[R, L]#O]) = new Unapply[TC, Effects[R, L, A0]] {
     override type A = A0
@@ -156,14 +157,11 @@ object Effects extends Effects0 {
   def sendU[FV](value: FV)(implicit u: Unapply[Functor, FV]): Effects.One[Layer.Aux[u.M], u.A] =
     send[Layer.Aux[u.M], u.A](u.leibniz(value))
 
-  /**
-   * Send a nested pair of effects F[G[A]], inferring the types based on implicit functor instances.
+  /** Send a nested pair of effects F[G[A]], inferring the types based on implicit functor instances.
    */
   def sendTU[FGA, GA](value: FGA)(implicit u1: Unapply[Functor, FGA] {
     type A = GA
-  }, u2: Unapply[Functor, GA]): Effects[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil, Layers[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil] {
-    type O[X] = u1.M[X] :+: u2.M[X] :+: CNil
-  }, u2.A] = {
+  }, u2: Unapply[Functor, GA]): Effects.Two[Layer.Aux[u1.M], Layer.Aux[u2.M], u2.A] = {
     // Inlining this causes compilation to fail, I don't understand why
     def sendGA(ga: GA) = sendU(ga).extend[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil]()
     sendU(value).extend[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil]().flatMap(sendGA(_))
