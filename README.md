@@ -209,15 +209,11 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
- * Scalaz integration
-  * ReaderWriterState
-  * Task / Future (perhaps in -concurrent)
+ * Scalaz Task / Future (perhaps in -concurrent)
  * Cats integration
   * OptionT
   * WriterT / Writer
   * XorT / Xor
- * Treelog integration
-  * Possibly pointless, but take a look - even if it's just one convenience function it helps
  * Doobie integration
  * Wait for scalaz 7.3 release and shapeless 2.3.1 release and then:
   * Use msumlU rather than msuml

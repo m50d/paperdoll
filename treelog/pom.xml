@@ -15,6 +15,11 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>com.github.m50d</groupId>
+			<artifactId>paperdoll-scalaz</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
 			<groupId>com.casualmiracles</groupId>
 			<artifactId>treelog_2.11</artifactId>
 			<version>1.3.0</version>
