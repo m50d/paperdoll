@@ -120,6 +120,10 @@ TODO: list of all the other supported ones
 
 TODO: mention not supporting StateT/IndexedState
 
+#### Cats
+
+TODO: Not supporting state / reader / etc.
+
 ### Custom effects
 
 TODO: Basic and advanced use cases 
@@ -211,9 +215,7 @@ but make use of unsafe casts internally for performance.
 
  * Scalaz Task / Future (perhaps in -concurrent)
  * Cats integration
-  * WriterT / Writer
-  * XorT / Xor
-  * State / StateT
+  * XorT
  * Doobie integration
  * Once scalaz 7.3 and shapeless 2.3.1 are released:
   * Use msumlU rather than msuml

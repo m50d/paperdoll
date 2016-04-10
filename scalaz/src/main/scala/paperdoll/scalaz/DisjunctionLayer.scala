@@ -7,9 +7,12 @@ import shapeless.Coproduct
 import paperdoll.core.layer.Layers
 import paperdoll.core.effect.Bind
 import scalaz.{-\/, \/-, Disjunction}
-import paperdoll.core.effect.Effects.handle
+import paperdoll.core.effect.Effects.{handle, sendU}
+import paperdoll.core.effect.Effects
 
 object DisjunctionLayer {
+  def sendDisjunction[A, B](disjunction: Disjunction[A, B]): Effects.One[Disjunction_[A], B] =
+    sendU(disjunction)
     /** Disjunction is handled much like Option: if \/-,
    *  run the continuation, if -\/, return that.
    */
