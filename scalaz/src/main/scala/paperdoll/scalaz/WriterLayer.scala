@@ -25,7 +25,7 @@ object WriterLayer {
     override def pure[A](a: A) = (cbf().result, a)
     override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[W, V], arr: Arr[RR, RL, V, (CC, A)]) = {
       val (log, result) = writer.run
-      arr(result) map { la ⇒ (cbf() += log ++= la._1 result, la._2) }
+      arr(result) map { la ⇒ (cbf().+=(log).++=(la._1).result, la._2) }
     }
   })
 
