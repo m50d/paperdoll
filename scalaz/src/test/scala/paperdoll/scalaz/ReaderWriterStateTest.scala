@@ -21,5 +21,7 @@ class ReaderWriterStateTest {
     
     val _1 = assertThat(writerHandler(readerHandler(stateHandler(effect))).run)
       .isEqualTo((8, ("prefix4", "meh")))
+    val _2 = assertThat(readerHandler(stateHandler(writerHandler(effect))).run)
+      .isEqualTo(("prefix4", (8, "meh")))
   }
 }
