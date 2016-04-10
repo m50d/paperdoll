@@ -116,6 +116,10 @@ To represent a collection (`List`, `Vector` etc.) as an effect TODO: NDet for st
 
 TODO: list of all the other supported ones
 
+#### ScalaZ
+
+TODO: mention not supporting StateT/IndexedState
+
 ### Custom effects
 
 TODO: Basic and advanced use cases 
@@ -206,8 +210,8 @@ but make use of unsafe casts internally for performance.
 ## TODO for 1.0
 
  * Scalaz integration
-  * IndexedReaderWriterStateT and all subsets thereof
-  * Task / Future
+  * ReaderWriterState
+  * Task / Future (perhaps in -concurrent)
  * Cats integration
   * OptionT
   * WriterT / Writer
