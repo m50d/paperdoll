@@ -3,14 +3,17 @@ package paperdoll.scalaz
 import shapeless.Coproduct
 import scalaz.{ Monoid, Writer }
 import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
+import paperdoll.core.effect.Effects.sendU
 import paperdoll.core.layer.Layers
 import scalaz.syntax.monad._
 import scalaz.syntax.monoid._
 import scala.collection.generic.CanBuildFrom
 
 object WriterLayer {
+  def sendWriter[W, A](writer: Writer[W, A]): Effects.One[Writer_[W], A] =
+    sendU(writer)
   def sendTell[W](w: W): Effects.One[Writer_[W], Unit] =
-    Effects.sendU(Writer(w, {}))
+    sendWriter(Writer(w, {}))
 
   /**
    * Run the writer effect, producing a collection of all the written values

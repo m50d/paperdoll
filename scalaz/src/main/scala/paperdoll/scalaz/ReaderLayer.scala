@@ -9,10 +9,12 @@ import scalaz.Reader
 import scala.Predef.identity
 
 object ReaderLayer {
+  def sendReader[I, A](reader: Reader[I, A]): Effects.One[Reader_[I], A] =
+    sendU(reader)
   /** Effect that reads an input I and returns it.
    */
   def sendAsk[I]: Effects.One[Reader_[I], I] =
-    sendU(Reader(identity[I]))
+    sendReader(Reader(identity[I]))
 
   /** Run the reader effect in the stack R by passing the input i
    *  (i.e. giving the value i to any reads in the "lazy effectful value" e),
