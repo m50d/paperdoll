@@ -21,7 +21,6 @@ import scalaz.Unapply
 import scala.Vector
 import scalaz.Leibniz.===
 import paperdoll.core.effect.Arrs
-import paperdoll.core.effect.Effects_
 import paperdoll.core.layer.Member
 import paperdoll.core.layer.Subset
 import paperdoll.core.effect.Arr_
