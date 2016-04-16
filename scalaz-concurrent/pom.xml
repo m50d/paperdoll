@@ -6,18 +6,17 @@
 		<artifactId>paperdoll-aggregator</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
-	<artifactId>paperdoll-doobie</artifactId>
+	<artifactId>paperdoll-scalaz-concurrent</artifactId>
 	<packaging>jar</packaging>
 	<dependencies>
 		<dependency>
 			<groupId>com.github.m50d</groupId>
-			<artifactId>paperdoll-scalaz-concurrent</artifactId>
+			<artifactId>paperdoll-scalaz</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.tpolecat</groupId>
-			<artifactId>doobie-core_2.11</artifactId>
-			<version>0.2.3</version>
+			<groupId>org.scalaz</groupId>
+			<artifactId>scalaz-concurrent_2.11</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

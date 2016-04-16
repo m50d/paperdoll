@@ -214,8 +214,6 @@ but make use of unsafe casts internally for performance.
 ## TODO for 1.0
 
  * Scalaz Task / Future (perhaps in -concurrent)
- * Cats integration
-  * XorT
  * Doobie integration
  * Bidirectionality around monad transformer integration
  * Once scalaz 7.3 and shapeless 2.3.1 are released:
