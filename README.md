@@ -217,7 +217,6 @@ but make use of unsafe casts internally for performance.
  * Bidirectionality around monad transformer integration
   * Allows some limited support for ReaderWriterState and friends
  * Once scalaz 7.3 and shapeless 2.3.1 are released:
-  * Use msumlU rather than msuml
   * Tighten up dependency config (i.e. not snapshots repo)
   * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
  * Finish TODOs in this document (in particular examples)

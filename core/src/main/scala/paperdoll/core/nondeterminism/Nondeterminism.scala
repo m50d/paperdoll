@@ -49,7 +49,7 @@ object Nondeterminism {
       type LS = L0
       type LT = Layers.One[NDet_]
     }, me: Member[R, NDet_] { type L = L0 }): Effects[R, L0, Option[(A, Effects[R, L0, A])]] =
-    j.fold(a => Pure[R, L0, Option[(A, Effects[R, L0, A])]](Some((a, jq.msuml[Effects_[R, L0]#O, A]))),
+    j.fold(a => Pure[R, L0, Option[(A, Effects[R, L0, A])]](Some((a, jq.msumlU))),
       new Forall[({ type K[X] = (L0#O[X], Arrs[R, L0, X, A]) => Effects[R, L0, Option[(A, Effects[R, L0, A])]] })#K] {
         override def apply[X] = {
           (eff, cont) =>
