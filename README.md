@@ -217,6 +217,7 @@ but make use of unsafe casts internally for performance.
  * Cats integration
   * XorT
  * Doobie integration
+ * Bidirectionality around monad transformer integration
  * Once scalaz 7.3 and shapeless 2.3.1 are released:
   * Use msumlU rather than msuml
   * Tighten up dependency config (i.e. not snapshots repo)
