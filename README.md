@@ -213,9 +213,9 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
- * Scalaz Task / Future (perhaps in -concurrent)
  * Doobie integration
  * Bidirectionality around monad transformer integration
+  * Allows some limited support for ReaderWriterState and friends
  * Once scalaz 7.3 and shapeless 2.3.1 are released:
   * Use msumlU rather than msuml
   * Tighten up dependency config (i.e. not snapshots repo)
