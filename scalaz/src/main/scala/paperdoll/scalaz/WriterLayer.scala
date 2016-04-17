@@ -9,7 +9,6 @@ import scalaz.syntax.monad._
 import scalaz.syntax.monoid._
 import scala.collection.generic.CanBuildFrom
 import scalaz.MonadTell
-import scalaz.Id.Id
 import paperdoll.core.effect.Translator
 import paperdoll.core.layer.Layer
 import paperdoll.core.layer.Member
