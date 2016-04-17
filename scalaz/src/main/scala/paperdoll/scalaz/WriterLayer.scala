@@ -3,7 +3,7 @@ package paperdoll.scalaz
 import shapeless.{ :+:, CNil, Coproduct }
 import scalaz.{ Monoid, Writer }
 import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
-import paperdoll.core.effect.Effects.sendU
+import paperdoll.core.effect.Effects.{ sendU, compose }
 import paperdoll.core.layer.Layers
 import scalaz.syntax.monad._
 import scalaz.syntax.monoid._
@@ -17,6 +17,9 @@ import paperdoll.core.layer.Subset
 import paperdoll.core.effect.Pure
 import scalaz.Forall
 import paperdoll.core.effect.Arrs
+import paperdoll.core.effect.Arr_
+import paperdoll.core.effect.Impure
+import paperdoll.core.queue.Queue
 
 object WriterLayer {
   def sendWriter[W, A](writer: Writer[W, A]): Effects.One[Writer_[W], A] =
@@ -52,26 +55,37 @@ object WriterLayer {
     }
   })
 
-//  def translateWriter[F[_], W](
-//    implicit mt: MonadTell[F, W]): Translator.Aux[Writer_[W], Layer.Aux[F] :+: CNil] =
-//    new Translator[Writer_[W]] {
-//      override type OR = Layer.Aux[F] :+: CNil
-//      override def run[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR], A](eff: Effects[R, L1, A])(
-//        implicit me: Member[R, Writer_[W]] {
-//          type L = L1
-//          type RestR = RR
-//          type RestL = RL
-//        },
-//        su: Subset[RR, OR]) = {
-//        eff.fold(Pure[RR, RL, A](_),
-//          new Forall[({
-//            type K[X] = (L1#O[X], Arrs[R, L1, X, A]) ⇒ Effects[RR, RL, A]
-//          })#K] {
-//          override def apply[A] = {
-//            (eff, cont) =>
-//              ???
-//          }
-//        })
-//      }
-//    }
+  def translateWriter[F[_], W](
+    implicit mt: MonadTell[F, W]): Translator.Aux[Writer_[W], Layer.Aux[F] :+: CNil] =
+    new Translator[Writer_[W]] {
+      override type OR = Layer.Aux[F] :+: CNil
+      override type OL = Layers.One[Layer.Aux[F]]
+      override def run[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR], A](eff: Effects[R, L1, A])(
+        implicit me: Member[R, Writer_[W]] {
+          type L = L1
+          type RestR = RR
+          type RestL = RL
+        },
+        su: Subset[RR, OR] {
+          type LT = OL
+          type LS = RL
+        }) = {
+        eff.fold(Pure[RR, RL, A](_),
+          new Forall[({
+            type K[X] = (L1#O[X], Arrs[R, L1, X, A]) ⇒ Effects[RR, RL, A]
+          })#K] {
+            override def apply[X] = {
+              (eff, cont) ⇒
+                //New continuation is: recursively run this handler on the result of the old continuation 
+                val newCont = compose(cont) andThen { run(_) }
+                me.remove(eff).fold(
+                  otherEffect ⇒ Impure[RR, RL, X, A](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X, A](newCont)),
+                  { writer ⇒
+                    val (log, x) = writer.run
+                    sendU(mt.writer(log, x)).extend[RR]().flatMap(newCont)
+                  })
+            }
+          })
+      }
+    }
 }
