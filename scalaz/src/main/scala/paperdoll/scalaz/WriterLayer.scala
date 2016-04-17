@@ -1,6 +1,6 @@
 package paperdoll.scalaz
 
-import shapeless.Coproduct
+import shapeless.{ :+:, CNil, Coproduct }
 import scalaz.{ Monoid, Writer }
 import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
 import paperdoll.core.effect.Effects.sendU
@@ -8,6 +8,15 @@ import paperdoll.core.layer.Layers
 import scalaz.syntax.monad._
 import scalaz.syntax.monoid._
 import scala.collection.generic.CanBuildFrom
+import scalaz.MonadTell
+import scalaz.Id.Id
+import paperdoll.core.effect.Translator
+import paperdoll.core.layer.Layer
+import paperdoll.core.layer.Member
+import paperdoll.core.layer.Subset
+import paperdoll.core.effect.Pure
+import scalaz.Forall
+import paperdoll.core.effect.Arrs
 
 object WriterLayer {
   def sendWriter[W, A](writer: Writer[W, A]): Effects.One[Writer_[W], A] =
@@ -15,8 +24,7 @@ object WriterLayer {
   def sendTell[W](w: W): Effects.One[Writer_[W], Unit] =
     sendWriter(Writer(w, {}))
 
-  /**
-   * Run the writer effect, producing a collection of all the written values
+  /** Run the writer effect, producing a collection of all the written values
    */
   def handleWriterCollection[W, CC <: TraversableOnce[W]](implicit cbf: CanBuildFrom[CC, W, CC]): Handler[Writer_[W]] {
     type O[X] = (CC, X)
@@ -29,10 +37,9 @@ object WriterLayer {
     }
   })
 
-  /**
-   * Run the writer effect, merging all the written values.
-   * Notice how we can have multiple interpreters for the same effect,
-   * as we've decoupled the declaration of an effect from its implementation.
+  /** Run the writer effect, merging all the written values.
+   *  Notice how we can have multiple interpreters for the same effect,
+   *  as we've decoupled the declaration of an effect from its implementation.
    */
   def handleWriterMonoid[W](implicit monoid: Monoid[W]): Handler[Writer_[W]] {
     type O[X] = (W, X)
@@ -44,4 +51,27 @@ object WriterLayer {
       arr(result) map { la ⇒ (log |+| la._1, la._2) }
     }
   })
+
+//  def translateWriter[F[_], W](
+//    implicit mt: MonadTell[F, W]): Translator.Aux[Writer_[W], Layer.Aux[F] :+: CNil] =
+//    new Translator[Writer_[W]] {
+//      override type OR = Layer.Aux[F] :+: CNil
+//      override def run[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR], A](eff: Effects[R, L1, A])(
+//        implicit me: Member[R, Writer_[W]] {
+//          type L = L1
+//          type RestR = RR
+//          type RestL = RL
+//        },
+//        su: Subset[RR, OR]) = {
+//        eff.fold(Pure[RR, RL, A](_),
+//          new Forall[({
+//            type K[X] = (L1#O[X], Arrs[R, L1, X, A]) ⇒ Effects[RR, RL, A]
+//          })#K] {
+//          override def apply[A] = {
+//            (eff, cont) =>
+//              ???
+//          }
+//        })
+//      }
+//    }
 }

@@ -213,6 +213,7 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
+ * Bind should probably subclass Handler rather than using Eff#handle, this isn't Haskell
  * Doobie integration
  * Bidirectionality around monad transformer integration
   * Allows some limited support for ReaderWriterState and friends
