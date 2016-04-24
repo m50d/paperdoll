@@ -55,7 +55,7 @@ object WriterLayer {
   })
 
   def translateWriter[F[_], W](
-    implicit mt: MonadTell[F, W]): Translator.Aux[Writer_[W], Layer.Aux[F] :+: CNil] =
+    implicit mt: MonadTell[F, W]): Translator.Aux[Writer_[W], Layer.Aux[F] :+: CNil, Layers.One[Layer.Aux[F]]] =
     new Translator[Writer_[W]] {
       override type OR = Layer.Aux[F] :+: CNil
       override type OL = Layers.One[Layer.Aux[F]]

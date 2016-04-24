@@ -38,7 +38,8 @@ trait Translator[L <: Layer] {
     run(le.subst[({ type L[X <: Layers[R]] = Effects[R, X, A] })#L](eff))(me, su)
 }
 object Translator {
-  type Aux[L <: Layer, OR0 <: Coproduct] = Translator[L] {
+  type Aux[L <: Layer, OR0 <: Coproduct, OL0 <: Layers[OR0]] = Translator[L] {
     type OR = OR0
+    type OL = OL0
   }
 }
