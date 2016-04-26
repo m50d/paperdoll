@@ -10,6 +10,11 @@ import scalaz.WriterT
 import scalaz.std.option._
 import shapeless.{:+:, CNil}
 import paperdoll.core.layer.Layer
+import paperdoll.core.layer.Layers
+import paperdoll.core.layer.Member
+import scalaz.Leibniz
+import paperdoll.core.layer.Subset
+import paperdoll.core.effect.Effects.unsafeRun
 
 class WriterTest {
   val effect = for {
@@ -28,6 +33,14 @@ class WriterTest {
     type Tgt[A] = WriterT[Option, Int, A]
     val translator = translateWriter[Tgt, Int]
     val extendedEffect = effect.extend[Writer_[Int] :+: Layer.Aux[Tgt] :+: CNil]()
-//    translator(extendedEffect)
+    val translatedEffect = translator.apply[Writer_[Int] :+: Layer.Aux[Tgt] :+: CNil, Layers.Two[Writer_[Int], Layer.Aux[Tgt]],
+      String, Layers.Two[Writer_[Int], Layer.Aux[Tgt]], Layer.Aux[Tgt] :+: CNil, Layers.One[Layer.Aux[Tgt]]
+    ](extendedEffect)(Member.nil[Writer_[Int], Layer.Aux[Tgt] :+: CNil], Leibniz.refl[Layers.Two[Writer_[Int], Layer.Aux[Tgt]]],
+        Subset.consSubset[Layer.Aux[Tgt] :+: CNil, Layer.Aux[Tgt], Layers.One[Layer.Aux[Tgt]], CNil, Layers.One[Layer.Aux[Tgt]]](
+          Member.nil[Layer.Aux[Tgt], CNil],
+            Subset.nilSubset[Layer.Aux[Tgt] :+: CNil], Leibniz.refl[Layers.One[Layer.Aux[Tgt]]]
+        ))
+    val overall = unsafeRun(translatedEffect)
+    val _1 = assertThat(overall.run).isEqualTo(Some((6, "WriterTest")))
   }
 }
