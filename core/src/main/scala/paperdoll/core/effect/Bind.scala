@@ -5,6 +5,7 @@ import shapeless.Coproduct
 import paperdoll.core.layer.Member
 import scalaz.Forall
 import paperdoll.core.queue.Queue
+import Arrs.compose
 
 /** The simplest/most common implementation of Handler,
  *  supplying implementations for pure and bind
@@ -29,7 +30,7 @@ trait Bind[L <: Layer] extends Handler[L] {
     eff.fold({ a ⇒ Pure[me.RestR, me.RestL, O[A]](pure(a)) }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Effects[me.RestR, me.RestL, O[A]] })#K] {
       override def apply[X] = { (eff, cont) ⇒
         //New continuation is: recursively run this handler on the result of the old continuation 
-        val newCont = Effects.compose(cont) andThen { run(_) }
+        val newCont = compose(cont) andThen { run(_) }
         me.remove(eff).fold(
           otherEffect ⇒ Impure[me.RestR, me.RestL, X, O[A]](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X, O[A]](newCont)),
           thisEffect ⇒ bind[X, me.RestR, me.RestL, A](thisEffect, newCont))

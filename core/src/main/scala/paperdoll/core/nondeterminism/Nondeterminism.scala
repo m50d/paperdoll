@@ -24,6 +24,7 @@ import paperdoll.core.effect.Arrs
 import paperdoll.core.layer.Member
 import paperdoll.core.layer.Subset
 import paperdoll.core.effect.Arr_
+import paperdoll.core.effect.Arrs.compose
 
 sealed trait Nondeterminism[A] {
   def fold[B](zero: ⇒ B, plus: A === Boolean ⇒ B): B
@@ -53,7 +54,7 @@ object Nondeterminism {
         override def apply[X] = {
           (eff, cont) ⇒
             me.remove(eff).fold({ otherEffect ⇒
-              val newCont = Effects.compose(cont) andThen { loop(jq, _) }
+              val newCont = compose(cont) andThen { loop(jq, _) }
               //We pass eff here, knowing that it is now really otherEffects.
               //Arguably it would be more correct to lift otherEffects back into the [R, L0]
               //layer stack using .extend (or some inverse method on Member)
@@ -66,7 +67,7 @@ object Nondeterminism {
                   jqn ⇒ loop(jqn.tail.toList, jqn.head)
                 })
               }, { le ⇒
-                val booleanCont = Effects.compose(le.subst[({ type K[Y] = Arrs[R, L0, Y, A] })#K](cont))
+                val booleanCont = compose(le.subst[({ type K[Y] = Arrs[R, L0, Y, A] })#K](cont))
                 loop(booleanCont(false) :: jq, booleanCont(true))
               }))
         }

@@ -2,7 +2,8 @@ package paperdoll.scalaz
 
 import scalaz.State
 import paperdoll.core.effect.Effects
-import paperdoll.core.effect.Effects.{ sendU, compose }
+import paperdoll.core.effect.Effects.sendU
+import paperdoll.core.effect.Arrs.compose
 import paperdoll.core.effect.Handler
 import shapeless.Coproduct
 import paperdoll.core.layer.Layers

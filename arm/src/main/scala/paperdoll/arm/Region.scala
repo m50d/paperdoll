@@ -1,6 +1,7 @@
 package paperdoll.arm
 
 import resource.Resource
+import paperdoll.core.effect.Arrs.compose
 import paperdoll.core.effect.Effects
 import scalaz.Leibniz
 import paperdoll.core.layer.Member
@@ -58,7 +59,7 @@ object Region {
         a => Pure[me.RestR, me.RestL, A](a),
         new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Effects[me.RestR, me.RestL, O[A]] })#K] {
           override def apply[X] = { (eff, cont) ⇒
-            val composed = Effects.compose(cont)
+            val composed = compose(cont)
             me.remove(eff).fold(
               otherEffect ⇒ Impure[me.RestR, me.RestL, X, O[A]](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X, O[A]](
                 composed andThen { run(_) })),

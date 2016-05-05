@@ -3,7 +3,8 @@ package paperdoll.scalaz
 import shapeless.{ :+:, CNil, Coproduct }
 import scalaz.{ Monoid, Writer }
 import paperdoll.core.effect.{ Effects, Arr, Bind, Handler }
-import paperdoll.core.effect.Effects.{ sendU, compose }
+import paperdoll.core.effect.Effects.sendU
+import paperdoll.core.effect.Arrs.compose
 import paperdoll.core.layer.Layers
 import scalaz.syntax.monad._
 import scalaz.syntax.monoid._

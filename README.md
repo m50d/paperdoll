@@ -28,8 +28,15 @@ where commands are composed of instance of that datatype and custom functions
  * Implementation is compatible with ScalaZ Monads
   * i.e. you can use existing ScalaZ-compatible functions like `traverse` on paperdoll effect stacks
  * Adapters to allow you to use popular monads from existing libraries as effect layers
- * Improving on the paper, Paperdoll uses a `Coproduct`-based representation for the effect stack,
+
+### Compared to other Scala implementations of the same paper
+
+ * Full `Coproduct`-based representation of the effect stack (improving on the paper),
  allowing effects to be reordered and interpreted in in different orders by different interpreter stacks
+ * Bidirectional integration with established monad libraries including ScalaZ and Cats
+ * Idiomatic Scala style, including use of OO where appropriate (i.e. not a direct Haskell port)
+ * Designed for user-friendliness, with readable method names and extensive scaffolding to encourage correct type inference.
+ * Intended as first-class, production-quality code
 
 ## How to use
 

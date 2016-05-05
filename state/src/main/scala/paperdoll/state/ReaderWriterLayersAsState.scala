@@ -1,6 +1,7 @@
 package paperdoll.state
 
 import shapeless.Coproduct
+import paperdoll.core.effect.Arrs.compose
 import paperdoll.core.layer.Layers
 import paperdoll.core.effect.Effects
 import paperdoll.core.layer.Member
@@ -26,7 +27,7 @@ final class ReaderWriterAsStateHandler[S] {
     a ⇒ Pure((s, a)),
     new Forall[({ type K[X] = (L0#O[X], Arrs[R, L0, X, A]) ⇒ Effects[m1.RestR, m1.RestL, (S, A)] })#K] {
       override def apply[X] = (eff, cont) ⇒ {
-        def newCont(s: S) = Effects.compose(cont) andThen { e ⇒ loop(e, s) }
+        def newCont(s: S) = compose(cont) andThen { e ⇒ loop(e, s) }
         m0.remove(eff).fold(
           effr ⇒ m1.remove(l.subst[({ type K[RLL <: Layers[_]] = RLL#O[X] })#K](effr)).fold(
             effrr ⇒ Impure[m1.RestR, m1.RestL, X, (S, A)](effrr, Queue.one[Arr_[m1.RestR, m1.RestL]#O, X, (S, A)](

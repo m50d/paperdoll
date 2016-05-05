@@ -5,11 +5,12 @@ import shapeless.{ Coproduct, CNil, :+:, Inl }
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
 import paperdoll.core.queue.Queue
-import paperdoll.core.layer.{ Layer, Layers, Member, Subset }
+import paperdoll.core.layer.{ Layer, Layers, Subset }
 import scalaz.Functor
 import paperdoll.core.nondeterminism.NDet_
 import scalaz.MonadPlus
 import paperdoll.core.nondeterminism.Nondeterminism
+import Arrs.compose
 
 sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
   final type O[A, B] = A ⇒ Effects[R, L, B]
@@ -22,6 +23,23 @@ object Arr_ {
 
 object Arrs {
   final type One[L <: Layer, A, B] = Queue[Arr_.One[L]#O, A, B]
+  /** Collapse an Arrs (a queue of Arr) to a single Arr.
+   */
+  def compose[R <: Coproduct, L <: Layers[R], A, B](arrs: Arrs[R, L, A, B]): Arr[R, L, A, B] = {
+    value: A ⇒
+      arrs.destructureHead.fold({ witness ⇒ Leibniz.symm[Nothing, Any, B, A](witness)(value).point[Effects_[R, L]#O] },
+        new Forall[({ type K[W] = (Arr[R, L, A, W], Arrs[R, L, W, B]) ⇒ Effects[R, L, B] })#K] {
+          override def apply[W] = {
+            (head, tail) ⇒
+              val ctail = compose(tail)
+              head(value).fold(
+                ctail,
+                new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, W]) ⇒ Effects[R, L, B] })#K] {
+                  override def apply[X] = (eff, cont) ⇒ Impure[R, L, X, B](eff, cont :+ ctail)
+                })
+          }
+        })
+  }
 }
 
 /** Intermediate step as a helper for type inference of Effects#extend
@@ -89,7 +107,7 @@ final case class Impure[R <: Coproduct, L <: Layers[R], X, A](eff: L#O[X],
     impure.apply[X](eff, cont)
 
   private[effect] override def inject[S <: Coproduct](implicit su: Subset[S, R] { type LT = L }): Effects[S, su.LS, A] =
-    Impure[S, su.LS, X, A](su.inject(eff), Queue.one[Arr_[S, su.LS]#O, X, A](Effects.compose(cont) andThen { _.inject[S] }))
+    Impure[S, su.LS, X, A](su.inject(eff), Queue.one[Arr_[S, su.LS]#O, X, A](compose(cont) andThen { _.inject[S] }))
 }
 
 sealed trait Effects_[R <: Coproduct, L <: Layers[R]] {
@@ -166,24 +184,6 @@ object Effects extends Effects0 {
     // Inlining this causes compilation to fail, I don't understand why
     def sendGA(ga: GA) = sendU(ga).extend[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil]()
     sendU(value).extend[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil]().flatMap(sendGA(_))
-  }
-  /** Collapse an Arrs (a queue of Arr) to a single Arr.
-   *  TODO: doesn't really belong here
-   */
-  def compose[R <: Coproduct, L <: Layers[R], A, B](arrs: Arrs[R, L, A, B]): Arr[R, L, A, B] = {
-    value: A ⇒
-      arrs.destructureHead.fold({ witness ⇒ Leibniz.symm[Nothing, Any, B, A](witness)(value).point[Effects_[R, L]#O] },
-        new Forall[({ type K[W] = (Arr[R, L, A, W], Arrs[R, L, W, B]) ⇒ Effects[R, L, B] })#K] {
-          override def apply[W] = {
-            (head, tail) ⇒
-              val ctail = compose(tail)
-              head(value).fold(
-                ctail,
-                new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, W]) ⇒ Effects[R, L, B] })#K] {
-                  override def apply[X] = (eff, cont) ⇒ Impure[R, L, X, B](eff, cont :+ ctail)
-                })
-          }
-        })
   }
 
   /** Usually effects can be interleaved, but some effects cannot be expressed
