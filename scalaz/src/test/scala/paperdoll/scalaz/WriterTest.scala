@@ -36,10 +36,7 @@ class WriterTest {
     val translatedEffect = translator.apply[Writer_[Int] :+: Layer.Aux[Tgt] :+: CNil, Layers.Two[Writer_[Int], Layer.Aux[Tgt]],
       String, Layers.Two[Writer_[Int], Layer.Aux[Tgt]], Layer.Aux[Tgt] :+: CNil, Layers.One[Layer.Aux[Tgt]]
     ](extendedEffect)(Member.nil[Writer_[Int], Layer.Aux[Tgt] :+: CNil], Leibniz.refl[Layers.Two[Writer_[Int], Layer.Aux[Tgt]]],
-        Subset.consSubset[Layer.Aux[Tgt] :+: CNil, Layer.Aux[Tgt], Layers.One[Layer.Aux[Tgt]], CNil, Layers.One[Layer.Aux[Tgt]]](
-          Member.nil[Layer.Aux[Tgt], CNil],
-            Subset.nilSubset[Layer.Aux[Tgt] :+: CNil], implicitly
-        ))
+        Subset[Layer.Aux[Tgt] :+: CNil, Layer.Aux[Tgt] :+: CNil])
     val overall = unsafeRun(translatedEffect)
     val _1 = assertThat(overall.run).isEqualTo(Some((6, "WriterTest")))
   }
