@@ -4,7 +4,6 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 import paperdoll.core.effect.Bind
-import paperdoll.core.effect.Effects
 import paperdoll.core.effect.Handler
 import paperdoll.core.effect.Pure
 import paperdoll.core.layer.Layers
