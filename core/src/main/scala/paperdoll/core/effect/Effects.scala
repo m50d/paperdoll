@@ -45,7 +45,7 @@ sealed trait Effects[R <: Coproduct, L <: Layers[R], A] {
   /** This is a "shallow" catamorphism. In practice the main use cases for this are recursive,
    *  folding all the way down, but I found it very difficult to express the required type
    *  for that case.
-   *  While calling directly is supported, the most common use case for this is covered by Effects#handle.
+   *  While calling directly is supported, the most common use case for this is covered by Bind.
    */
   def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]): B
 
@@ -168,6 +168,7 @@ object Effects extends Effects0 {
     sendU(value).extend[Layer.Aux[u1.M] :+: Layer.Aux[u2.M] :+: CNil]().flatMap(sendGA(_))
   }
   /** Collapse an Arrs (a queue of Arr) to a single Arr.
+   *  TODO: doesn't really belong here
    */
   def compose[R <: Coproduct, L <: Layers[R], A, B](arrs: Arrs[R, L, A, B]): Arr[R, L, A, B] = {
     value: A ⇒
@@ -184,22 +185,6 @@ object Effects extends Effects0 {
           }
         })
   }
-  /** "Lift" bind to produce a Handler for L.
-   */
-  def handle[L <: Layer](bind: Bind[L]): Handler.Aux[L, bind.O] =
-    new Handler[L] {
-      override type O[X] = bind.O[X]
-      override def run[R <: Coproduct, L1 <: Layers[R], A](eff: Effects[R, L1, A])(implicit me: Member[R, L] { type L = L1 }): Effects[me.RestR, me.RestL, O[A]] =
-        eff.fold({ a ⇒ Pure[me.RestR, me.RestL, O[A]](bind.pure(a)) }, new Forall[({ type K[X] = (me.L#O[X], Arrs[R, me.L, X, A]) ⇒ Effects[me.RestR, me.RestL, O[A]] })#K] {
-          override def apply[X] = { (eff, cont) ⇒
-            //New continuation is: recursively run this handler on the result of the old continuation 
-            val newCont = compose(cont) andThen { run(_) }
-            me.remove(eff).fold(
-              otherEffect ⇒ Impure[me.RestR, me.RestL, X, O[A]](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X, O[A]](newCont)),
-              thisEffect ⇒ bind[X, me.RestR, me.RestL, A](thisEffect, newCont))
-          }
-        })
-    }
 
   /** Usually effects can be interleaved, but some effects cannot be expressed
    *  in an interleaveable way (similar to monads which do not have monad transformers).

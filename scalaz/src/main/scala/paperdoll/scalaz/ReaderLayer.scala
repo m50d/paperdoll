@@ -20,10 +20,10 @@ object ReaderLayer {
    *  (i.e. giving the value i to any reads in the "lazy effectful value" e),
    *  removing Reader_[I] from the stack of effects in the result.
    */
-  def handleReader[I](i: I): Handler.Aux[Reader_[I], Id] = Effects.handle(new Bind[Reader_[I]] {
+  def handleReader[I](i: I): Handler.Aux[Reader_[I], Id] = new Bind[Reader_[I]] {
     override type O[X] = X
     override def pure[A](a: A) = a
-    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](reader: Reader[I, V], arr: Arr[RR, RL, V, A]) =
+    override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](reader: Reader[I, V], arr: Arr[RR, RL, V, A]) =
       arr(reader(i))
-  })
+  }
 }

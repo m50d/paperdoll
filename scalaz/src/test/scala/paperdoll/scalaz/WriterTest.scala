@@ -10,6 +10,7 @@ import scalaz.WriterT
 import scalaz.std.option._
 import shapeless.{:+:, CNil}
 import paperdoll.core.effect.Effects.unsafeRun
+import paperdoll.core.layer.Layer
 
 class WritterTest {
   val effect = for {

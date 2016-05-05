@@ -126,16 +126,21 @@ TODO: Not supporting state / reader / etc.
 
 ### Custom effects
 
-TODO: Basic and advanced use cases 
+TODO: Basic and advanced use cases
 
-## Non-features and rationales
+## Non-features and missing functionality
 
- * Contributions of layers for more popular monads are very welcome;
- instances and support code for an external library "foo"
- should be placed in a new `paperdoll-foo` maven module.
- * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
- I found it made the code clearer to separate the two (and it should make effects
- more compositional/reusable), but there may be an efficiency penalty.
+### Explicitly intended for future versions
+
+ * Consistent tagging of layers. Sometimes we might want multiple "versions" of the same effect
+ in a stack (e.g. two different `Writer_[String]` effects for two different logs).
+ It would be necessary to be able to distinguish these effects at the type level i.e. using
+ some kind of "tagged" types. I have added ad-hoc support for something similar in
+ `paperdoll-arm`'s `Region` effect (which uses a shapeless `Nat` to "label" each region),
+ but it would be good to have general-purpose support for this instead.  
+
+### Not scheduled for any particular release but contributions welcome
+
  * `Effects#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
  Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
  is likely quadratic rather than linear as it should be.
@@ -147,20 +152,27 @@ TODO: Basic and advanced use cases
  so this aspect of the behaviour is no worse than what the original Haskell implementation
  would do for a chain of `f flatMap g |> handleA flatMap h |> handleB ...`
  Note that a `for { x <- f.extend[...] ; y <- g.extend[...] ; z <- h.extend[...] } yield ...`
- construct should still behave linearly, so I believe this is not a problem in practice; patches are very welcome.
+ construct should still behave linearly, so I believe this is not a problem in practice.
+ * Compilation time is really awful, particularly in the case of errors
+ * There are no performance tests.
+  * Constant-factor performance is likely bad. Contributions are likely a waste of time without tests.
+ * The `Arr` type is closely related to `Kleisli`/`Arrow`, but I don't fully understand
+  the similarity and am not yet aware of concrete use cases for it.
+ * There is no support for `MonadPartialOrder`. In my limited experimentation it didn't seem
+ to work correctly and looked to be subsumed for most purposes by `MonadTell` et al.
+ * I have not implemented the `MonadCatchIO` example from the paper as there is no single established
+ IO monad implementation in Scala and I don't really understand the approach ScalaZ is taking.
+ 
+### Design compromises and deliberate omissions
+
+ * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
+ I found it made the code clearer to separate the two (and it should make effects
+ more compositional/reusable), but there may be an efficiency penalty.
  * Use of type members vs. type parameters is arguably inconsistent in places, as is general style.
  In some cases this is deliberate pragmatism so as to ensure that the types can be used in practice;
  in others I couldn't get type inference to work correctly with a more natural representation.
  * I have largely ignored variance. Good type inference is a higher priority than correct variance,
  but contributions that add co- or contravariance without compromising type inference are welcome.
- * I have not integrated with ScalaZ `MonadTell` and friends. This is partly because I'd rather not
- couple `paperdoll-core` tightly to ScalaZ but mostly because I don't understand the use cases for it.
- Contributions are welcome provided they come with a convincing test case/example.
-  * Similarly, the `Arr` type is closely related to `Kleisli`/`Arrow`, but I don't fully understand
-  the similarity and am not yet aware of concrete use cases for it.
- * Compilation time is really awful, particularly in the case of errors. Contributions very welcome.
- * There are no performance tests. I don't have time to do these, but would welcome contributions.
-  * Constant-factor performance is likely also bad. Contributions welcome but likely a waste of time without tests.
  * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven.
  I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
  but any implementation of binary compatibility checking in the maven build would be very welcome.
@@ -168,9 +180,12 @@ TODO: Basic and advanced use cases
  (at least for `paperdoll-core`), but this functionality is a firm requirement.
  I also use a feature of `MonadPlus` that I don't believe  is presently implemented in Cats,
  and make some use of `Unapply`.
- * I have not implemented the `MonadCatchIO` example from the paper as there is no single established
- IO monad implementation in Scala and I don't really understand the approach ScalaZ is taking.
- Contributions welcome.
+ 
+### Permanently open for improvement
+
+ * Contributions of layers for popular monads are very welcome;
+ instances and support code for an external library "foo"
+ should be placed in a new `paperdoll-foo` maven module.
 
 ## Implementation notes
 
@@ -213,10 +228,9 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
- * Bind should probably subclass Handler rather than using Eff#handle, this isn't Haskell
- * Doobie integration
- * Bidirectionality around monad transformer integration
+ * Extend Translator support to cover many monad transformers
   * Allows some limited support for ReaderWriterState and friends
+ * Finish paperdoll-doobie
  * Once scalaz 7.3 and shapeless 2.3.1 are released:
   * Tighten up dependency config (i.e. not snapshots repo)
   * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
@@ -304,7 +318,11 @@ Some projects have responded by adopting codes of conduct.
 In my view such codes have been counterproductive on the whole:
 they necessitate all the downsides of a formal process,
 but are rarely clear and objective enough to ensure consistent,
-predictable handling of incidents or allegations.
+predictable handling of incidents or allegations).
+The end result is the worst of both worlds: project leaders
+are no longer empowered to take case-specific action,
+but nor can contributors be confident that conduct issues will
+always be dealt with appropriately.
 
 The TypeLevel Code of Conduct in particular has been ambiguously enforced
 with very little accountability. Specifically, the inconsistent
@@ -312,14 +330,24 @@ statements from Lars Hupel and Miles Sabin at various times
 regarding alleged violation (or not) of the Code of Conduct
 by Tony Morris are irreconcilable with the basic principles
 of transparency and accountability in project governance.
-I believe this was an inappropriate use of a Code of Conduct,
-that likely arose out of an unwillingness to directly confront
-a specific individual who was causing problems. But I also believe
-that adopting a code within a small project inherently leads
-those involved to inappropriately overgeneralise.
-Therefore I explicitly intend handle conduct issues in Paperdoll
-at a personal/individual level, unless and until I become experienced
-enough to set good general policies.
+I would speculate that this arose out of an unwillingness to directly
+confront a specific individual who was causing problems,
+and/or an attempt to generalize a single problem into
+a policy that would prevent all future problems of that nature.
+I consider that this would be premature generalization
+with all that that implies.
+Therefore I explicitly intend to handle conduct issues in Paperdoll
+at a personal/individual level, unless and until I feel I have
+sufficient experience to set good general policies.
+
+(In my experience large classes of people have incompatible needs;
+even having a code at all implies particular power structures that
+I perceive as class-loaded and exclusionary toward certain categories
+of marginalized people. Every code is a reflection of a particular culture,
+and all cultures are exclusionary to some potential participants.
+So I believe a project should form policies appropriate to its own
+culture and community, and will be ill-served by adopting
+something intended as a general-purpose code of conduct)
 
 Mr Morris has upset people (including newcomers and myself)
 in Scala-related spaces on numerous occasions. I find it implausible

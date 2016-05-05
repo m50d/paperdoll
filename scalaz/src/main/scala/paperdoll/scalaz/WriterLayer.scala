@@ -30,14 +30,14 @@ object WriterLayer {
    */
   def handleWriterCollection[W, CC <: TraversableOnce[W]](implicit cbf: CanBuildFrom[CC, W, CC]): Handler[Writer_[W]] {
     type O[X] = (CC, X)
-  } = Effects.handle(new Bind[Writer_[W]] {
+  } = new Bind[Writer_[W]] {
     override type O[X] = (CC, X)
     override def pure[A](a: A) = (cbf().result, a)
-    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[W, V], arr: Arr[RR, RL, V, (CC, A)]) = {
+    override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[W, V], arr: Arr[RR, RL, V, (CC, A)]) = {
       val (log, result) = writer.run
       arr(result) map { la ⇒ (cbf().+=(log).++=(la._1).result, la._2) }
     }
-  })
+  }
 
   /** Run the writer effect, merging all the written values.
    *  Notice how we can have multiple interpreters for the same effect,
@@ -45,14 +45,14 @@ object WriterLayer {
    */
   def handleWriterMonoid[W](implicit monoid: Monoid[W]): Handler[Writer_[W]] {
     type O[X] = (W, X)
-  } = Effects.handle(new Bind[Writer_[W]] {
+  } = new Bind[Writer_[W]] {
     override type O[X] = (W, X)
     override def pure[A](a: A) = (monoid.zero, a)
-    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[W, V], arr: Arr[RR, RL, V, O[A]]) = {
+    override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[W, V], arr: Arr[RR, RL, V, O[A]]) = {
       val (log, result) = writer.run
       arr(result) map { la ⇒ (log |+| la._1, la._2) }
     }
-  })
+  }
 
   def translateWriter[F[_], W](
     implicit mt: MonadTell[F, W]): Translator.Aux[Writer_[W], Layer.Aux[F] :+: CNil, Layers.One[Layer.Aux[F]]] =

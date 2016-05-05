@@ -40,15 +40,15 @@ object Region {
         resource(Leibniz.refl, r)
     })
 
-  private[this] def handleInRgn[S <: Nat, RE](handle: RE)(implicit re: Resource[RE]) = Effects.handle(new Bind[Region_[S, RE]] {
+  private[this] def handleInRgn[S <: Nat, RE](handle: RE)(implicit re: Resource[RE]) = new Bind[Region_[S, RE]] {
     override type O[X] = X
     override def pure[A](a: A) = {
       re.close(handle)
       a
     }
-    override def apply[V, RR <: Coproduct, RL <: Layers[RR], A](eff: Region[S, RE, V], cont: Arr[RR, RL, V, O[A]]) =
+    override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](eff: Region[S, RE, V], cont: Arr[RR, RL, V, O[A]]) =
       throw new RuntimeException("Opened the same handle twice. Did you reuse the same S type for multiple regions?")
-  })
+  }
 
   def newRgn[S <: Nat, RE](implicit re: Resource[RE]): Handler[Region_[S, RE]] = new Handler[Region_[S, RE]] {
     override type O[X] = X

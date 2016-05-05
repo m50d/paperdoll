@@ -16,6 +16,7 @@ import paperdoll.core.layer.Layers
  * and supports the common use case of instantiating a handler
  * for a specific layer separately from applying it to a stack
  * of layers that contains that layer
+ * TODO: unify with Translator as far as possible
  */
 trait Handler[L <: Layer] {
   type O[X]
