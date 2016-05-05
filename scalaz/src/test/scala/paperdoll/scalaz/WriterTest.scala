@@ -9,11 +9,6 @@ import scala.collection.immutable.BitSet
 import scalaz.WriterT
 import scalaz.std.option._
 import shapeless.{:+:, CNil}
-import paperdoll.core.layer.Layer
-import paperdoll.core.layer.Layers
-import paperdoll.core.layer.Member
-import scalaz.Leibniz
-import paperdoll.core.layer.Subset
 import paperdoll.core.effect.Effects.unsafeRun
 
 class WritterTest {
