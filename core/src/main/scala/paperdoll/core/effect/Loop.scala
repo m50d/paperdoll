@@ -1,7 +1,6 @@
 package paperdoll.core.effect
 
 import paperdoll.core.layer.Layers
-import paperdoll.core.layer.Member
 import paperdoll.core.layer.Layer
 import scalaz.Forall
 import shapeless.Coproduct
