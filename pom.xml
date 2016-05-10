@@ -194,7 +194,7 @@
 			<dependency>
 				<groupId>com.chuusai</groupId>
 				<artifactId>shapeless_2.11</artifactId>
-				<version>2.3.1-SNAPSHOT</version>
+				<version>2.3.1-RC1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.typelevel</groupId>
