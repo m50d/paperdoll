@@ -14,8 +14,9 @@ import scalaz.syntax.std.list._
 import paperdoll.core.queue.Queue
 import paperdoll.core.effect.Arr
 import scalaz.syntax.monad._
-import paperdoll.core.effect.Bind
-import paperdoll.core.effect.Handler
+import paperdoll.core.effect.PureBind
+import paperdoll.core.effect.PureHandler
+import paperdoll.core.effect.PureBind
 import scalaz.Foldable
 import scalaz.Unapply
 import scala.Vector
@@ -104,7 +105,7 @@ object Nondeterminism {
   /** Example interpreter. The paper implements this for any F[_]: Alternative
    *  rather than just Vector
    */
-  def runNDetVector: Handler.Aux[NDet_, Vector] = new Bind[NDet_] {
+  def runNDetVector: PureHandler.Aux[NDet_, Vector] = new PureBind[NDet_] {
     override type O[X] = Vector[X]
     override def pure[A](a: A) = Vector(a)
     override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](eff: Nondeterminism[V], cont: Arr[RR, RL, V, Vector[A]]) =

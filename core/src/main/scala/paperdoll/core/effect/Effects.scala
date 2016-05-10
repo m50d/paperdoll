@@ -63,7 +63,7 @@ sealed trait Effects[R <: Coproduct, L <: Layers[R], A] {
   /** This is a "shallow" catamorphism. In practice the main use cases for this are recursive,
    *  folding all the way down, but I found it very difficult to express the required type
    *  for that case.
-   *  While calling directly is supported, the most common use case for this is covered by Bind.
+   *  While calling directly is supported, the most common use case for this is covered by PureBind.
    */
   def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]): B
 
