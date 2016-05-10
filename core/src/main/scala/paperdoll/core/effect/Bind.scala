@@ -2,6 +2,7 @@ package paperdoll.core.effect
 
 import paperdoll.core.layer.{ Layer, Layers }
 import shapeless.Coproduct
+import paperdoll.core.layer.Member
 
 trait Bind[R <: Coproduct, L1 <: Layers[R], L <: Layer] extends Handler[R, L1, L] with Loop[R, L1, L]
 
