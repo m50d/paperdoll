@@ -20,6 +20,7 @@ import paperdoll.core.effect.Arrs
 import paperdoll.core.effect.Arr_
 import paperdoll.core.effect.Impure
 import paperdoll.core.queue.Queue
+import paperdoll.core.effect.Loop
 
 object WriterLayer {
   def sendWriter[W, A](writer: Writer[W, A]): Effects.One[Writer_[W], A] =
@@ -55,37 +56,21 @@ object WriterLayer {
     }
   }
 
-  def translateWriter[F[_], W](
-    implicit mt: MonadTell[F, W]): PureTranslator.Aux[Writer_[W], Layer.Aux[F] :+: CNil, Layers.One[Layer.Aux[F]]] =
-    new PureTranslator[Writer_[W]] {
-      override type OR = Layer.Aux[F] :+: CNil
-      override type OL = Layers.One[Layer.Aux[F]]
-      override def run[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR], A](eff: Effects[R, L1, A])(
-        implicit me: Member[R, Writer_[W]] {
-          type L = L1
-          type RestR = RR
-          type RestL = RL
-        },
-        su: Subset[RR, OR] {
-          type LT = OL
-          type LS = RL
-        }) = {
-        eff.fold(Pure[RR, RL, A](_),
-          new Forall[({
-            type K[X] = (L1#O[X], Arrs[R, L1, X, A]) ⇒ Effects[RR, RL, A]
-          })#K] {
-            override def apply[X] = {
-              (eff, cont) ⇒
-                //New continuation is: recursively run this handler on the result of the old continuation 
-                val newCont = compose(cont) andThen { run(_) }
-                me.remove(eff).fold(
-                  otherEffect ⇒ Impure[RR, RL, X, A](otherEffect, Queue.one[Arr_[me.RestR, me.RestL]#O, X, A](newCont)),
-                  { writer ⇒
-                    val (log, x) = writer.run
-                    sendU(mt.writer(log, x)).extend[RR]().flatMap(newCont)
-                  })
-            }
-          })
+  def translateWriter[R <: Coproduct, L1 <: Layers[R], F[_], W, RR <: Coproduct, RL <: Layers[RR]](
+    implicit me1: Member[R, Writer_[W]]{type L = L1; type RestR = RR; type RestL = RL}, mt: MonadTell[F, W],
+    su: Subset[RR, Layer.Aux[F] :+: CNil] {
+      type LS = RL
+      type LT = Layers.One[Layer.Aux[F]]
+    }): Loop[R, L1, Writer_[W]] =
+    new Loop[R, L1, Writer_[W]] {
+      override type RestR = RR
+      override type RestL = RL
+      override type O[X] = X
+      override def me = me1
+      override def pure[A](a: A) = a
+      override def bind[V, A](eff: Writer[W, V],cont: V ⇒  Effects[RR,RL,A]): Effects[RR,RL,A] = {
+        val (w, v) = eff.run
+        sendU(mt.tell(w)).extend[RR]() flatMap {_ => cont(v)}      
       }
     }
 }
