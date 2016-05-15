@@ -7,7 +7,7 @@ import paperdoll.core.layer.Layer
 import paperdoll.core.layer.Layers
 import paperdoll.core.layer.Subset
 
-trait PureTranslator[L <: Layer] {
+trait GenericTranslator[L <: Layer] {
   type OR <: Coproduct
   type OL <: Layers[OR]
   def handler[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR]](
@@ -49,8 +49,8 @@ trait PureTranslator[L <: Layer] {
       }
     })#K](su)).run(eff)
 }
-object PureTranslator {
-  type Aux[L <: Layer, OR0 <: Coproduct, OL0 <: Layers[OR0]] = PureTranslator[L] {
+object GenericTranslator {
+  type Aux[L <: Layer, OR0 <: Coproduct, OL0 <: Layers[OR0]] = GenericTranslator[L] {
     type OR = OR0
     type OL = OL0
   }

@@ -2,14 +2,14 @@ package paperdoll.scalaz
 
 import shapeless.{ :+:, CNil, Coproduct }
 import scalaz.{ Monoid, Writer }
-import paperdoll.core.effect.{ Effects, Arr, PureBind, GenericHandler }
+import paperdoll.core.effect.{ Effects, Arr, GenericBind, GenericHandler }
 import paperdoll.core.effect.Effects.sendU
 import paperdoll.core.layer.Layers
 import scalaz.syntax.monad._
 import scalaz.syntax.monoid._
 import scala.collection.generic.CanBuildFrom
 import scalaz.MonadTell
-import paperdoll.core.effect.PureTranslator
+import paperdoll.core.effect.GenericTranslator
 import paperdoll.core.layer.Layer
 import paperdoll.core.layer.Member
 import paperdoll.core.layer.Subset
@@ -26,7 +26,7 @@ object WriterLayer {
    */
   def handleWriterCollection[W, CC <: TraversableOnce[W]](implicit cbf: CanBuildFrom[CC, W, CC]): GenericHandler[Writer_[W]] {
     type O[X] = (CC, X)
-  } = new PureBind[Writer_[W]] {
+  } = new GenericBind[Writer_[W]] {
     override type O[X] = (CC, X)
     override def pure[A](a: A) = (cbf().result, a)
     override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[W, V], arr: Arr[RR, RL, V, (CC, A)]) = {
@@ -41,7 +41,7 @@ object WriterLayer {
    */
   def handleWriterMonoid[W](implicit monoid: Monoid[W]): GenericHandler[Writer_[W]] {
     type O[X] = (W, X)
-  } = new PureBind[Writer_[W]] {
+  } = new GenericBind[Writer_[W]] {
     override type O[X] = (W, X)
     override def pure[A](a: A) = (monoid.zero, a)
     override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](writer: Writer[W, V], arr: Arr[RR, RL, V, O[A]]) = {
@@ -50,11 +50,11 @@ object WriterLayer {
     }
   }
 
-  def translateWriter[F[_], W](implicit mt: MonadTell[F, W]): PureTranslator[Writer_[W]]{
+  def translateWriter[F[_], W](implicit mt: MonadTell[F, W]): GenericTranslator[Writer_[W]]{
     type OR= Layer.Aux[F] :+: CNil
     type OL = Layers.One[Layer.Aux[F]]
   } =
-    new PureTranslator[Writer_[W]] {
+    new GenericTranslator[Writer_[W]] {
     override type OR = Layer.Aux[F] :+: CNil
     override type OL = Layers.One[Layer.Aux[F]]
     override def handler[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR]](

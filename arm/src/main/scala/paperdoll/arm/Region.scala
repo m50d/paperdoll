@@ -15,7 +15,7 @@ import paperdoll.core.effect.Arr_
 import paperdoll.core.effect.Arrs
 import paperdoll.core.effect.Impure
 import paperdoll.core.queue.Queue
-import paperdoll.core.effect.PureBind
+import paperdoll.core.effect.GenericBind
 import paperdoll.core.effect.Arr
 import paperdoll.core.effect.GenericHandler
 import shapeless.Nat
@@ -42,7 +42,7 @@ object Region {
         resource(Leibniz.refl, r)
     })
 
-  private[this] def handleInRgn[S <: Nat, RE](handle: RE)(implicit re: Resource[RE]) = new PureBind[Region_[S, RE]] {
+  private[this] def handleInRgn[S <: Nat, RE](handle: RE)(implicit re: Resource[RE]) = new GenericBind[Region_[S, RE]] {
     override type O[X] = X
     override def pure[A](a: A) = {
       re.close(handle)

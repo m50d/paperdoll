@@ -3,7 +3,7 @@ package paperdoll.std
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-import paperdoll.core.effect.PureBind
+import paperdoll.core.effect.GenericBind
 import paperdoll.core.effect.GenericHandler
 import paperdoll.core.effect.Pure
 import paperdoll.core.layer.Layers
@@ -15,7 +15,7 @@ object TryLayer {
    *  run the continuation, if Failure, return that.
    */
   def runTry: GenericHandler.Aux[Try_, Try] =
-    new PureBind[Try_] {
+    new GenericBind[Try_] {
       override type O[X] = Try[X]
       override def pure[A](b: A) = Success(b)
       override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](eff: Try[V], cont: Arr[RR, RL, V, Try[A]]) =

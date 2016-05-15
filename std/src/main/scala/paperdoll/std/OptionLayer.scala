@@ -1,6 +1,6 @@
 package paperdoll.std
 
-import paperdoll.core.effect.PureBind
+import paperdoll.core.effect.GenericBind
 import paperdoll.core.effect.GenericHandler
 import paperdoll.core.effect.Effects
 import paperdoll.core.effect.Arr
@@ -13,7 +13,7 @@ object OptionLayer {
    *  return Pure(None)
    */
   def handleOption: GenericHandler.Aux[Option_, Option] =
-    new PureBind[Option_] {
+    new GenericBind[Option_] {
       override type O[X] = Option[X]
       override def pure[A](a: A) = Some(a)
       override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](eff: Option[V], cont: Arr[RR, RL, V, Option[A]]) =

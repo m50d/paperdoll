@@ -5,7 +5,7 @@ import paperdoll.core.effect.Arr
 import paperdoll.core.effect.GenericHandler
 import shapeless.Coproduct
 import paperdoll.core.layer.Layers
-import paperdoll.core.effect.PureBind
+import paperdoll.core.effect.GenericBind
 import paperdoll.core.effect.Effects
 import paperdoll.core.effect.Pure
 import CatsEffects.sendUC
@@ -17,7 +17,7 @@ object XorLayer {
    *  run the continuation, if -\/, return that.
    */
   def handleXor[A]: GenericHandler.Aux[Xor_[A], Xor_[A]#F] =
-    new PureBind[Xor_[A]] {
+    new GenericBind[Xor_[A]] {
       override type O[X] = Xor[A, X]
       override def pure[B](b: B) = Xor.Right(b)
       override def bind[V, RR <: Coproduct, RL <: Layers[RR], B](

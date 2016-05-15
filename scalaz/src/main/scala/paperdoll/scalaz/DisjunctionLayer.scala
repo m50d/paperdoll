@@ -5,7 +5,7 @@ import paperdoll.core.effect.GenericHandler
 import paperdoll.core.effect.Pure
 import shapeless.Coproduct
 import paperdoll.core.layer.Layers
-import paperdoll.core.effect.PureBind
+import paperdoll.core.effect.GenericBind
 import scalaz.{ -\/, \/-, Disjunction }
 import paperdoll.core.effect.Effects.sendU
 import paperdoll.core.effect.Effects
@@ -17,7 +17,7 @@ object DisjunctionLayer {
    *  run the continuation, if -\/, return that.
    */
   def handleDisjunction[A]: GenericHandler.Aux[Disjunction_[A], Disjunction_[A]#F] =
-    new PureBind[Disjunction_[A]] {
+    new GenericBind[Disjunction_[A]] {
       override type O[X] = Disjunction[A, X]
       override def pure[B](b: B) = \/-(b)
       override def bind[V, RR <: Coproduct, RL <: Layers[RR], B](
