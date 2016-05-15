@@ -4,7 +4,6 @@ import shapeless.{ :+:, CNil, Coproduct }
 import scalaz.{ Monoid, Writer }
 import paperdoll.core.effect.{ Effects, Arr, PureBind, PureHandler }
 import paperdoll.core.effect.Effects.sendU
-import paperdoll.core.effect.Arrs.compose
 import paperdoll.core.layer.Layers
 import scalaz.syntax.monad._
 import scalaz.syntax.monoid._
@@ -14,12 +13,6 @@ import paperdoll.core.effect.PureTranslator
 import paperdoll.core.layer.Layer
 import paperdoll.core.layer.Member
 import paperdoll.core.layer.Subset
-import paperdoll.core.effect.Pure
-import scalaz.Forall
-import paperdoll.core.effect.Arrs
-import paperdoll.core.effect.Arr_
-import paperdoll.core.effect.Impure
-import paperdoll.core.queue.Queue
 import paperdoll.core.effect.Loop
 import paperdoll.core.effect.Handler
 
