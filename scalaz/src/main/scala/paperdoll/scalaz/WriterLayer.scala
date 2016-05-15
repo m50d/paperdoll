@@ -21,6 +21,7 @@ import paperdoll.core.effect.Arr_
 import paperdoll.core.effect.Impure
 import paperdoll.core.queue.Queue
 import paperdoll.core.effect.Loop
+import paperdoll.core.effect.Handler
 
 object WriterLayer {
   def sendWriter[W, A](writer: Writer[W, A]): Effects.One[Writer_[W], A] =
@@ -56,21 +57,27 @@ object WriterLayer {
     }
   }
 
-  def translateWriter[R <: Coproduct, L1 <: Layers[R], F[_], W, RR <: Coproduct, RL <: Layers[RR]](
-    implicit me1: Member[R, Writer_[W]]{type L = L1; type RestR = RR; type RestL = RL}, mt: MonadTell[F, W],
-    su: Subset[RR, Layer.Aux[F] :+: CNil] {
-      type LS = RL
-      type LT = Layers.One[Layer.Aux[F]]
-    }): Loop[R, L1, Writer_[W]] =
-    new Loop[R, L1, Writer_[W]] {
-      override type RestR = RR
-      override type RestL = RL
-      override type O[X] = X
-      override def me = me1
-      override def pure[A](a: A) = a
-      override def bind[V, A](eff: Writer[W, V],cont: V ⇒  Effects[RR,RL,A]): Effects[RR,RL,A] = {
-        val (w, v) = eff.run
-        sendU(mt.tell(w)).extend[RR]() flatMap {_ => cont(v)}      
-      }
-    }
+  def translateWriter[F[_], W](implicit mt: MonadTell[F, W]): PureTranslator[Writer_[W]]{
+    type OR= Layer.Aux[F] :+: CNil
+    type OL = Layers.One[Layer.Aux[F]]
+  } =
+    new PureTranslator[Writer_[W]] {
+    override type OR = Layer.Aux[F] :+: CNil
+    override type OL = Layers.One[Layer.Aux[F]]
+    override def handler[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR]](
+        implicit me1: Member[R, Writer_[W]]{type L = L1; type RestR = RR; type RestL = RL},
+        su: Subset[RR, OR]{type LT = OL; type LS = RL}): Handler[R,L1, Writer_[W]]{type RestR = RR; type RestL = RL; type O[X] = X} =
+        new Loop[R, L1, Writer_[W]] {
+          override type RestR = RR
+          override type RestL = RL
+          override type O[X] = X
+          override def me = me1
+          override def pure[A](a: A) = a
+          override def bind[V, A](eff: Writer[W, V], cont: V ⇒ Effects[RR, RL, A]): Effects[RR, RL, A] = {
+            val (w, v) = eff.run
+            sendU(mt.tell(w)).extend[RR]() flatMap { _ ⇒ cont(v) }
+          }
+        }
+  }
+
 }
