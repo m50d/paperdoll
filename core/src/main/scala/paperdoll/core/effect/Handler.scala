@@ -41,7 +41,7 @@ trait Handler[R <: Coproduct, L1 <: Layers[R], L <: Layer] {
 
 trait PureHandler[L <: Layer] {
   type O[X]
-  def handler[R <: Coproduct, L1 <: Layers[R]](implicit me1: Member[R, L] { type L = L1 }): Handler[R, L1, L] {
+  def handler[R <: Coproduct](implicit me1: Member[R, L]): Handler[R, me1.L, L] {
     type RestR = me1.RestR
     type RestL = me1.RestL
     type O[X] = PureHandler.this.O[X]
@@ -49,7 +49,7 @@ trait PureHandler[L <: Layer] {
   final def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Effects[R, L1, A])(
     implicit me: Member[R, L] { type L = L2 },
     le: Leibniz[Nothing, Layers[R], L2, L1]): Effects[me.RestR, me.RestL, O[A]] =
-    handler[R, L1](le.subst[({type K[X] = Member[R, L] {
+    handler[R](le.subst[({type K[X] = Member[R, L] {
       type L = X
       type RestR = me.RestR
       type RestL = me.RestL

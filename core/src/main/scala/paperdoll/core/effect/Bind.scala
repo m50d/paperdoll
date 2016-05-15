@@ -10,12 +10,12 @@ trait PureBind[L <: Layer] extends PureHandler[L] {
   def pure[A](a: A): O[A]
   def bind[V, RR <: Coproduct, RL <: Layers[RR], A](eff: L#F[V], cont: Arr[RR, RL, V, O[A]]): Effects[RR, RL, O[A]]
 
-  override def handler[R <: Coproduct, L1 <: Layers[R]](implicit me1: Member[R, L] { type L = L1 }): Handler[R, L1, L] {
+  override def handler[R <: Coproduct](implicit me1: Member[R, L]): Handler[R, me1.L, L] {
     type RestR = me1.RestR
     type RestL = me1.RestL
     type O[X] = PureBind.this.O[X]
   } =
-    new Bind[R, L1, L] {
+    new Bind[R, me1.L, L] {
       type RestR = me1.RestR
       type RestL = me1.RestL
       override def me = me1

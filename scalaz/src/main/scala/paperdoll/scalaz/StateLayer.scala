@@ -21,20 +21,18 @@ object StateLayer {
 
   private[this] class StateHandler[S](initialState: S) extends PureHandler[State_[S]] {
     type O[X] = (S, X)
-    override def handler[R <: Coproduct, L1 <: Layers[R]](implicit me1: Member[R, State_[S]] {
-      type L = L1
-    }): Handler[R, L1, State_[S]] {
+    override def handler[R <: Coproduct](implicit me1: Member[R, State_[S]]): Handler[R, me1.L, State_[S]] {
       type RestR = me1.RestR
       type RestL = me1.RestL
       type O[X] = StateHandler.this.O[X]
-    } = new Handler[R, L1, State_[S]] {
+    } = new Handler[R, me1.L, State_[S]] {
       override type RestR = me1.RestR
       override type RestL = me1.RestL
       override type O[X] = StateHandler.this.O[X]
       override def me = me1
-      override def run[A](eff: Effects[R, L1, A]): Effects[RestR, RestL, (S, A)] =
+      override def run[A](eff: Effects[R, me1.L, A]): Effects[RestR, RestL, (S, A)] =
         eff.fold({ a ⇒ Pure[RestR, RestL, (S, A)]((initialState, a)) },
-          new Forall[({ type K[X] = (L1#O[X], Arrs[R, L1, X, A]) ⇒ Effects[RestR, RestL, (S, A)] })#K] {
+          new Forall[({ type K[X] = (me1.L#O[X], Arrs[R, me1.L, X, A]) ⇒ Effects[RestR, RestL, (S, A)] })#K] {
             override def apply[X] = { (eff, cont) ⇒
               def newCont(newState: S) = compose(cont) andThen { handleState(newState).handler(me1).run(_) }
               me.remove(eff).fold(

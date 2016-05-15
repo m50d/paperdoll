@@ -54,19 +54,19 @@ object Region {
 
   def newRgn[S <: Nat, RE](implicit re: Resource[RE]): PureHandler[Region_[S, RE]] = new PureHandler[Region_[S, RE]] {
     override type O[X] = X
-    override def handler[R <: Coproduct, L1 <: Layers[R]](implicit me1: Member[R, Region_[S, RE]]{type L = L1}): Handler[R, L1, Region_[S, RE]] {
+    override def handler[R <: Coproduct](implicit me1: Member[R, Region_[S, RE]]): Handler[R, me1.L, Region_[S, RE]] {
       type RestR = me1.RestR
       type RestL = me1.RestL
       type O[X] = X
-    } = new Handler[R, L1, Region_[S, RE]] {
+    } = new Handler[R, me1.L, Region_[S, RE]] {
       type RestR = me1.RestR
       type RestL = me1.RestL
       type O[X] = X
       def me = me1
-      override def run[A](eff: Effects[R, L1, A]): Effects[RestR, RestL, O[A]] =
+      override def run[A](eff: Effects[R, me1.L, A]): Effects[RestR, RestL, O[A]] =
         eff.fold(
           a ⇒ Pure[RestR, RestL, A](a),
-          new Forall[({ type K[X] = (L1#O[X], Arrs[R, L1, X, A]) ⇒ Effects[RestR, RestL, O[A]] })#K] {
+          new Forall[({ type K[X] = (me1.L#O[X], Arrs[R, me1.L, X, A]) ⇒ Effects[RestR, RestL, O[A]] })#K] {
             override def apply[X] = { (eff, cont) ⇒
               val composed = compose(cont)
               me.remove(eff).fold(
@@ -74,7 +74,7 @@ object Region {
                   composed andThen { run(_) })),
                 _.fold({ (le, r) ⇒
                   re.open(r)
-                  handleInRgn[S, RE](r).apply(le.subst[({ type K[Y] = Arr[R, L1, Y, A] })#K](composed)(r))
+                  handleInRgn[S, RE](r).apply[R, me1.L, A, me1.L](le.subst[({ type K[Y] = Arr[R, me1.L, Y, A] })#K](composed)(r))(me1, Leibniz.refl)
                 }))
             }
           })
