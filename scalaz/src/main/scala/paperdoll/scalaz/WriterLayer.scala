@@ -13,8 +13,8 @@ import paperdoll.core.effect.PureTranslator
 import paperdoll.core.layer.Layer
 import paperdoll.core.layer.Member
 import paperdoll.core.layer.Subset
-import paperdoll.core.effect.Loop
 import paperdoll.core.effect.Handler
+import paperdoll.core.effect.Bind
 
 object WriterLayer {
   def sendWriter[W, A](writer: Writer[W, A]): Effects.One[Writer_[W], A] =
@@ -60,7 +60,7 @@ object WriterLayer {
     override def handler[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR]](
         implicit me1: Member[R, Writer_[W]]{type L = L1; type RestR = RR; type RestL = RL},
         su: Subset[RR, OR]{type LT = OL; type LS = RL}): Handler[R,L1, Writer_[W]]{type RestR = RR; type RestL = RL; type O[X] = X} =
-        new Loop[R, L1, Writer_[W]] {
+        new Bind[R, L1, Writer_[W]] {
           override type RestR = RR
           override type RestL = RL
           override type O[X] = X
