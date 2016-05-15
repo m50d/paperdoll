@@ -6,7 +6,6 @@ import paperdoll.core.effect.Effects.sendU
 import paperdoll.core.effect.Arrs.compose
 import paperdoll.core.effect.{ GenericHandler, Handler }
 import shapeless.Coproduct
-import paperdoll.core.layer.Layers
 import paperdoll.core.layer.Member
 import paperdoll.core.effect.Pure
 import scalaz.Forall

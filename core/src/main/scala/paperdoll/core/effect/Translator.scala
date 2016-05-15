@@ -2,7 +2,7 @@ package paperdoll.core.effect
 
 import scalaz.Leibniz
 import paperdoll.core.layer.Member
-import shapeless.Coproduct
+import shapeless.{CNil, :+:, Coproduct}
 import paperdoll.core.layer.Layer
 import paperdoll.core.layer.Layers
 import paperdoll.core.layer.Subset
@@ -49,6 +49,16 @@ trait GenericTranslator[L <: Layer] {
       }
     })#K](su)).run(eff)
 }
+
+/**
+ * TODO: Translator trait, implement things using it
+ */
+trait GenericSingleTranslator[L <: Layer] extends GenericTranslator[L] {
+  type O <: Layer
+  final override type OR = O :+: CNil
+  final override type OL = Layers.One[O]
+}
+
 object GenericTranslator {
   type Aux[L <: Layer, OR0 <: Coproduct, OL0 <: Layers[OR0]] = GenericTranslator[L] {
     type OR = OR0
