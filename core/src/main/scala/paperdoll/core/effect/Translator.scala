@@ -7,12 +7,10 @@ import paperdoll.core.layer.Layer
 import paperdoll.core.layer.Layers
 import paperdoll.core.layer.Subset
 
-trait Translator[L <: Layer] {
+trait PureTranslator[L <: Layer] {
   type OR <: Coproduct
   type OL <: Layers[OR]
-  /** Actual implementation - apply method has extra Leibniz to assist type inference.
-   */
-  def run[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR], A](eff: Effects[R, L1, A])(
+  def handler[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR]](
     implicit me: Member[R, L] {
       type L = L1
       type RestR = RR
@@ -21,7 +19,11 @@ trait Translator[L <: Layer] {
     su: Subset[RR, OR] {
       type LT = OL
       type LS = RL
-    }): Effects[me.RestR, me.RestL, A]
+    }): Handler[R, L1, L] {
+    type RestR = RR
+    type RestL = RL
+    type O[X] = X
+  }
   final def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R], RR <: Coproduct, RL <: Layers[RR], LT0 <: Layers[OR]](
     eff: Effects[R, L1, A])(implicit me: Member[R, L] {
       type L = L2
@@ -32,18 +34,23 @@ trait Translator[L <: Layer] {
         type LS = RL
         type LT = LT0
       },
-      //FIXME: inconsistent in which way I substitute, should resolve this generally
-      le1: Leibniz[Nothing, Layers[R], L1, L2],
-      le2: Leibniz[Nothing, Layers[OR], LT0, OL]): Effects[me.RestR, me.RestL, A] =
-    run(le1.subst[({ type K[X <: Layers[R]] = Effects[R, X, A] })#K](eff))(me, le2.subst[({
+      le1: Leibniz[Nothing, Layers[R], L2, L1],
+      le2: Leibniz[Nothing, Layers[OR], LT0, OL]): Effects[RR, RL, A] =
+    handler[R, L1, RR, RL](le1.subst[
+      ({type K[X] = Member[R, L] {
+        type L = X
+        type RestR = RR
+        type RestL = RL
+      }})#K  
+    ](me), le2.subst[({
       type K[X <: Layers[OR]] = Subset[RR, OR] {
         type LS = RL
         type LT = X
       }
-    })#K](su))
+    })#K](su)).run(eff)
 }
-object Translator {
-  type Aux[L <: Layer, OR0 <: Coproduct, OL0 <: Layers[OR0]] = Translator[L] {
+object PureTranslator {
+  type Aux[L <: Layer, OR0 <: Coproduct, OL0 <: Layers[OR0]] = PureTranslator[L] {
     type OR = OR0
     type OL = OL0
   }

@@ -217,6 +217,10 @@ so my preferred style is to avoid pattern matches entirely.
 This also makes it possible to hide trait implementation subtypes
 (by using anonymous classes) where appropriate.
 
+`Leibniz#subst` represents that types are equal so in a sense it doesn't matter
+"which way round" it's used, but for consistency I would prefer to first substitute
+implicit parameters, then regular parameters, then self.
+
 As `paperdoll-core` is very abstract, a lot of tests for `paperdoll-core` code
 require one or more effect implementations.
 So I've moved those tests down into `paperdoll-all` rather than add test-only effects.
