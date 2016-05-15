@@ -14,7 +14,7 @@ import Arrs.compose
  *  Purely an implementation helper - anything done with this could be done
  *  by calling Effects#fold directly.
  *  This is still quite low-level - most common use cases are covered by
- *  PureBind and/or Translator.
+ *  PureBind and/or PureTranslator.
  */
 trait Loop[R <: Coproduct, L1 <: Layers[R], L <: Layer] extends Handler[R, L1, L] {
 

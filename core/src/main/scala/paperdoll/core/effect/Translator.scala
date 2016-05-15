@@ -7,7 +7,7 @@ import paperdoll.core.layer.Layer
 import paperdoll.core.layer.Layers
 import paperdoll.core.layer.Subset
 
-trait Translator[L <: Layer] {
+trait PureTranslator[L <: Layer] {
   type OR <: Coproduct
   type OL <: Layers[OR]
   /** Actual implementation - apply method has extra Leibniz to assist type inference.
@@ -42,8 +42,8 @@ trait Translator[L <: Layer] {
       }
     })#K](su))
 }
-object Translator {
-  type Aux[L <: Layer, OR0 <: Coproduct, OL0 <: Layers[OR0]] = Translator[L] {
+object PureTranslator {
+  type Aux[L <: Layer, OR0 <: Coproduct, OL0 <: Layers[OR0]] = PureTranslator[L] {
     type OR = OR0
     type OL = OL0
   }

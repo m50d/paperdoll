@@ -10,7 +10,7 @@ import scalaz.Leibniz
  *  This is purely an implementation helper - any subclasses could also be
  *  written directly using Effects#fold.
  *  This is still quite low-level - most common use cases are covered by
- *  PureBind and/or Translator
+ *  PureBind and/or PureTranslator
  */
 trait Handler[R <: Coproduct, L1 <: Layers[R], L <: Layer] {
   type RestR <: Coproduct

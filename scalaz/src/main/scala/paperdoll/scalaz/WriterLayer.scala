@@ -10,7 +10,7 @@ import scalaz.syntax.monad._
 import scalaz.syntax.monoid._
 import scala.collection.generic.CanBuildFrom
 import scalaz.MonadTell
-import paperdoll.core.effect.Translator
+import paperdoll.core.effect.PureTranslator
 import paperdoll.core.layer.Layer
 import paperdoll.core.layer.Member
 import paperdoll.core.layer.Subset
@@ -56,8 +56,8 @@ object WriterLayer {
   }
 
   def translateWriter[F[_], W](
-    implicit mt: MonadTell[F, W]): Translator.Aux[Writer_[W], Layer.Aux[F] :+: CNil, Layers.One[Layer.Aux[F]]] =
-    new Translator[Writer_[W]] {
+    implicit mt: MonadTell[F, W]): PureTranslator.Aux[Writer_[W], Layer.Aux[F] :+: CNil, Layers.One[Layer.Aux[F]]] =
+    new PureTranslator[Writer_[W]] {
       override type OR = Layer.Aux[F] :+: CNil
       override type OL = Layers.One[Layer.Aux[F]]
       override def run[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR], A](eff: Effects[R, L1, A])(
