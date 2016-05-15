@@ -2,7 +2,7 @@ package paperdoll.cats
 
 import cats.data.Xor
 import paperdoll.core.effect.Arr
-import paperdoll.core.effect.PureHandler
+import paperdoll.core.effect.GenericHandler
 import shapeless.Coproduct
 import paperdoll.core.layer.Layers
 import paperdoll.core.effect.PureBind
@@ -16,7 +16,7 @@ object XorLayer {
     /** Xor is handled much like Option: if \/-,
    *  run the continuation, if -\/, return that.
    */
-  def handleXor[A]: PureHandler.Aux[Xor_[A], Xor_[A]#F] =
+  def handleXor[A]: GenericHandler.Aux[Xor_[A], Xor_[A]#F] =
     new PureBind[Xor_[A]] {
       override type O[X] = Xor[A, X]
       override def pure[B](b: B) = Xor.Right(b)

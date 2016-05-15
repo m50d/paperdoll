@@ -43,7 +43,7 @@ trait Bind[R <: Coproduct, L1 <: Layers[R], L <: Layer] extends Handler[R, L1, L
       })
 }
 
-trait PureBind[L <: Layer] extends PureHandler[L] {
+trait PureBind[L <: Layer] extends GenericHandler[L] {
   def pure[A](a: A): O[A]
   def bind[V, RR <: Coproduct, RL <: Layers[RR], A](eff: L#F[V], cont: Arr[RR, RL, V, O[A]]): Effects[RR, RL, O[A]]
 

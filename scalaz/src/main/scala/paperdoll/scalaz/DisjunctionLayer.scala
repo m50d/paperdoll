@@ -1,7 +1,7 @@
 package paperdoll.scalaz
 
 import paperdoll.core.effect.Arr
-import paperdoll.core.effect.PureHandler
+import paperdoll.core.effect.GenericHandler
 import paperdoll.core.effect.Pure
 import shapeless.Coproduct
 import paperdoll.core.layer.Layers
@@ -16,7 +16,7 @@ object DisjunctionLayer {
   /** Disjunction is handled much like Option: if \/-,
    *  run the continuation, if -\/, return that.
    */
-  def handleDisjunction[A]: PureHandler.Aux[Disjunction_[A], Disjunction_[A]#F] =
+  def handleDisjunction[A]: GenericHandler.Aux[Disjunction_[A], Disjunction_[A]#F] =
     new PureBind[Disjunction_[A]] {
       override type O[X] = Disjunction[A, X]
       override def pure[B](b: B) = \/-(b)

@@ -17,7 +17,7 @@ import paperdoll.core.effect.Impure
 import paperdoll.core.queue.Queue
 import paperdoll.core.effect.PureBind
 import paperdoll.core.effect.Arr
-import paperdoll.core.effect.PureHandler
+import paperdoll.core.effect.GenericHandler
 import shapeless.Nat
 
 sealed trait Region[S <: Nat, R, A] {
@@ -52,7 +52,7 @@ object Region {
       throw new RuntimeException("Opened the same handle twice. Did you reuse the same S type for multiple regions?")
   }
 
-  def newRgn[S <: Nat, RE](implicit re: Resource[RE]): PureHandler[Region_[S, RE]] = new PureHandler[Region_[S, RE]] {
+  def newRgn[S <: Nat, RE](implicit re: Resource[RE]): GenericHandler[Region_[S, RE]] = new GenericHandler[Region_[S, RE]] {
     override type O[X] = X
     override def handler[R <: Coproduct](implicit me1: Member[R, Region_[S, RE]]): Handler[R, me1.L, Region_[S, RE]] {
       type RestR = me1.RestR

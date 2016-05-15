@@ -2,7 +2,7 @@ package paperdoll.scalaz
 
 import shapeless.{ :+:, CNil, Coproduct }
 import scalaz.{ Monoid, Writer }
-import paperdoll.core.effect.{ Effects, Arr, PureBind, PureHandler }
+import paperdoll.core.effect.{ Effects, Arr, PureBind, GenericHandler }
 import paperdoll.core.effect.Effects.sendU
 import paperdoll.core.layer.Layers
 import scalaz.syntax.monad._
@@ -24,7 +24,7 @@ object WriterLayer {
 
   /** Run the writer effect, producing a collection of all the written values
    */
-  def handleWriterCollection[W, CC <: TraversableOnce[W]](implicit cbf: CanBuildFrom[CC, W, CC]): PureHandler[Writer_[W]] {
+  def handleWriterCollection[W, CC <: TraversableOnce[W]](implicit cbf: CanBuildFrom[CC, W, CC]): GenericHandler[Writer_[W]] {
     type O[X] = (CC, X)
   } = new PureBind[Writer_[W]] {
     override type O[X] = (CC, X)
@@ -39,7 +39,7 @@ object WriterLayer {
    *  Notice how we can have multiple interpreters for the same effect,
    *  as we've decoupled the declaration of an effect from its implementation.
    */
-  def handleWriterMonoid[W](implicit monoid: Monoid[W]): PureHandler[Writer_[W]] {
+  def handleWriterMonoid[W](implicit monoid: Monoid[W]): GenericHandler[Writer_[W]] {
     type O[X] = (W, X)
   } = new PureBind[Writer_[W]] {
     override type O[X] = (W, X)

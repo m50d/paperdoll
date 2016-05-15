@@ -10,7 +10,7 @@ import scalaz.Leibniz
  *  This is purely an implementation helper - any subclasses could also be
  *  written directly using Effects#fold.
  *  This is still quite low-level - most common use cases are covered by
- *  PureBind and/or PureTranslator
+ *  GenericBind and/or GenericTranslator
  */
 trait Handler[R <: Coproduct, L1 <: Layers[R], L <: Layer] {
   type RestR <: Coproduct
@@ -36,15 +36,14 @@ trait Handler[R <: Coproduct, L1 <: Layers[R], L <: Layer] {
    *  (and possibly a transformed value).
    */
   def run[A](eff: Effects[R, L1, A]): Effects[RestR, RestL, O[A]]
-
 }
 
-trait PureHandler[L <: Layer] {
+trait GenericHandler[L <: Layer] {
   type O[X]
   def handler[R <: Coproduct](implicit me1: Member[R, L]): Handler[R, me1.L, L] {
     type RestR = me1.RestR
     type RestL = me1.RestL
-    type O[X] = PureHandler.this.O[X]
+    type O[X] = GenericHandler.this.O[X]
   }
   final def apply[R <: Coproduct, L1 <: Layers[R], A, L2 <: Layers[R]](eff: Effects[R, L1, A])(
     implicit me: Member[R, L] { type L = L2 },
@@ -55,8 +54,8 @@ trait PureHandler[L <: Layer] {
       type RestL = me.RestL
     }})#K](me)).run(eff)
 }
-object PureHandler {
-  type Aux[L <: Layer, O0[_]] = PureHandler[L] {
+object GenericHandler {
+  type Aux[L <: Layer, O0[_]] = GenericHandler[L] {
     type O[X] = O0[X]
   }
 }

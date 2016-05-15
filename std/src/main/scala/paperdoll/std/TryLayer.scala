@@ -4,7 +4,7 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 import paperdoll.core.effect.PureBind
-import paperdoll.core.effect.PureHandler
+import paperdoll.core.effect.GenericHandler
 import paperdoll.core.effect.Pure
 import paperdoll.core.layer.Layers
 import shapeless.Coproduct
@@ -14,7 +14,7 @@ object TryLayer {
   /** Try is handled much like Option: if Success,
    *  run the continuation, if Failure, return that.
    */
-  def runTry: PureHandler.Aux[Try_, Try] =
+  def runTry: GenericHandler.Aux[Try_, Try] =
     new PureBind[Try_] {
       override type O[X] = Try[X]
       override def pure[A](b: A) = Success(b)

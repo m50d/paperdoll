@@ -1,7 +1,7 @@
 package paperdoll.std
 
 import paperdoll.core.effect.PureBind
-import paperdoll.core.effect.PureHandler
+import paperdoll.core.effect.GenericHandler
 import paperdoll.core.effect.Effects
 import paperdoll.core.effect.Effects.sendU
 import paperdoll.core.effect.Arr
@@ -17,7 +17,7 @@ object EitherLayer {
   /** Either is handled much like Option: if Right,
    *  run the continuation, if Left, return that.
    */
-  def handleEither[A]: PureHandler.Aux[Either_[A], Either_[A]#F] =
+  def handleEither[A]: GenericHandler.Aux[Either_[A], Either_[A]#F] =
     new PureBind[Either_[A]] {
       override type O[X] = Either[A, X]
       override def pure[B](b: B) = Right(b)

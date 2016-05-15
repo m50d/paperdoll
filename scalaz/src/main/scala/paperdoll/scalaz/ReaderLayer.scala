@@ -2,7 +2,7 @@ package paperdoll.scalaz
 
 import shapeless.Coproduct
 import paperdoll.core.layer.Layers
-import paperdoll.core.effect.{ Effects, Arr, PureBind, PureHandler }
+import paperdoll.core.effect.{ Effects, Arr, PureBind, GenericHandler }
 import paperdoll.core.effect.Effects.sendU
 import scalaz.Id.Id
 import scalaz.Reader
@@ -20,7 +20,7 @@ object ReaderLayer {
    *  (i.e. giving the value i to any reads in the "lazy effectful value" e),
    *  removing Reader_[I] from the stack of effects in the result.
    */
-  def handleReader[I](i: I): PureHandler.Aux[Reader_[I], Id] = new PureBind[Reader_[I]] {
+  def handleReader[I](i: I): GenericHandler.Aux[Reader_[I], Id] = new PureBind[Reader_[I]] {
     override type O[X] = X
     override def pure[A](a: A) = a
     override def bind[V, RR <: Coproduct, RL <: Layers[RR], A](reader: Reader[I, V], arr: Arr[RR, RL, V, A]) =
