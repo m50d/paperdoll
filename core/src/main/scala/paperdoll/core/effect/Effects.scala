@@ -150,10 +150,10 @@ object Effects extends Effects0 {
         })
       override def empty[A] = Nondeterminism.Zero[A].extend[R].apply[LT0]()
     }
-  implicit def catchable[R <: Coproduct, L <: Layers[R]]: Catchable[Effects_[R, L]#O] =
-    new Catchable[Effects_[R, L]#O] {
-    override def attempt[A](f: Effects[R, L, A])
-  }
+//  implicit def catchable[R <: Coproduct, L <: Layers[R]]: Catchable[Effects_[R, L]#O] =
+//    new Catchable[Effects_[R, L]#O] {
+//    override def attempt[A](f: Effects[R, L, A]) = \/-(f)
+//  }
   /** One[L, A] is the type of an Effects with layer stack just L,
    *  and value type A, i.e. Effects[L :+: CNil, ..., A]
    */
