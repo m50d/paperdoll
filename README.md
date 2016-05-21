@@ -241,8 +241,10 @@ but make use of unsafe casts internally for performance.
 
  * Extend Translator support to cover many monad transformers
   * Allows some limited support for ReaderWriterState and friends
+  * Use cases from doobie and ScalaZ to guide
  * Finish paperdoll-doobie
- * Once scalaz 7.3 released:
+  * Needs a doobie built against ScalaZ 7.3
+ * Once scalaz 7.3 released, and a doobie built against it:
   * Tighten up dependency config (i.e. not snapshots repo)
   * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
  * Finish TODOs in this document (in particular examples)
