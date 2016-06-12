@@ -5,7 +5,7 @@ import paperdoll.core.effect.Effects
 import paperdoll.core.effect.Effects.sendU
 import paperdoll.core.effect.Arrs.compose
 import paperdoll.core.effect.{ GenericHandler, Handler }
-import shapeless.Coproduct
+import shapeless.{CNil, :+:, Coproduct}
 import paperdoll.core.layer.Member
 import paperdoll.core.effect.Pure
 import scalaz.Forall
@@ -13,6 +13,12 @@ import paperdoll.core.effect.Arrs
 import paperdoll.core.effect.Impure
 import paperdoll.core.effect.Arr_
 import paperdoll.core.queue.Queue
+import paperdoll.core.effect.GenericSingleTranslator
+import scalaz.MonadState
+import paperdoll.core.layer.Layer
+import paperdoll.core.effect.GenericTranslator
+import paperdoll.core.layer.Layers
+import scalaz.syntax.monad._
 
 object StateLayer {
   def sendState[S, A](state: State[S, A]): Effects.One[State_[S], A] =
@@ -49,4 +55,17 @@ object StateLayer {
   def handleState[S](initialState: S): GenericHandler[State_[S]] {
     type O[A] = (S, A)
   } = new StateHandler(initialState)
+  
+  def translateState[F[_], S](implicit ms: MonadState[F, S]): GenericTranslator[State_[S]] {
+    type OR = Layer.Aux[F] :+: CNil
+    type OL = Layers.One[Layer.Aux[F]]
+  } = new GenericSingleTranslator[State_[S]] {
+    override type O = Layer.Aux[F]
+    override def handle[V](eff: State[S, V]) =
+      for {
+        oldS <- sendU(ms.get)
+        (newS, a) = eff.run(oldS)
+        _ <- sendU(ms.put(newS))
+      } yield a
+  }
 }
