@@ -11,10 +11,6 @@ import scala.collection.generic.CanBuildFrom
 import scalaz.MonadTell
 import paperdoll.core.effect.GenericTranslator
 import paperdoll.core.layer.Layer
-import paperdoll.core.layer.Member
-import paperdoll.core.layer.Subset
-import paperdoll.core.effect.Handler
-import paperdoll.core.effect.Bind
 import paperdoll.core.effect.GenericSingleTranslator
 
 object WriterLayer {

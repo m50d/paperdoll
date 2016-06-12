@@ -8,12 +8,8 @@ import scalaz.Id.Id
 import scalaz.Reader
 import scala.Predef.identity
 import scalaz.MonadListen
-import paperdoll.core.layer.Member
-import paperdoll.core.layer.Subset
-import paperdoll.core.effect.Handler
 import paperdoll.core.layer.Layer
 import paperdoll.core.effect.GenericTranslator
-import paperdoll.core.effect.Bind
 import scalaz.syntax.monad._
 import paperdoll.core.effect.GenericSingleTranslator
 
