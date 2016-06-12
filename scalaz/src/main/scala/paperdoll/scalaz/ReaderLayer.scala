@@ -12,6 +12,7 @@ import paperdoll.core.layer.Layer
 import paperdoll.core.effect.GenericTranslator
 import scalaz.syntax.monad._
 import paperdoll.core.effect.GenericSingleTranslator
+import scalaz.MonadReader
 
 object ReaderLayer {
   def sendReader[I, A](reader: Reader[I, A]): Effects.One[Reader_[I], A] =
@@ -32,15 +33,12 @@ object ReaderLayer {
       arr(reader(i))
   }
 
-  def translateReader[F[_], I](implicit ml: MonadListen[F, I]): GenericTranslator[Reader_[I]] {
+  def translateReader[F[_], I](implicit mr: MonadReader[F, I]): GenericTranslator[Reader_[I]] {
     type OR = Layer.Aux[F] :+: CNil
     type OL = Layers.One[Layer.Aux[F]]
   } = new GenericSingleTranslator[Reader_[I]] {
     override type O = Layer.Aux[F]
     override def handle[V](eff: Reader[I, V]) =
-      sendU(ml.listen(ml.point({}))).map { ui ⇒
-        val (_, i) = ui
-        eff(i)
-      }
+      sendU(mr.asks(eff.run))
   }
 }
