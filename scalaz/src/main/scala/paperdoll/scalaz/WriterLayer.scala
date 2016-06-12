@@ -15,6 +15,7 @@ import paperdoll.core.layer.Member
 import paperdoll.core.layer.Subset
 import paperdoll.core.effect.Handler
 import paperdoll.core.effect.Bind
+import paperdoll.core.effect.GenericSingleTranslator
 
 object WriterLayer {
   def sendWriter[W, A](writer: Writer[W, A]): Effects.One[Writer_[W], A] =
@@ -50,27 +51,16 @@ object WriterLayer {
     }
   }
 
-  def translateWriter[F[_], W](implicit mt: MonadTell[F, W]): GenericTranslator[Writer_[W]]{
-    type OR= Layer.Aux[F] :+: CNil
+  def translateWriter[F[_], W](implicit mt: MonadTell[F, W]): GenericTranslator[Writer_[W]] {
+    type OR = Layer.Aux[F] :+: CNil
     type OL = Layers.One[Layer.Aux[F]]
   } =
-    new GenericTranslator[Writer_[W]] {
-    override type OR = Layer.Aux[F] :+: CNil
-    override type OL = Layers.One[Layer.Aux[F]]
-    override def handler[R <: Coproduct, L1 <: Layers[R], RR <: Coproduct, RL <: Layers[RR]](
-        implicit me1: Member[R, Writer_[W]]{type L = L1; type RestR = RR; type RestL = RL},
-        su: Subset[RR, OR]{type LT = OL; type LS = RL}): Handler[R,L1, Writer_[W]]{type RestR = RR; type RestL = RL; type O[X] = X} =
-        new Bind[R, L1, Writer_[W]] {
-          override type RestR = RR
-          override type RestL = RL
-          override type O[X] = X
-          override def me = me1
-          override def pure[A](a: A) = a
-          override def bind[V, A](eff: Writer[W, V], cont: V ⇒ Effects[RR, RL, A]): Effects[RR, RL, A] = {
-            val (w, v) = eff.run
-            sendU(mt.tell(w)).extend[RR]() flatMap { _ ⇒ cont(v) }
-          }
-        }
-  }
+    new GenericSingleTranslator[Writer_[W]] {
+      override type O = Layer.Aux[F]
+      override def handle[V](eff: Writer[W, V]) = {
+        val (w, v) = eff.run
+        sendU(mt.tell(w)) map { _ ⇒ v }
+      }
+    }
 
 }
