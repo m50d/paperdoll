@@ -8,7 +8,6 @@ import org.fest.assertions.Assertions.assertThat
 import scalaz.ReaderWriterState
 import paperdoll.core.layer.Layer
 import scalaz.std.anyVal._
-import scalaz.Id.Id
 import paperdoll.core.effect.Effects
 import scalaz.Monad
 
