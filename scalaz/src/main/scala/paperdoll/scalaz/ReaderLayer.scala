@@ -7,10 +7,8 @@ import paperdoll.core.effect.Effects.sendU
 import scalaz.Id.Id
 import scalaz.Reader
 import scala.Predef.identity
-import scalaz.MonadListen
 import paperdoll.core.layer.Layer
 import paperdoll.core.effect.GenericTranslator
-import scalaz.syntax.monad._
 import paperdoll.core.effect.GenericSingleTranslator
 import scalaz.MonadReader
 
