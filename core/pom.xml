@@ -9,6 +9,11 @@
     <artifactId>paperdoll-core</artifactId>
     <packaging>jar</packaging>
     <dependencies>
+		<dependency>
+			<groupId>com.github.m50d</groupId>
+			<artifactId>paperdoll-queue</artifactId>
+			<version>${project.version}</version>
+		</dependency>
         <dependency>
             <groupId>com.chuusai</groupId>
             <artifactId>shapeless_2.11</artifactId>
