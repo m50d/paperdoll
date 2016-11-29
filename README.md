@@ -242,9 +242,7 @@ but make use of unsafe casts internally for performance.
  * Extend Translator support to cover many monad transformers
   * Allows some limited support for ReaderWriterState and friends
  * Finish paperdoll-doobie
- * Once scalaz 7.3 released:
-  * Tighten up dependency config (i.e. not snapshots repo)
-  * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
+ * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
  * Finish TODOs in this document (in particular examples)
  * Final code/readme review for readability
   * With particular focus on examples
