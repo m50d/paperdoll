@@ -114,8 +114,7 @@
 				<executions>
 					<execution>
 						<configuration>
-							<!-- Reenable once scalaz 7.3 is released -->
-							<!-- <failNoSignature>true</failNoSignature> -->
+							<failNoSignature>true</failNoSignature>
 						</configuration>
 						<goals>
 							<goal>check</goal>
@@ -170,16 +169,6 @@
 			</plugins>
 		</pluginManagement>
 	</build>
-	<repositories>
-		<repository>
-			<id>oss-sonatype</id>
-			<name>oss-sonatype</name>
-			<url>https://oss.sonatype.org/content/repositories/snapshots/</url>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
