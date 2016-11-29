@@ -12,7 +12,7 @@ import scalaz.Forall
 import paperdoll.core.effect.Arrs
 import paperdoll.core.effect.Impure
 import paperdoll.core.effect.Arr_
-import paperdoll.core.queue.Queue
+import paperdoll.queue.Queue
 import paperdoll.core.effect.GenericSingleTranslator
 import scalaz.MonadState
 import paperdoll.core.layer.Layer

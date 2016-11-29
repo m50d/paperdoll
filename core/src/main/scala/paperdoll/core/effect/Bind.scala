@@ -5,7 +5,7 @@ import shapeless.Coproduct
 import paperdoll.core.layer.Member
 import scalaz.Forall
 import paperdoll.core.effect.Arrs.compose
-import paperdoll.core.queue.Queue
+import paperdoll.queue.Queue
 
 /** TODO update
  *  Handle an effect layer that works by recursively handling subsequent effects,

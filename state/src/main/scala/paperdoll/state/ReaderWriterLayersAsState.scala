@@ -13,7 +13,7 @@ import paperdoll.core.effect.Arrs
 import scalaz.Leibniz
 import paperdoll.core.effect.Impure
 import paperdoll.core.effect.Arr_
-import paperdoll.core.queue.Queue
+import paperdoll.queue.Queue
 
 final class ReaderWriterAsStateHandler[S] {
   private[this] def loop[R <: Coproduct, L0 <: Layers[R], A, RR <: Coproduct, RL0 <: Layers[RR], RL1 <: Layers[_]](

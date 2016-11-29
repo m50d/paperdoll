@@ -11,7 +11,7 @@ import shapeless.CNil
 import scalaz.syntax.foldable._
 import scalaz.std.list._
 import scalaz.syntax.std.list._
-import paperdoll.core.queue.Queue
+import paperdoll.queue.Queue
 import paperdoll.core.effect.Arr
 import scalaz.syntax.monad._
 import paperdoll.core.effect.GenericBind

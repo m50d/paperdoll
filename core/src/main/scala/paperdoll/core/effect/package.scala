@@ -1,7 +1,7 @@
 package paperdoll.core
 
 import shapeless.Coproduct
-import paperdoll.core.queue.Queue
+import paperdoll.queue.Queue
 import paperdoll.core.layer.Layers
 
 package object effect {
