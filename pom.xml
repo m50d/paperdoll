@@ -36,6 +36,13 @@
 	<scm>
 		<connection>scm:git:git@github.com:m50d/paperdoll.git</connection>
 	</scm>
+	<distributionManagement>
+		<repository>
+			<id>bintray-lmm-maven</id>
+			<name>lmm-maven</name>
+			<url>https://api.bintray.com/maven/lmm/maven/paperchase/;publish=1</url>
+		</repository>
+	</distributionManagement>
 	<modules>
 		<module>all</module>
 		<module>arm</module>
