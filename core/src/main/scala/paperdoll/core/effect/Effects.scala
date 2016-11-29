@@ -4,7 +4,7 @@ import Predef.identity
 import shapeless.{ Coproduct, CNil, :+:, Inl }
 import scalaz.{ Monad, Leibniz, Forall, Unapply }
 import scalaz.syntax.monad._
-import paperdoll.core.queue.Queue
+import paperdoll.queue.Queue
 import paperdoll.core.layer.{ Layer, Layers, Subset }
 import scalaz.Functor
 import paperdoll.core.nondeterminism.NDet_

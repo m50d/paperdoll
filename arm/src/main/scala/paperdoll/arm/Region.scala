@@ -14,7 +14,7 @@ import scalaz.Forall
 import paperdoll.core.effect.Arr_
 import paperdoll.core.effect.Arrs
 import paperdoll.core.effect.Impure
-import paperdoll.core.queue.Queue
+import paperdoll.queue.Queue
 import paperdoll.core.effect.GenericBind
 import paperdoll.core.effect.Arr
 import paperdoll.core.effect.GenericHandler

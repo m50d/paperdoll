@@ -1,7 +1,6 @@
-package paperdoll.core.queue
+package paperdoll.queue
 
 import org.junit.Test
-import Predef.identity
 
 class QueueTest {
   @Test def longQueue(): Unit = {
