@@ -6,28 +6,9 @@
 		<artifactId>paperdoll-aggregator</artifactId>
 		<version>0.1-SNAPSHOT</version>
 	</parent>
-	<properties>
-		<doobie.version>0.3.1-M2</doobie.version>
-	</properties>
-	<artifactId>paperdoll-doobie</artifactId>
+	<artifactId>paperdoll-queue</artifactId>
 	<packaging>jar</packaging>
 	<dependencies>
-		<dependency>
-			<groupId>com.github.m50d</groupId>
-			<artifactId>paperdoll-scalaz-concurrent</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.tpolecat</groupId>
-			<artifactId>doobie-core_2.11</artifactId>
-			<version>${doobie.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.tpolecat</groupId>
-			<artifactId>doobie-h2_2.11</artifactId>
-			<version>${doobie.version}</version>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

@@ -39,6 +39,7 @@
 		<module>cats</module>
 		<module>core</module>
 		<module>doobie</module>
+		<module>queue</module>
 		<module>scalaz</module>
 		<module>scalaz-concurrent</module>
 		<module>state</module>
