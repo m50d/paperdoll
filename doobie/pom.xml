@@ -7,7 +7,7 @@
 		<version>0.1-SNAPSHOT</version>
 	</parent>
 	<properties>
-		<doobie.version>0.3.0-SNAPSHOT</doobie.version>
+		<doobie.version>0.3.1-M2</doobie.version>
 	</properties>
 	<artifactId>paperdoll-doobie</artifactId>
 	<packaging>jar</packaging>
@@ -24,7 +24,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.tpolecat</groupId>
-			<artifactId>doobie-contrib-h2_2.11</artifactId>
+			<artifactId>doobie-h2_2.11</artifactId>
 			<version>${doobie.version}</version>
 			<scope>test</scope>
 		</dependency>
