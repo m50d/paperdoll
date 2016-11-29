@@ -33,6 +33,9 @@
 			</build>
 		</profile>
 	</profiles>
+	<scm>
+		<connection>scm:git:git@github.com:m50d/paperdoll.git</connection>
+	</scm>
 	<modules>
 		<module>all</module>
 		<module>arm</module>
