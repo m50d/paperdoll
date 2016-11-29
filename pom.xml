@@ -40,7 +40,7 @@
 		<repository>
 			<id>bintray-lmm-maven</id>
 			<name>lmm-maven</name>
-			<url>https://api.bintray.com/maven/lmm/maven/paperchase/;publish=1</url>
+			<url>https://api.bintray.com/maven/lmm/maven/paperdoll/;publish=1</url>
 		</repository>
 	</distributionManagement>
 	<modules>
