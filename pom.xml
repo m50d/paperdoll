@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.m50d</groupId>
 	<artifactId>paperdoll-aggregator</artifactId>
@@ -32,10 +33,28 @@
 			</build>
 		</profile>
 	</profiles>
+	<name>Paperdoll</name>
+	<description>Scala implementation of "Freer Monads, More Extensible Effects" - see http://okmij.org/ftp/Haskell/extensible/more.pdf</description>
+	<url>https://github.com/m50d/paperdoll</url>
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<name>Michael Donaghy</name>
+			<email>md401@srcf.ucam.org</email>
+			<organization>m50d</organization>
+			<organizationUrl>https://github.com/m50d</organizationUrl>
+		</developer>
+	</developers>
 	<scm>
-		<connection>scm:git:git@github.com:m50d/paperdoll.git</connection>
-	  <tag>HEAD</tag>
-  </scm>
+		<connection>scm:git:git://github.com/m50d/paperdoll.git</connection>
+		<developerConnection>scm:git:ssh://github.com:m50d/paperdoll.git</developerConnection>
+		<tag>HEAD</tag>
+	</scm>
 	<distributionManagement>
 		<repository>
 			<id>bintray-lmm-maven</id>
@@ -69,6 +88,12 @@
 							<goal>testCompile</goal>
 						</goals>
 					</execution>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>doc-jar</goal>
+						</goals>
+					</execution>
 				</executions>
 				<configuration>
 					<args>
@@ -98,6 +123,20 @@
 						</compilerPlugin>
 					</compilerPlugins>
 				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.0.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
