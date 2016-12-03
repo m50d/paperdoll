@@ -2,7 +2,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.m50d</groupId>
 	<artifactId>paperdoll-aggregator</artifactId>
-	<version>0.3-SNAPSHOT</version>
+	<version>0.3</version>
 	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -52,7 +52,7 @@
 	<scm>
 		<connection>scm:git:git://github.com/m50d/paperdoll.git</connection>
 		<developerConnection>scm:git:git@github.com:m50d/paperdoll.git</developerConnection>
-		<tag>HEAD</tag>
+		<tag>paperdoll-aggregator-0.3</tag>
 	</scm>
 	<distributionManagement>
 		<repository>
