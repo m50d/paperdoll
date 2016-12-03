@@ -213,6 +213,7 @@
 					<configuration>
 						<!-- During release:perform, enable the "release" profile -->
 						<releaseProfiles>release</releaseProfiles>
+						<useReleaseProfile>false</useReleaseProfile>
 					</configuration>
 				</plugin>
 			</plugins>
