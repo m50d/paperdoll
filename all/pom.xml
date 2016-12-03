@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.github.m50d</groupId>
 		<artifactId>paperdoll-aggregator</artifactId>
-		<version>0.4</version>
+		<version>0.5-SNAPSHOT</version>
 	</parent>
 	<artifactId>paperdoll-all</artifactId>
 	<packaging>jar</packaging>
