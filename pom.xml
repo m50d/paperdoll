@@ -90,6 +90,11 @@
 							<goal>compile</goal>
 							<goal>testCompile</goal>
 						</goals>
+						<configuration>
+							<args>
+								<arg>-P:wartremover:all</arg>
+							</args>
+						</configuration>
 					</execution>
 					<execution>
 						<id>attach-javadocs</id>
@@ -113,16 +118,15 @@
 						<arg>-Xfuture</arg>
 						<arg>-Ywarn-unused-import</arg>
 						<arg>-Yno-predef</arg>
-						<arg>-P:wartremover:all</arg>
 						<arg>-unchecked</arg>
 					</args>
 					<scalaCompatVersion>2.11.-1</scalaCompatVersion>
 					<failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
 					<compilerPlugins>
 						<compilerPlugin>
-							<groupId>org.brianmckenna</groupId>
+							<groupId>org.wartremover</groupId>
 							<artifactId>wartremover${scala.suffix}</artifactId>
-							<version>0.14</version>
+							<version>1.2.1</version>
 						</compilerPlugin>
 					</compilerPlugins>
 				</configuration>
