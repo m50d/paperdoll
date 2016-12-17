@@ -10,7 +10,7 @@
 	<dependencies>
         <dependency>
             <groupId>org.scalaz</groupId>
-            <artifactId>scalaz-core_2.11</artifactId>
+            <artifactId>scalaz-core${scala.suffix}</artifactId>
         </dependency>
 		<dependency>
 			<groupId>junit</groupId>

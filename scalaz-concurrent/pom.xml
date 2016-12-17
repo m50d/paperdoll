@@ -15,7 +15,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.scalaz</groupId>
-			<artifactId>scalaz-concurrent_2.11</artifactId>
+			<artifactId>scalaz-concurrent${scala.suffix}</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>

@@ -18,12 +18,12 @@
 		</dependency>
 		<dependency>
 			<groupId>org.tpolecat</groupId>
-			<artifactId>doobie-core_2.11</artifactId>
+			<artifactId>doobie-core${scala.suffix}</artifactId>
 			<version>${doobie.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.tpolecat</groupId>
-			<artifactId>doobie-h2_2.11</artifactId>
+			<artifactId>doobie-h2${scala.suffix}</artifactId>
 			<version>${doobie.version}</version>
 			<scope>test</scope>
 		</dependency>

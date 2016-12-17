@@ -15,7 +15,7 @@
 		</dependency>
         <dependency>
             <groupId>com.chuusai</groupId>
-            <artifactId>shapeless_2.11</artifactId>
+            <artifactId>shapeless${scala.suffix}</artifactId>
         </dependency>
         <dependency>
             <groupId>junit</groupId>

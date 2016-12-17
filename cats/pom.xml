@@ -20,7 +20,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.typelevel</groupId>
-			<artifactId>cats-core_2.11</artifactId>
+			<artifactId>cats-core${scala.suffix}</artifactId>
 			<version>0.4.1</version>
 		</dependency>
 		<dependency>
