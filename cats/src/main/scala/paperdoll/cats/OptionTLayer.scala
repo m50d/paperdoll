@@ -6,7 +6,7 @@ import paperdoll.std.Option_
 import CatsEffects.sendTUC
 import cats.Functor
 import cats.data.OptionT
-import cats.std.option._
+import cats.instances.option._
 
 object OptionTLayer {
   def sendOptionT[F[_]: Functor, A](ot: OptionT[F, A]): Effects.Two[Layer.Aux[F], Option_, A] =

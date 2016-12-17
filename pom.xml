@@ -1,4 +1,5 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.m50d</groupId>
 	<artifactId>paperdoll-aggregator</artifactId>
@@ -7,6 +8,7 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<scala.version>2.11.8</scala.version>
+		<scala.suffix>_2.11</scala.suffix>
 		<scalaz.version>7.3.0-M7</scalaz.version>
 	</properties>
 	<profiles>
@@ -88,6 +90,11 @@
 							<goal>compile</goal>
 							<goal>testCompile</goal>
 						</goals>
+						<configuration>
+							<args>
+								<arg>-P:wartremover:all</arg>
+							</args>
+						</configuration>
 					</execution>
 					<execution>
 						<id>attach-javadocs</id>
@@ -111,16 +118,15 @@
 						<arg>-Xfuture</arg>
 						<arg>-Ywarn-unused-import</arg>
 						<arg>-Yno-predef</arg>
-						<arg>-P:wartremover:all</arg>
 						<arg>-unchecked</arg>
 					</args>
 					<scalaCompatVersion>2.11.-1</scalaCompatVersion>
 					<failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
 					<compilerPlugins>
 						<compilerPlugin>
-							<groupId>org.brianmckenna</groupId>
-							<artifactId>wartremover_2.11</artifactId>
-							<version>0.14</version>
+							<groupId>org.wartremover</groupId>
+							<artifactId>wartremover${scala.suffix}</artifactId>
+							<version>1.2.1</version>
 						</compilerPlugin>
 					</compilerPlugins>
 				</configuration>
@@ -186,15 +192,9 @@
 							<pluginExecutions>
 								<pluginExecution>
 									<pluginExecutionFilter>
-										<groupId>
-											com.github.s4u.plugins
-										</groupId>
-										<artifactId>
-											pgpverify-maven-plugin
-										</artifactId>
-										<versionRange>
-											[1.0.0,)
-										</versionRange>
+										<groupId>com.github.s4u.plugins</groupId>
+										<artifactId>pgpverify-maven-plugin</artifactId>
+										<versionRange>[1.0.0,)</versionRange>
 										<goals>
 											<goal>check</goal>
 										</goals>
@@ -234,27 +234,27 @@
 			</dependency>
 			<dependency>
 				<groupId>com.chuusai</groupId>
-				<artifactId>shapeless_2.11</artifactId>
-				<version>2.3.1-RC1</version>
+				<artifactId>shapeless${scala.suffix}</artifactId>
+				<version>2.3.2</version>
 			</dependency>
 			<dependency>
 				<groupId>org.typelevel</groupId>
-				<artifactId>macro-compat_2.11</artifactId>
+				<artifactId>macro-compat${scala.suffix}</artifactId>
 				<version>1.1.1</version>
 			</dependency>
 			<dependency>
 				<groupId>org.scalaz</groupId>
-				<artifactId>scalaz-concurrent_2.11</artifactId>
+				<artifactId>scalaz-concurrent${scala.suffix}</artifactId>
 				<version>${scalaz.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.scalaz</groupId>
-				<artifactId>scalaz-core_2.11</artifactId>
+				<artifactId>scalaz-core${scala.suffix}</artifactId>
 				<version>${scalaz.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.scalaz</groupId>
-				<artifactId>scalaz-effect_2.11</artifactId>
+				<artifactId>scalaz-effect${scala.suffix}</artifactId>
 				<version>${scalaz.version}</version>
 			</dependency>
 			<dependency>

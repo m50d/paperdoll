@@ -20,8 +20,8 @@
 		</dependency>
 		<dependency>
 			<groupId>com.jsuereth</groupId>
-			<artifactId>scala-arm_2.11</artifactId>
-			<version>1.4</version>
+			<artifactId>scala-arm${scala.suffix}</artifactId>
+			<version>2.0</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
