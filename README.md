@@ -40,6 +40,15 @@ where commands are composed of instance of that datatype and custom functions
 
 ## How to use
 
+### Declaring the dependency
+
+    <dependency>
+      <groupId>com.github.m50d</groupId>
+      <artifactId>paperdoll-all</artifactId>
+      <version>0.4</version>
+      <type>pom</type>
+    </dependency>
+
 ### Basic effect representation
 
 Values of type `Effects[R, L, ?]` form a monad (using ScalaZ's `Monad` implementation).
@@ -47,25 +56,22 @@ You can use `Effects.send` or `Effects.sendU` (which infers the type if there
 is a ScalaZ `Functor` instance) to create `Effects` values, and then use monadic
 `for`/`yield` (or other monad-based constructs) to work with them:
 
-````scala
-import scalaz.std.option._
-import scalaz.syntax.monad._
-import paperdoll.core.effect.Effects._
+    import scalaz.std.option._
+    import scalaz.syntax.monad._
+    import paperdoll.core.effect.Effects._
 
-val eff1 = for {
-  r <- sendU(Option(1))
-  s <- sendU(Option.empty[String])
-} yield s + r
-````
+    val eff1 = for {
+      r <- sendU(Option(1))
+      s <- sendU(Option.empty[String])
+    } yield s + r
 
 To use these values you apply the appropriate handler(s), and then
 finally call `.run`:
 
-````scala
-import paperdoll.std.OptionLayer._
+    import paperdoll.std.OptionLayer._
 
-val result: Option[String] = handleOption(eff1).run
-````
+    val result: Option[String] = handleOption(eff1).run
+
 
 ### Combining multiple effects
 
@@ -75,28 +81,26 @@ The difference comes when we want to mix and match two or more effects,
 which we do by using `.extend` to extend the effects into a common stack.
 I recommend using a type alias to name the effect stack for convenience:
 
-````scala
-import shapeless.{:+:, CNil}
-import paperdoll.scalaz.Writer_
-import paperdoll.scalaz.WriterLayer._
-import paperdoll.std.Option_
-import scalaz.std.anyVal._
-import scala.collection.BitSet
+    import shapeless.{:+:, CNil}
+    import paperdoll.scalaz.Writer_
+    import paperdoll.scalaz.WriterLayer._
+    import paperdoll.std.Option_
+    import scalaz.std.anyVal._
+    import scala.collection.BitSet
 
-type MyStack = Option_ :+: Writer_[Int] :+: CNil
+    type MyStack = Option_ :+: Writer_[Int] :+: CNil
 
-val eff2 = for {
-  _ <- sendTell(2).extend[MyStack]()
-  t <- eff1.extend[MyStack]()
-  _ <- sendTell(1).extend[MyStack]()
-} yield t
+    val eff2 = for {
+      _ <- sendTell(2).extend[MyStack]()
+      t <- eff1.extend[MyStack]()
+      _ <- sendTell(1).extend[MyStack]()
+    } yield t
 
-val resultA: (Option[String], Int) = handleWriterMonoid[Int].apply(handleOption(eff2)).run
-val resultB: Option[(String, BitSet)] = handleOption(handleWriterCollection[Int, BitSet].apply(eff2)).run
+    val resultA: (Option[String], Int) = handleWriterMonoid[Int].apply(handleOption(eff2)).run
+    val resultB: Option[(String, BitSet)] = handleOption(handleWriterCollection[Int, BitSet].apply(eff2)).run
 
-val eff3 = eff2.extend[Writer_[Int] :+: Option_ :+: CNil]()
-val resultC: (Option[String], Int) = handleWriterMonoid[Int].apply(handleOption(eff2)).run
-````
+    val eff3 = eff2.extend[Writer_[Int] :+: Option_ :+: CNil]()
+    val resultC: (Option[String], Int) = handleWriterMonoid[Int].apply(handleOption(eff2)).run
 
 (`sendTell` here is just a convenience function - you can still call `send`
 or `sendU` directly for `Writer` or any other effect)
@@ -247,7 +251,6 @@ but make use of unsafe casts internally for performance.
  * Final code/readme review for readability
   * With particular focus on examples
   * Ensure no abbreviations where a full name will work
- * Submit a release to Maven Central
  
 ## Conduct
 
