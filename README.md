@@ -365,10 +365,9 @@ Mr Morris has upset people (including newcomers and myself)
 in Scala-related spaces on numerous occasions. I find it implausible
 that his statements were not intended to upset their recipients,
 and in any case he has been repeatedly warned about them by many people.
-My decision to ban him is taken in full awareness of his contributions to the Scala
-community (in particular as founder of ScalaZ, which Paperdoll depends on);
-while such contributions are laudable they do not make the things he says
-any less unacceptable.
+My decision to ban him is taken in full awareness of his contributions to
+the Scala community; while such contributions are laudable they do not
+make the things he says any less unacceptable.
 
 Paperdoll is an act of artistic self-expression (though it is also intended
 as a production-standard library). Sex is part of human life
