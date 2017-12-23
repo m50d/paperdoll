@@ -70,7 +70,7 @@ object Region {
             override def apply[X] = { (eff, cont) ⇒
               val composed = compose(cont)
               me.remove(eff).fold(
-                otherEffect ⇒ Impure[RestR, RestL, X, O[A]](otherEffect, Queue.one[Arr_[RestR, RestL]#O, X, O[A]](
+                otherEffect ⇒ Impure[RestR, RestL, X, O[A]](otherEffect, Queue.One[Arr_[RestR, RestL]#O, X, O[A]](
                   composed andThen { run(_) })),
                 _.fold({ (le, r) ⇒
                   re.open(r)

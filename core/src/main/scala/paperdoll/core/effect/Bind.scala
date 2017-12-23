@@ -37,7 +37,7 @@ trait Bind[R <: Coproduct, L1 <: Layers[R], L <: Layer] extends Handler[R, L1, L
           //New continuation is: recursively run this handler on the result of the old continuation 
           val newCont = compose(cont) andThen { run(_) }
           me.remove(eff).fold(
-            otherEffect ⇒ Impure[RestR, RestL, X, O[A]](otherEffect, Queue.one[Arr_[RestR, RestL]#O, X, O[A]](newCont)),
+            otherEffect ⇒ Impure[RestR, RestL, X, O[A]](otherEffect, Queue.One[Arr_[RestR, RestL]#O, X, O[A]](newCont)),
             thisEffect ⇒ bind[X, A](thisEffect, newCont))
         }
       })
