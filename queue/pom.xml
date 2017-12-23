@@ -7,6 +7,26 @@
 	</parent>
 	<artifactId>paperdoll-queue</artifactId>
 	<packaging>jar</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<configuration>
+							<!-- Scaladoc interacts poorly with kind-projector -->
+							<excludes>
+								<exclude>paperdoll/queue/MiniQueue.scala</exclude>
+								<exclude>paperdoll/queue/Queue.scala</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
 	<dependencies>
         <dependency>
             <groupId>org.scalaz</groupId>
