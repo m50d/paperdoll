@@ -120,7 +120,7 @@
 						<arg>-Yno-predef</arg>
 						<arg>-unchecked</arg>
 					</args>
-					<scalaCompatVersion>2.11.-1</scalaCompatVersion>
+					<scalaCompatVersion>2.12.-1</scalaCompatVersion>
 					<failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
 					<compilerPlugins>
 						<compilerPlugin>
