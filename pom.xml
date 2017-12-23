@@ -7,8 +7,8 @@
 	<packaging>pom</packaging>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<scala.version>2.11.8</scala.version>
-		<scala.suffix>_2.11</scala.suffix>
+		<scala.version>2.12.4</scala.version>
+		<scala.suffix>_2.12</scala.suffix>
 		<scalaz.version>7.3.0-M7</scalaz.version>
 	</properties>
 	<profiles>
@@ -120,7 +120,7 @@
 						<arg>-Yno-predef</arg>
 						<arg>-unchecked</arg>
 					</args>
-					<scalaCompatVersion>2.11.-1</scalaCompatVersion>
+					<scalaCompatVersion>2.12.-1</scalaCompatVersion>
 					<failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
 					<compilerPlugins>
 						<compilerPlugin>
