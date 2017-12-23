@@ -30,7 +30,7 @@ final class ReaderWriterAsStateHandler[S] {
         def newCont(s: S) = compose(cont) andThen { e ⇒ loop(e, s) }
         m0.remove(eff).fold(
           effr ⇒ m1.remove(l.subst[({ type K[RLL <: Layers[_]] = RLL#O[X] })#K](effr)).fold(
-            effrr ⇒ Impure[m1.RestR, m1.RestL, X, (S, A)](effrr, Queue.one[Arr_[m1.RestR, m1.RestL]#O, X, (S, A)](
+            effrr ⇒ Impure[m1.RestR, m1.RestL, X, (S, A)](effrr, Queue.One[Arr_[m1.RestR, m1.RestL]#O, X, (S, A)](
               newCont(s))),
             r => newCont(s)(r(s))),
           { effw =>

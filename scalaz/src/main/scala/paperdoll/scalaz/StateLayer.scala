@@ -42,7 +42,7 @@ object StateLayer {
               def newCont(newState: S) = compose(cont) andThen { handleState(newState).handler(me1).run(_) }
               me.remove(eff).fold(
                 otherEffect ⇒ Impure[RestR, RestL, X, (S, A)](otherEffect,
-                  Queue.one[Arr_[RestR, RestL]#O, X, O[A]](newCont(initialState))),
+                  Queue.One[Arr_[RestR, RestL]#O, X, O[A]](newCont(initialState))),
                 { stateEffect ⇒
                   val (newState, result) = stateEffect(initialState)
                   newCont(newState)(result)
