@@ -45,7 +45,7 @@ where commands are composed of instance of that datatype and custom functions
     <dependency>
       <groupId>com.github.m50d</groupId>
       <artifactId>paperdoll-all</artifactId>
-      <version>0.4</version>
+      <version>0.5</version>
       <type>pom</type>
     </dependency>
 

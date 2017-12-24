@@ -1,6 +1,7 @@
 package paperdoll.queue
 
 import scalaz.Forall
+import scalaz.Leibniz
 
 /**
  * A type-aligned queue C[A, X] :: C[X, Y] :: ... :: C[Z, B]
@@ -29,38 +30,33 @@ sealed trait Queue[C[_, _], A, B] {
   def destructureHead: DestructuredHead[Queue, C, A, B]
 }
 object Queue {
-  def empty[C[_, _], A]: Queue[C, A, A] = Empty()
-  def one[C[_, _], A, B](value: C[A, B]): Queue[C, A, B] = One(value)
-}
-/**
- * Empty queue - note that this implies A === B at the type level
- */
-private[queue] final case class Empty[C[_, _], A]() extends Queue[C, A, A] {
-  override def :+[Z](e: C[A, Z]) = One(e)
-  override def destructureHead = DestructuredHead.nil
-}
-private[queue] final case class One[C[_, _], A, B](value: C[A, B]) extends Queue[C, A, B] {
-  override def :+[Z](e: C[B, Z]) =
-    Node[C, A, Z, B, B](MiniQueue.one(value), Empty[Pair_[C]#O, B](), MiniQueue.one(e))
-  override def destructureHead = DestructuredHead.cons(value, Empty())
-}
-private[queue] final case class Node[C[_, _], A, B, X, Y](
-  head: MiniQueue[C, A, X], middle: Queue[Pair_[C]#O, X, Y], last: MiniQueue[C, Y, B]) extends Queue[C, A, B] {
-  override def :+[Z](newLast: C[B, Z]) =
-    last.fold(lastOne ⇒ Node(head, middle, MiniQueue.pair(Pair(lastOne, newLast))),
-      lastPair ⇒ Node(head, middle :+ lastPair, MiniQueue.one(newLast)))
+  /**
+   * Empty queue - note that this implies A === B at the type level
+   */
+  final case class Empty[C[_, _], A]() extends Queue[C, A, A] {
+    override def :+[Z](e: C[A, Z]) = One(e)
+    override def destructureHead = DestructuredHead.Nil(Leibniz.refl)
+  }
+  final case class One[C[_, _], A, B](value: C[A, B]) extends Queue[C, A, B] {
+    override def :+[Z](e: C[B, Z]) =
+      Node[C, A, Z, B, B](MiniQueue.One(value), Empty[Pair[C, ?, ?], B](), MiniQueue.One(e))
+    override def destructureHead = DestructuredHead.Cons(value, Empty())
+  }
+  final case class Node[C[_, _], A, B, X, Y](
+    head: MiniQueue[C, A, X], middle: Queue[Pair[C, ?, ?], X, Y], last: MiniQueue[C, Y, B]) extends Queue[C, A, B] {
+    override def :+[Z](newLast: C[B, Z]) = last match {
+      case MiniQueue.One(lastOne) => Node(head, middle, MiniQueue.Pair(Pair(lastOne, newLast)))
+      case MiniQueue.Pair(lastPair) ⇒ Node(head, middle :+ lastPair, MiniQueue.One(newLast))
+    }
 
-  override def destructureHead = head.fold({
-    headOne ⇒
-      DestructuredHead.cons(headOne, middle.destructureHead.fold({
-        witness ⇒ witness.subst[({ type L[V] = MiniQueue[C, V, B] })#L](last).asQueue
-      }, new Forall[({ type L[V] = (Pair[C, X, V], Queue[Pair_[C]#O, V, Y]) ⇒ Queue[C, X, B] })#L] {
-        override def apply[V] = (head, tail) ⇒ Node(MiniQueue.pair(head), tail, last)
-      }))
-  },
-    {
-      _.fold(new Forall[({ type L[W] = (C[A, W], C[W, X]) ⇒ DestructuredHead[Queue, C, A, B] })#L] {
-        override def apply[W] = (first, second) ⇒ DestructuredHead.cons(first, Node(MiniQueue.one[C, W, X](second), middle, last))
-      })
-    })
+    override def destructureHead = head match {
+      case MiniQueue.One(headOne) ⇒
+        DestructuredHead.Cons(headOne, middle.destructureHead match {
+          case nil: DestructuredHead.Nil[Queue, Pair[C, ?, ?], X, Y] => nil.witness.subst[MiniQueue[C, ?, B]](last).asQueue
+          case cons: DestructuredHead.Cons[Queue, Pair[C, ?, ?], X, Y, w] => Node(MiniQueue.Pair(cons.head), cons.tail, last)
+        })
+      case MiniQueue.Pair(Pair.Impl(first, second)) =>
+        DestructuredHead.Cons(first, Node(MiniQueue.One(second), middle, last))
+    }
+  }
 }

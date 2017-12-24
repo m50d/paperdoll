@@ -61,7 +61,7 @@ object Nondeterminism {
               //layer stack using .extend (or some inverse method on Member)
               //but that would add overhead for no practical benefit
               Impure[R, L0, X, Option[(A, Effects[R, L0, A])]](
-                eff, Queue.one[Arr_[R, L0]#O, X, Option[(A, Effects[R, L0, A])]](newCont))
+                eff, Queue.One[Arr_[R, L0]#O, X, Option[(A, Effects[R, L0, A])]](newCont))
             },
               _.fold({
                 jq.toNel.fold[Effects[R, L0, Option[(A, Effects[R, L0, A])]]](Pure[R, L0, Option[(A, Effects[R, L0, A])]](None))({
