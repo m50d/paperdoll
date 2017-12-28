@@ -68,7 +68,7 @@ object Nondeterminism {
                   jqn ⇒ loop(jqn.tail.toList, jqn.head)
                 })
               }, { le ⇒
-                val booleanCont = compose(le.subst[({ type K[Y] = Arrs[R, L0, Y, A] })#K](cont))
+                val booleanCont = compose(le.subst[Arrs[R, L0, ?, A]](cont))
                 loop(booleanCont(false) :: jq, booleanCont(true))
               }))
         }

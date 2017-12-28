@@ -1,6 +1,5 @@
 package paperdoll.queue
 
-import scalaz.Forall
 import scalaz.Leibniz
 
 /**
