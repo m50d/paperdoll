@@ -1,7 +1,5 @@
 package paperdoll.queue
 
-import scalaz.Forall
-
 /**
  * Type aligned queue of exactly one or two elements
  */
