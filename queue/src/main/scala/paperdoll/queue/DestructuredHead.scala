@@ -1,6 +1,6 @@
 package paperdoll.queue
 
-import scalaz.Leibniz.===
+import cats.evidence.Is
 
 /**
  * Destructure of a type-aligned datastructure S[C, X, Y] from the left
@@ -12,6 +12,6 @@ import scalaz.Leibniz.===
 sealed trait DestructuredHead[S[_[_, _], _, _], C[_, _], X, Y]
 
 object DestructuredHead {
-  final case class Nil[S[_[_, _], _, _], C[_, _], X, Y](witness: Y === X) extends DestructuredHead[S, C, X, Y]
+  final case class Nil[S[_[_, _], _, _], C[_, _], X, Y](witness: Y Is X) extends DestructuredHead[S, C, X, Y]
   final case class Cons[S[_[_, _], _, _], C[_, _], X, Y, W](head: C[X, W], tail: S[C, W, Y]) extends DestructuredHead[S, C, X, Y]
 }

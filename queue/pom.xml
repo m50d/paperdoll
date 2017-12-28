@@ -28,10 +28,11 @@
 		</plugins>
 	</build>
 	<dependencies>
-        <dependency>
-            <groupId>org.scalaz</groupId>
-            <artifactId>scalaz-core${scala.suffix}</artifactId>
-        </dependency>
+		<dependency>
+			<groupId>org.typelevel</groupId>
+			<artifactId>cats-core${scala.suffix}</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
 			<artifactId>junit</artifactId>

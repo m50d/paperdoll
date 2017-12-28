@@ -2,16 +2,15 @@ package paperdoll.core.effect
 
 import Predef.identity
 import shapeless.{ Coproduct, CNil, :+:, Inl }
-import scalaz.{ Monad, Leibniz, Forall, Unapply }
-import scalaz.syntax.monad._
 import paperdoll.queue.Queue
 import paperdoll.core.layer.{ Layer, Layers, Subset }
-import scalaz.Functor
 import paperdoll.core.nondeterminism.NDet_
-import scalaz.MonadPlus
 import paperdoll.core.nondeterminism.Nondeterminism
 import Arrs.compose
 import paperdoll.queue.DestructuredHead
+import cats.~>
+import cats.evidence.Is
+import cats.syntax.monad._
 
 sealed trait Arr_[R <: Coproduct, L <: Layers[R]] {
   final type O[A, B] = A ⇒ Effects[R, L, B]
@@ -31,13 +30,14 @@ object Arrs {
     value: A ⇒
       arrs.destructureHead match {
         case nil: DestructuredHead.Nil[Queue, Arr_[R, L]#O, A, B] =>
-          Leibniz.symm[Nothing, Any, B, A](nil.witness)(value).point[Effects_[R, L]#O]
+          Pure(nil.witness.flip.coerce(value))
         case cons: DestructuredHead.Cons[Queue, Arr_[R, L]#O, A, B, w] =>
           val ctail = compose(cons.tail)
           cons.head(value).fold(
             ctail,
-            new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, w]) ⇒ Effects[R, L, B] })#K] {
-              override def apply[X] = (eff, cont) ⇒ Impure[R, L, X, B](eff, cont :+ ctail)
+            new (Lambda[X => (L#O[X], Arrs[R, L, X, w])] ~> Lambda[X ⇒ Effects[R, L, B]]){
+              override def apply[X](ec: (L#O[X], Arrs[R, L, X, w])) =
+                Impure[R, L, X, B](ec._1, ec._2 :+ ctail)
             })
       }
   }
@@ -49,7 +49,7 @@ object Arrs {
 final class ExtendingEffects[R <: Coproduct, L <: Layers[R], S <: Coproduct, A](eff: Effects[R, L, A]) {
   def apply[L0 <: Layers[R]]()(implicit su: Subset[S, R] {
     type LT = L0
-  }, le: Leibniz[Nothing, Layers[R], L0, L]): Effects[S, su.LS, A] = eff.inject(le.subst[({
+  }, le: L0 Is L): Effects[S, su.LS, A] = eff.inject(le.substitute[({
     type K[LL] = Subset[S, R] {
       type LT = LL
       type LS = su.LS
@@ -69,7 +69,7 @@ sealed trait Effects[R <: Coproduct, L <: Layers[R], A] {
    *  for that case.
    *  While calling directly is supported, the most common use case for this is covered by GenericBind.
    */
-  def fold[B](pure: A ⇒ B, impure: Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ B })#K]): B
+  def fold[B](pure: A ⇒ B, impure: Lambda[X => (L#O[X], Arrs[R, L, X, A])] ~> Lambda[ X ⇒ B]): B
 
   private[effect] def inject[S <: Coproduct](implicit su: Subset[S, R] {
     type LT = L
@@ -85,9 +85,9 @@ sealed trait Effects[R <: Coproduct, L <: Layers[R], A] {
    * Run this effectful value to produce an A. Only available once all effects have been handled
    *  (i.e. R will be CNil) and therefore this Effects must actually be a Pure.
    */
-  final def run(implicit l: Leibniz[Nothing, Layers[R], L, Layers[R] { type O[X] = CNil }]): A =
-    fold(identity, new Forall[({ type K[X] = (L#O[X], Arrs[R, L, X, A]) ⇒ A })#K] {
-      override def apply[X] = (eff, cont) ⇒ l.subst[({ type J[K <: Layers[R]] = K#O[X] })#J](eff).impossible
+  final def run(implicit l: L Is Layers[R] { type O[X] = CNil }): A =
+    fold(identity, new (Lambda[X => (L#O[X], Arrs[R, L, X, A])] ~> Lambda[X ⇒ A]) {
+      override def apply[X] = l.substitute[({ type J[K <: Layers[R]] = K#O[X] })#J](eff).impossible
     })
 }
 /**

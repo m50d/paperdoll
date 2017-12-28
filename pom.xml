@@ -8,7 +8,7 @@
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<scala.version>2.12.4</scala.version>
 		<scala.suffix>_2.12</scala.suffix>
-		<scalaz.version>7.3.0-M7</scalaz.version>
+		<scalaz.version>7.3.0-M18</scalaz.version>
 	</properties>
 	<profiles>
 		<profile>
@@ -81,19 +81,28 @@
 			<plugin>
 				<groupId>net.alchim31.maven</groupId>
 				<artifactId>scala-maven-plugin</artifactId>
-				<version>3.2.1</version>
+				<version>3.3.1</version>
 				<executions>
 					<execution>
+						<id>attach-source</id>
 						<goals>
 							<goal>add-source</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>compile</id>
+						<goals>
 							<goal>compile</goal>
-							<goal>testCompile</goal>
 						</goals>
 						<configuration>
-							<args>
-								<arg>-P:wartremover:all</arg>
-							</args>
+							<addScalacArgs>-P:wartremover:all|-Xfatal-warnings</addScalacArgs>
 						</configuration>
+					</execution>
+					<execution>
+						<id>test-compile</id>
+						<goals>
+							<goal>testCompile</goal>
+						</goals>
 					</execution>
 					<execution>
 						<id>attach-javadocs</id>
@@ -108,7 +117,7 @@
 						<arg>-feature</arg>
 						<arg>-language:higherKinds</arg>
 						<arg>-language:existentials</arg>
-						<arg>-Xfatal-warnings</arg>
+						<arg>-language:postfixOps</arg>
 						<arg>-Xlint</arg>
 						<arg>-Yno-adapted-args</arg>
 						<arg>-Ywarn-dead-code</arg>
@@ -116,9 +125,12 @@
 						<arg>-Ywarn-value-discard</arg>
 						<arg>-Xfuture</arg>
 						<arg>-Ywarn-unused-import</arg>
-						<arg>-Yno-predef</arg>
 						<arg>-unchecked</arg>
+						<arg>-Ypartial-unification</arg>
 					</args>
+					<jvmArgs>
+						<jvmArg>-Dkp:genAsciiNames=true</jvmArg>
+					</jvmArgs>
 					<scalaCompatVersion>2.12.-1</scalaCompatVersion>
 					<failOnMultipleScalaVersions>true</failOnMultipleScalaVersions>
 					<compilerPlugins>
@@ -135,7 +147,6 @@
 					</compilerPlugins>
 				</configuration>
 			</plugin>
-
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>

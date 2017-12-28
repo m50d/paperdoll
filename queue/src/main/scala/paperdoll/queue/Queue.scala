@@ -1,7 +1,7 @@
 package paperdoll.queue
 
-import scalaz.Forall
-import scalaz.Leibniz
+import cats.evidence.Is
+
 
 /**
  * A type-aligned queue C[A, X] :: C[X, Y] :: ... :: C[Z, B]
@@ -35,7 +35,7 @@ object Queue {
    */
   final case class Empty[C[_, _], A]() extends Queue[C, A, A] {
     override def :+[Z](e: C[A, Z]) = One(e)
-    override def destructureHead = DestructuredHead.Nil(Leibniz.refl)
+    override def destructureHead = DestructuredHead.Nil(Is.refl)
   }
   final case class One[C[_, _], A, B](value: C[A, B]) extends Queue[C, A, B] {
     override def :+[Z](e: C[B, Z]) =
@@ -52,7 +52,7 @@ object Queue {
     override def destructureHead = head match {
       case MiniQueue.One(headOne) ⇒
         DestructuredHead.Cons(headOne, middle.destructureHead match {
-          case nil: DestructuredHead.Nil[Queue, Pair[C, ?, ?], X, Y] => nil.witness.subst[MiniQueue[C, ?, B]](last).asQueue
+          case nil: DestructuredHead.Nil[Queue, Pair[C, ?, ?], X, Y] => nil.witness.substitute[MiniQueue[C, ?, B]](last).asQueue
           case cons: DestructuredHead.Cons[Queue, Pair[C, ?, ?], X, Y, w] => Node(MiniQueue.Pair(cons.head), cons.tail, last)
         })
       case MiniQueue.Pair(Pair.Impl(first, second)) =>

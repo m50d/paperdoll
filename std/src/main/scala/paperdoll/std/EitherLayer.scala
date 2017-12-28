@@ -3,7 +3,7 @@ package paperdoll.std
 import paperdoll.core.effect.GenericBind
 import paperdoll.core.effect.GenericHandler
 import paperdoll.core.effect.Effects
-import paperdoll.core.effect.Effects.sendU
+import paperdoll.core.effect.Effects.send
 import paperdoll.core.effect.Arr
 import paperdoll.core.effect.Pure
 import paperdoll.core.layer.Layers
@@ -12,7 +12,7 @@ import scalaz.std.either._
 
 object EitherLayer {
   def sendEither[A, B](either: Either[A, B]): Effects.One[Either_[A], B] =
-    sendU(either)
+    send[Either_[A], B](either)
 
   /** Either is handled much like Option: if Right,
    *  run the continuation, if Left, return that.

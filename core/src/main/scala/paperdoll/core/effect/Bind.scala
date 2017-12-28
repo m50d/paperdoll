@@ -3,7 +3,6 @@ package paperdoll.core.effect
 import paperdoll.core.layer.{ Layer, Layers }
 import shapeless.Coproduct
 import paperdoll.core.layer.Member
-import scalaz.Forall
 import paperdoll.core.effect.Arrs.compose
 import paperdoll.queue.Queue
 
@@ -32,15 +31,13 @@ trait Bind[R <: Coproduct, L1 <: Layers[R], L <: Layer] extends Handler[R, L1, L
    */
   final def run[A](eff: Effects[R, L1, A]): Effects[RestR, RestL, O[A]] =
     eff.fold({ a ⇒ Pure[RestR, RestL, O[A]](pure(a)) },
-      new Forall[({ type K[X] = (L1#O[X], Arrs[R, L1, X, A]) ⇒ Effects[RestR, RestL, O[A]] })#K] {
-        override def apply[X] = { (eff, cont) ⇒
+      Lambda [X => (L1#O[X], Arrs[R, L1, X, A])] ~> Lambda[ X ⇒ Effects[RestR, RestL, O[A]] ]({ (eff, cont) ⇒
           //New continuation is: recursively run this handler on the result of the old continuation 
           val newCont = compose(cont) andThen { run(_) }
           me.remove(eff).fold(
             otherEffect ⇒ Impure[RestR, RestL, X, O[A]](otherEffect, Queue.One[Arr_[RestR, RestL]#O, X, O[A]](newCont)),
             thisEffect ⇒ bind[X, A](thisEffect, newCont))
-        }
-      })
+        }))
 }
 
 trait GenericBind[L <: Layer] extends GenericHandler[L] {
