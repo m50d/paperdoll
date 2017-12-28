@@ -13,30 +13,30 @@ be aware of any other layers.
 
 ## Features
 
- * A [Free Monad](http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html) implementation
-  * i.e. for any datatype you like, you can extend that datatype to a "command object",
-where commands are composed of instance of that datatype and custom functions
-  * Note that with Paperdoll there is no need for the `Coyoneda` trick, simplifying your code
-  * Free monads let you [separate the declaration of a computation from its implementation
- ](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html).
- You can then use multiple interpreters to run the same monadic computation e.g. test vs live
- or realtime datastore vs batch datastore (when using "lambda architecture")
- * Freer monads let you interleave multiple monadic effects without the complexities of monad transformers
-  * Both definition of effects and of interpreters can be completely separate (even in separate codebases)
-  * Effects are applied in a common-sense order according to their order in the code - different effects
-  can be interleaved
- * Implementation is compatible with ScalaZ Monads
-  * i.e. you can use existing ScalaZ-compatible functions like `traverse` on paperdoll effect stacks
- * Adapters to allow you to use popular monads from existing libraries as effect layers
+   * A [Free Monad](http://underscore.io/blog/posts/2015/04/14/free-monads-are-simple.html) implementation
+      * i.e. for any datatype you like, you can extend that datatype to a "command object",
+      where commands are composed of instance of that datatype and custom functions
+    * Note that with Paperdoll there is no need for the `Coyoneda` trick, simplifying your code
+    * Free monads let you [separate the declaration of a computation from its implementation
+   ](http://michaelxavier.net/posts/2014-04-27-Cool-Idea-Free-Monads-for-Testing-Redis-Calls.html).
+   You can then use multiple interpreters to run the same monadic computation e.g. test vs live
+   or realtime datastore vs batch datastore (when using "lambda architecture")
+   * Freer monads let you interleave multiple monadic effects without the complexities of monad transformers
+      * Both definition of effects and of interpreters can be completely separate (even in separate codebases)
+      * Effects are applied in a common-sense order according to their order in the code - different effects
+      can be interleaved
+   * Implementation is compatible with ScalaZ Monads
+      * i.e. you can use existing ScalaZ-compatible functions like `traverse` on paperdoll effect stacks
+   * Adapters to allow you to use popular monads from existing libraries as effect layers
 
 ### Compared to other Scala implementations of the same paper
 
- * Full `Coproduct`-based representation of the effect stack (improving on the paper),
- allowing effects to be reordered and interpreted in in different orders by different interpreter stacks
- * Bidirectional integration with established monad libraries including ScalaZ and Cats
- * Idiomatic Scala style, including use of OO where appropriate (i.e. not a direct Haskell port)
- * Designed for user-friendliness, with readable method names and extensive scaffolding to encourage correct type inference.
- * Intended as first-class, production-quality code
+   * Full `Coproduct`-based representation of the effect stack (improving on the paper),
+   allowing effects to be reordered and interpreted in in different orders by different interpreter stacks
+   * Bidirectional integration with established monad libraries including ScalaZ and Cats
+   * Idiomatic Scala style, including use of OO where appropriate (i.e. not a direct Haskell port)
+   * Designed for user-friendliness, with readable method names and extensive scaffolding to encourage correct type inference.
+   * Intended as first-class, production-quality code
 
 ## How to use
 
@@ -143,60 +143,63 @@ TODO: Basic and advanced use cases
 
 ### Explicitly intended for future versions
 
- * Consistent tagging of layers. Sometimes we might want multiple "versions" of the same effect
- in a stack (e.g. two different `Writer_[String]` effects for two different logs).
- It would be necessary to be able to distinguish these effects at the type level i.e. using
- some kind of "tagged" types. I have added ad-hoc support for something similar in
- `paperdoll-arm`'s `Region` effect (which uses a shapeless `Nat` to "label" each region),
- but it would be good to have general-purpose support for this instead.  
+   * Better use of kind-projector to improve readability of complex types
+   * Porting to work with `-Ypartial-unification`, hopefully replacing use of
+   * Consistent tagging of layers. Sometimes we might want multiple "versions" of the same effect
+   in a stack (e.g. two different `Writer_[String]` effects for two different logs).
+   It would be necessary to be able to distinguish these effects at the type level i.e. using
+   some kind of "tagged" types. I have added ad-hoc support for something similar in
+   `paperdoll-arm`'s `Region` effect (which uses a shapeless `Nat` to "label" each region),
+   but it would be good to have general-purpose support for this instead.  
 
 ### Not scheduled for any particular release but contributions welcome
 
- * `Effects#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
- Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
- is likely quadratic rather than linear as it should be.
- Indeed it may be worse than that, since `.extend` fixes a blob in the tree-like queue structure,
- so composing with further operations won't rebalance the tree
- and we lose the efficient "reflection without remorse" structure.
- So the behaviour may actually be cubic.
- On the other hand the implementation is the same as that in `handleRelay`,
- so this aspect of the behaviour is no worse than what the original Haskell implementation
- would do for a chain of `f flatMap g |> handleA flatMap h |> handleB ...`
- Note that a `for { x <- f.extend[...] ; y <- g.extend[...] ; z <- h.extend[...] } yield ...`
- construct should still behave linearly, so I believe this is not a problem in practice.
- * Compilation time is really awful, particularly in the case of errors
- * There are no performance tests.
-  * Constant-factor performance is likely bad. Contributions are likely a waste of time without tests.
- * The `Arr` type is closely related to `Kleisli`/`Arrow`, but I don't fully understand
-  the similarity and am not yet aware of concrete use cases for it.
- * There is no support for `MonadPartialOrder`. In my limited experimentation it didn't seem
- to work correctly and looked to be subsumed for most purposes by `MonadTell` et al.
- * I have not implemented the `MonadCatchIO` example from the paper as there is no single established
- IO monad implementation in Scala and I don't really understand the approach ScalaZ is taking.
+   * `Effects#extend` is implemented naïvely and adds overhead to the entire stack it's applied to.
+   Therefore the performance of a construct like `f.flatMap(g).extend[...].flatMap(h).extend[...]`
+   is likely quadratic rather than linear as it should be.
+   Indeed it may be worse than that, since `.extend` fixes a blob in the tree-like queue structure,
+   so composing with further operations won't rebalance the tree
+   and we lose the efficient "reflection without remorse" structure.
+   So the behaviour may actually be cubic.
+   On the other hand the implementation is the same as that in `handleRelay`,
+   so this aspect of the behaviour is no worse than what the original Haskell implementation
+   would do for a chain of `f flatMap g |> handleA flatMap h |> handleB ...`
+   Note that a `for { x <- f.extend[...] ; y <- g.extend[...] ; z <- h.extend[...] } yield ...`
+   construct should still behave linearly, so I believe this is not a problem in practice.
+   * Compilation time is really awful, particularly in the case of errors
+   * There are no performance tests.
+      * Constant-factor performance is likely bad. Contributions are likely a waste of time without tests.
+   * The `Arr` type is closely related to `Kleisli`/`Arrow`, but I don't fully understand
+    the similarity and am not yet aware of concrete use cases for it.
+   * There is no support for `MonadPartialOrder`. In my limited experimentation it didn't seem
+   to work correctly and looked to be subsumed for most purposes by `MonadTell` et al.
+   * I have not implemented the `MonadCatchIO` example from the paper as there is no single established
+   IO monad implementation in Scala and I don't really understand the approach ScalaZ is taking.
  
 ### Design compromises and deliberate omissions
 
- * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
- I found it made the code clearer to separate the two (and it should make effects
- more compositional/reusable), but there may be an efficiency penalty.
- * Use of type members vs. type parameters is arguably inconsistent in places, as is general style.
- In some cases this is deliberate pragmatism so as to ensure that the types can be used in practice;
- in others I couldn't get type inference to work correctly with a more natural representation.
- * I have largely ignored variance. Good type inference is a higher priority than correct variance,
- but contributions that add co- or contravariance without compromising type inference are welcome.
- * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven.
- I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
- but any implementation of binary compatibility checking in the maven build would be very welcome.
- * Paperdoll depends on ScalaZ since it makes extensive use of `Leibniz`. I would prefer to depend on Cats
- (at least for `paperdoll-core`), but this functionality is a firm requirement.
- I also use a feature of `MonadPlus` that I don't believe  is presently implemented in Cats,
- and make some use of `Unapply`.
+   * The `send` in the paper is equivalent to `send` followed by `extend` in Paperdoll.
+   I found it made the code clearer to separate the two (and it should make effects
+   more compositional/reusable), but there may be an efficiency penalty.
+   * Use of type members vs. type parameters is arguably inconsistent in places, as is general style.
+   In some cases this is deliberate pragmatism so as to ensure that the types can be used in practice;
+   in others I couldn't get type inference to work correctly with a more natural representation.
+   * I have largely ignored variance. Good type inference is a higher priority than correct variance,
+   but contributions that add co- or contravariance without compromising type inference are welcome.
+   * There is no automatic binary compatibility checking in the build. MiMA seems to only support SBT, not maven.
+   I find the maintainability advantages of maven compelling and will not accept patches to convert to SBT,
+   but any implementation of binary compatibility checking in the maven build would be very welcome.
+   * Paperdoll depends on ScalaZ since it makes extensive use of `Leibniz`. I would prefer to depend on Cats
+   (at least for `paperdoll-core`), but this functionality is a firm requirement. `Is` is an inadequate
+   replacement as it does not support upper bounds.
+   I also use a feature of `MonadPlus` that I don't believe  is presently implemented in Cats,
+   and make some use of `Unapply`.
  
 ### Permanently open for improvement
 
- * Contributions of layers for popular monads are very welcome;
- instances and support code for an external library "foo"
- should be placed in a new `paperdoll-foo` maven module.
+   * Contributions of layers for popular monads are very welcome;
+   instances and support code for an external library "foo"
+   should be placed in a new `paperdoll-foo` maven module.
 
 ## Implementation notes
 
@@ -243,14 +246,14 @@ but make use of unsafe casts internally for performance.
 
 ## TODO for 1.0
 
- * Extend Translator support to cover many monad transformers
-  * Allows some limited support for ReaderWriterState and friends
- * Finish paperdoll-doobie
- * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
- * Finish TODOs in this document (in particular examples)
- * Final code/readme review for readability
-  * With particular focus on examples
-  * Ensure no abbreviations where a full name will work
+   * Extend Translator support to cover many monad transformers
+      * Allows some limited support for ReaderWriterState and friends
+   * Finish paperdoll-doobie
+   * Tighten up PGP signature checking of upstream (i.e. specify key fingerprints)
+   * Finish TODOs in this document (in particular examples)
+   * Final code/readme review for readability
+      * With particular focus on examples
+      * Ensure no abbreviations where a full name will work
  
 ## Conduct
 
@@ -268,30 +271,31 @@ The following is explicitly not a code and not binding,
 but is a guide to my current thinking on issues that I have
 seen arise elsewhere. My decision is final in all cases:
 
- * Be polite. Correctness is no excuse for rudeness.
-  * At times it may be even better to not answer at all if you
-  know the answer to a (technical or other) question but are not
-  able or willing to express that answer politely.
-  * This applies particularly when interacting with newcomers
-  to the project, the language, or programming in general.
- * I expect discussion to occur on a wide variety of subjects,
- not necessarily "on-topic". However everyone has the right to disengage
- from a particular topic and others should respect that.
-  * Note that this applies even to technical matters.
-  It's correct to be wary of the [XY problem](http://xyproblem.info/),
-  but if someone has a particular requirement and is not interested
-  in discussing why they have that requirement, respect that.
- * If any participant requests some reasonable accommodation for themselves
- (including but not limited to: referring to them in a particular
- fashion or none, not discussing particular topics in project spaces
- (provided those topics are not directly relevant to the project))
- please respect that. If you find an accommodation that someone
- else has requested to be onerous then please raise this as a
- conduct issue.
-  * Generally I will either require participants to make that
-  accommodation or add the non-accommodation to the Content Notes
-  section of this document.
-  * Please request accommodations only in good faith and only for yourself.
+   * Be polite. Correctness is no excuse for rudeness.
+      * At times it may be even better to not answer at all if you
+      know the answer to a (technical or other) question but are not
+      able or willing to express that answer politely.
+      * This applies particularly when interacting with newcomers
+      to the project, the language, or programming in general.
+   * I expect discussion to occur on a wide variety of subjects,
+   not necessarily "on-topic". However everyone has the right to disengage
+   from a particular topic and others should respect that.
+      * Note that this applies even to technical matters.
+      It's correct to be wary of the [XY problem](http://xyproblem.info/),
+      but if someone has a particular requirement and is not interested
+      in discussing why they have that requirement, respect that.
+   * If any participant requests some reasonable behaviour from you to
+   accommodate them personally
+   (including but not limited to: referring to them in a particular
+   fashion or none, not discussing particular topics in project spaces
+   (provided those topics are not directly relevant to the project))
+   please respect that. If you find an accommodation that someone
+   else has requested to be onerous then please raise this as a
+   conduct issue.
+     * Generally I will either require participants to make that
+     accommodation or add the non-accommodation to the Content Notes
+     section of this document.
+      * Please request accommodations only in good faith and only for yourself.
 
 I will generally look to resolve conduct issues amicably through
 discussion wherever possible. In cases where this fails,
@@ -314,14 +318,14 @@ cannot file an issue.
 
 ### Banlist
 
- * Tony Morris (indefinite)
+   * Tony Morris (indefinite)
 
 ### Content Notes
 
 Paperdoll source code may contain sexualised elements, and discussion
 around it may be or become sexualised. Individuals who find sexualised
 code or conversation inherently threatening are advised not to
-contribute to this project or participate in its spaces. 
+contribute to this project or participate in its spaces.
 
 ### Rationale
 
