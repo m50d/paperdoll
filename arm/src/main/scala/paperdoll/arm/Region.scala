@@ -74,7 +74,7 @@ object Region {
                   composed andThen { run(_) })),
                 _.fold({ (le, r) ⇒
                   re.open(r)
-                  handleInRgn[S, RE](r).apply[R, me1.L, A, me1.L](le.subst[({ type K[Y] = Arr[R, me1.L, Y, A] })#K](composed)(r))(me1, Leibniz.refl)
+                  handleInRgn[S, RE](r).apply[R, me1.L, A, me1.L](le.subst[Arr[R, me1.L, ?, A]](composed)(r))(me1, Leibniz.refl)
                 }))
             }
           })

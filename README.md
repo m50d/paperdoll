@@ -143,8 +143,7 @@ TODO: Basic and advanced use cases
 
 ### Explicitly intended for future versions
 
-   * Better use of kind-projector to improve readability of complex types
-   * Porting to work with `-Ypartial-unification`, hopefully replacing use of
+   * Porting to work with `-Ypartial-unification`, hopefully replacing use of `Unapply`.
    * Consistent tagging of layers. Sometimes we might want multiple "versions" of the same effect
    in a stack (e.g. two different `Writer_[String]` effects for two different logs).
    It would be necessary to be able to distinguish these effects at the type level i.e. using
@@ -193,7 +192,9 @@ TODO: Basic and advanced use cases
    (at least for `paperdoll-core`), but this functionality is a firm requirement. `Is` is an inadequate
    replacement as it does not support upper bounds.
    I also use a feature of `MonadPlus` that I don't believe  is presently implemented in Cats,
-   and make some use of `Unapply`.
+   and make some use of `Unapply` and `Forall`. This last could reasonably be replaced with `~>`.
+   Finally, modern versions of cats require `-Ypartial-unification` which is incompatible with
+   ScalaZ `Unapply`. This makes migration or coexistence very difficult.
  
 ### Permanently open for improvement
 
