@@ -1,29 +1,55 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>com.github.m50d</groupId>
-        <artifactId>paperdoll-aggregator</artifactId>
-        <version>0.6-SNAPSHOT</version>
-    </parent>
-    <artifactId>paperdoll-core</artifactId>
-    <packaging>jar</packaging>
-    <dependencies>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.github.m50d</groupId>
+		<artifactId>paperdoll-aggregator</artifactId>
+		<version>0.6-SNAPSHOT</version>
+	</parent>
+	<artifactId>paperdoll-core</artifactId>
+	<packaging>jar</packaging>
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>net.alchim31.maven</groupId>
+				<artifactId>scala-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<configuration>
+							<!-- Scaladoc interacts poorly with kind-projector -->
+							<excludes>
+								<exclude>paperdoll/core/effect/package.scala</exclude>
+								<exclude>paperdoll/core/effect/Bind.scala</exclude>
+								<exclude>paperdoll/core/effect/Effects.scala</exclude>
+								<exclude>paperdoll/core/effect/Handler.scala</exclude>
+								<exclude>paperdoll/core/effect/Translator.scala</exclude>
+								<exclude>paperdoll/core/nondeterminism/package.scala</exclude>
+								<exclude>paperdoll/core/nondeterminism/Nondeterminism.scala</exclude>
+							</excludes>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
 		<dependency>
 			<groupId>com.github.m50d</groupId>
 			<artifactId>paperdoll-queue</artifactId>
 			<version>${project.version}</version>
 		</dependency>
-        <dependency>
-            <groupId>com.chuusai</groupId>
-            <artifactId>shapeless${scala.suffix}</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.easytesting</groupId>
-            <artifactId>fest-assert</artifactId>
-        </dependency>
-    </dependencies>
+		<dependency>
+			<groupId>com.chuusai</groupId>
+			<artifactId>shapeless${scala.suffix}</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.easytesting</groupId>
+			<artifactId>fest-assert</artifactId>
+		</dependency>
+	</dependencies>
 </project>
