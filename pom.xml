@@ -178,9 +178,9 @@
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>com.github.s4u.plugins</groupId>
+				<groupId>org.simplify4u.plugins</groupId>
 				<artifactId>pgpverify-maven-plugin</artifactId>
-				<version>1.0.0</version>
+				<version>1.18.2</version>
 				<executions>
 					<execution>
 						<configuration>

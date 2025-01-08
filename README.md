@@ -385,7 +385,7 @@ sexualized images, activities, or other material").
 
 ## Notices
 
-Copyright 2015-2016 Michael Donaghy. md401@srcf.ucam.org
+Copyright 2015-2025 Michael Donaghy. md401@srcf.ucam.org
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this project except in compliance with the License.
